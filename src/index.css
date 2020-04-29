@@ -1,13 +1,297 @@
+
 body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  background-color: black;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+.logoContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin-top: 5px;
 }
+
+.logo {
+  width: 50px;
+  height: 50px;
+}
+
+.logoJennings {
+  font-family: SansSerif;
+  font-size: 18px;
+  font-weight: bold;
+  font-style: italic;
+  color: darkblue;
+  margin-left: 10px;
+}
+
+.logoGames {
+  font-family: SansSerif;
+  font-size: 18px;
+  font-weight: bold;
+  font-style: italic;
+  color: red;
+  margin-left: 5px;
+}
+
+.playerCard {
+  width: 70px;
+  height: 100px;
+}
+
+.oppCard {
+  width: 90px;
+  height: 120px;
+}
+
+.oppCardHoriz {
+  width: 70px;
+  height: 50px;
+}
+
+.topPlayerCardArea {
+  display: flex;
+  flex-direction: row;
+  align-content: center;
+  max-width: 400px;
+}
+
+.topPlayerCardWrapper {
+  overflow: hidden;
+}
+
+.topPlayerCardWrapper:last-child, .topPlayerCardWrapper:hover {
+  overflow: visible;
+}
+
+.topPlayerCard {
+  width: 75px;
+  height: 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.bottomPlayerCardArea {
+  display: flex;
+  flex-direction: row;
+  align-content: center;
+  max-width: 550px;
+}
+
+.bottomPlayerCardWrapper {
+  overflow: hidden;
+}
+
+.bottomPlayerCardWrapper:last-child, .bottomPlayerCardWrapper:hover {
+  overflow: visible;
+}
+
+.bottomPlayerCard {
+  width: 110px;
+  height: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.leftPlayerCardArea {
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  max-height: 400px;
+}
+
+.leftPlayerCardWrapper {
+  overflow: hidden;
+}
+
+.leftPlayerCardWrapper:last-child, .leftPlayerCardWrapper:hover {
+  overflow: visible;
+}
+
+.leftPlayerCard {
+  width: 100px;
+  height: 75px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.rightPlayerCardArea {
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  max-height: 400px;
+}
+
+.rightPlayerCardWrapper {
+  overflow: hidden;
+}
+
+.rightPlayerCardWrapper:last-child, .rightPlayerCardWrapper:hover {
+  overflow: visible;
+}
+
+.rightPlayerCard {
+  width: 100px;
+  height: 75px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.playerImage {
+  width: 156px;
+  height: 172px;
+  border: solid;
+  border-width: 8px;
+  border-color: transparent;
+  border-radius: 50% 50%;
+}
+
+.gameView {
+  display: flex;
+  justify-content: center;
+}
+
+.gameArea {
+  width: 1200px;
+  height: 800px;
+  display: grid;
+  grid-template-columns: 200px 200px 200px 200px 200px 200px;
+  grid-template-rows: 100px 100px 100px 100px 100px 100px 100px 100px;
+  background-color: #47686b;
+}
+
+.gameInfoArea {
+  background-color: lightGray;
+  grid-row-start: 1;
+  grid-row-end: 9;
+  grid-column-start: 1;
+  grid-column-end: 2;
+}
+
+.topPlayerArea {
+  grid-row-start: 1;
+  grid-row-end: 3;
+  grid-column-start: 3;
+  grid-column-end: 6;
+  border: none;
+  border-width: 2;
+  border-color: black;
+  display: flex;
+  flex-direction: row-reverse;
+  align-content: center;
+  align-items: center;
+  background-color: #b3cacc;
+  border-radius: 10%;
+  border-style: inset;
+  border-color: #47686b;
+  border-width: 2px;
+  margin: 10px;
+}
+
+.leftPlayerArea {
+  grid-row-start: 2;
+  grid-row-end: 9;
+  grid-column-start: 2;
+  grid-column-end: 3;
+  border: none;
+  border-width: 2;
+  border-color: black;
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  align-items: center;
+  background-color: #b3cacc;
+  border-radius: 10%;
+  border-style: inset;
+  border-color: #47686b;
+  border-width: 2px;
+  margin: 10px;
+}
+
+.tableArea {
+  grid-row-start: 3;
+  grid-row-end: 7;
+  grid-column-start: 3;
+  grid-column-end: 6;
+  border-radius: 40% 40% 40% 40%;
+  background-image: url("/card-table.png");
+  background-size: cover;
+}
+
+.rightPlayerArea {
+  grid-row-start: 1;
+  grid-row-end: 7;
+  grid-column-start: 6;
+  grid-column-end: 7;
+  border: none;
+  border-width: 2;
+  border-color: black;
+  display: flex;
+  flex-direction: column-reverse;
+  align-content: center;
+  align-items: center;
+  background-color: #b3cacc;
+  border-style: inset;
+  border-color: #47686b;
+  border-width: 2px;
+  border-radius: 10%;
+  margin: 10px;
+}
+
+.bottomPlayerArea {
+  grid-row-start: 7;
+  grid-row-end: 9;
+  grid-column-start: 3;
+  grid-column-end: 7;
+  border: none;
+  border-width: 2;
+  border-color: black;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background-color: #b3cacc;
+  border-style: inset;
+  border-color: #47686b;
+  border-width: 2px;
+  border-radius: 10%;
+  margin: 10px;
+}
+
+
+/* BLINKING BORDER */
+
+@-webkit-keyframes borderBlink {
+  from, to {
+    border-color: transparent
+  }
+  50% {
+    border: solid 8px yellow;
+  }
+}
+@keyframes borderBlink {
+  from, to {
+    border-color: transparent
+  }
+  50% {
+    border: solid 8px yellow;
+  }
+}
+.selectedPlayerImage{
+  width: 156px;
+  height: 172px;
+  border: solid;
+  border-width: 8px;
+  border-color: transparent;
+  border-radius: 50% 50%;
+  -webkit-animation: borderBlink 1s step-end infinite;
+  animation: borderBlink 1s step-end infinite;
+}
+
