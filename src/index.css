@@ -56,15 +56,15 @@ body {
   max-width: 400px;
 }
 
-.topPlayerCardWrapper {
+.oppCardVertWrapper {
   overflow: hidden;
 }
 
-.topPlayerCardWrapper:last-child, .topPlayerCardWrapper:hover {
+.oppCardVertWrapper:last-child, .oppCardVertWrapper:hover {
   overflow: visible;
 }
 
-.topPlayerCard {
+.oppCardVert {
   width: 75px;
   height: 100px;
   display: flex;
@@ -72,6 +72,24 @@ body {
   justify-content: center;
   align-items: center;
 }
+
+.oppCardHorizWrapper {
+  overflow: hidden;
+}
+
+.oppCardHorizWrapper:last-child, .oppCardHorizWrapper:hover {
+  overflow: visible;
+}
+
+.oppCardHoriz {
+  width: 100px;
+  height: 75px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
 
 .bottomPlayerCardArea {
   display: flex;
