@@ -4,6 +4,9 @@ import players from './Players'
 import images from './Images'
 import Card from './Card';
 import PlayerCard from './PlayerCard';
+import PlayerCardWrapper from './PlayerCardWrapper';
+import OpponentCard from './OpponentCard';
+import CardTable from './CardTable';
 
 const NUM_CARDS_PER_PLAYER = 13;
 
@@ -11,8 +14,9 @@ class Game extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            players: [],
+            playerHands: [],
         }
+        this.cardTableRef = React.createRef();
         this.deal();
     }
 
@@ -21,46 +25,62 @@ class Game extends Component {
         let hand1 = [];
         let suit = "Black";
         for (let i = 1; i < NUM_CARDS_PER_PLAYER + 1; i++) {
-            hand1.push(new Card(toString(i), i, suit));
+            hand1.push(new Card(i.toString(), i, suit));
         }
-        this.state.players.push(hand1);
+        this.state.playerHands.push(hand1);
 
         // Player 2.
         let hand2 = [];
         suit = "Green";
         for (let i = 1; i < NUM_CARDS_PER_PLAYER + 1; i++) {
-            hand2.push(new Card(toString(i), i, suit));
+            hand2.push(new Card(i.toString(), i, suit));
         }
-        this.state.players.push(hand2);
+        this.state.playerHands.push(hand2);
 
         // Player 3.
         let hand3 = [];
         suit = "Red";
         for (let i = 1; i < NUM_CARDS_PER_PLAYER + 1; i++) {
-            hand3.push(new Card(toString(i), i, suit));
+            hand3.push(new Card(i.toString(), i, suit));
         }
-        this.state.players.push(hand3);
+        this.state.playerHands.push(hand3);
 
         // Player 4.
         let hand4 = [];
-        hand4.push(new Card(toString(11), 11, "Black"));
-        hand4.push(new Card(toString(12), 12, "Black"));
-        hand4.push(new Card(toString(13), 13, "Black"));
-        hand4.push(new Card(toString(14), 14, "Black"));
-        hand4.push(new Card(toString(14), 14, "Red"));
-        hand4.push(new Card(toString(14), 14, "Green"));
-        hand4.push(new Card(toString(14), 14, "Yellow"));
-        hand4.push(new Card(toString(14), 14, "Black"));
-        hand4.push(new Card(toString(14), 14, "Red"));
-        hand4.push(new Card(toString(14), 14, "Green"));
-        hand4.push(new Card(toString(14), 14, "Yellow"));
-        hand4.push(new Card(toString(14), 14, "Black"));
-        hand4.push(new Card(toString(14), 14, "Red"));
-        this.state.players.push(hand4);
+        hand4.push(new Card("11", 11, "Black"));
+        hand4.push(new Card("12", 12, "Black"));
+        hand4.push(new Card("13", 13, "Black"));
+        hand4.push(new Card("14", 14, "Black"));
+        hand4.push(new Card("14", 14, "Red"));
+        hand4.push(new Card("14", 14, "Green"));
+        hand4.push(new Card("14", 14, "Yellow"));
+        hand4.push(new Card("14", 14, "Black"));
+        hand4.push(new Card("14", 14, "Red"));
+        hand4.push(new Card("14", 14, "Green"));
+        hand4.push(new Card("14", 14, "Yellow"));
+        hand4.push(new Card("14", 14, "Black"));
+        hand4.push(new Card("14", 14, "Red"));
+        this.state.playerHands.push(hand4);
+    }
+
+    handleCardClick = (selPlayerCard) => {
+        //alert("Selected " + selPlayerCard.getCardName());
+
+        let playedCard =
+            <PlayerCard
+                name={selPlayerCard.props.name}
+                value={selPlayerCard.props.value}
+                suit={selPlayerCard.props.suit}
+                buttonClass={selPlayerCard.props.buttonClass}
+                imgClass={selPlayerCard.props.imgClass}
+                imgSrc={selPlayerCard.props.imgSrc}
+                onClick={selPlayerCard.props.onClick} />
+
+        this.cardTableRef.current.setState({bottomPlayerCard: playedCard});
     }
 
     render() {
-        let player1Hand = this.state.players[0];
+        let player1Hand = this.state.playerHands[0];
         let topPlayerCardCmpnts = [];
         let wrapperClass = "oppCardVertWrapper";
         let imgClass = "oppCardVert";
@@ -72,40 +92,41 @@ class Game extends Component {
                     <img className="topPlayerCard" src={cards.cardBack} alt="Card 1"></img>
                 </div>;
                 */
-            let cardEle = <PlayerCard name={card.name} value={card.value} suit={card.suit} wrapperClass={wrapperClass} imgClass={imgClass} imgSrc={imgSrc} />;
+            let cardEle = <OpponentCard name={card.name} value={card.value} suit={card.suit} wrapperClass={wrapperClass} imgClass={imgClass} imgSrc={imgSrc} onClick={this.handleCardClick} />;
             topPlayerCardCmpnts.push(cardEle);
         }
 
-        let player2Hand = this.state.players[1];
+        let player2Hand = this.state.playerHands[1];
         let leftPlayerCardCmpnts = [];
         wrapperClass = "oppCardHorizWrapper";
         imgClass = "oppCardHoriz";
         imgSrc = cards.cardBackHoriz;
         for (let i = 0; i < player2Hand.length; i++) {
             let card = player2Hand[i];
-            let cardEle = <PlayerCard name={card.name} value={card.value} suit={card.suit} wrapperClass={wrapperClass} imgClass={imgClass} imgSrc={imgSrc} />;
+            let cardEle = <OpponentCard name={card.name} value={card.value} suit={card.suit} wrapperClass={wrapperClass} imgClass={imgClass} imgSrc={imgSrc} onClick={this.handleCardClick} />;
             leftPlayerCardCmpnts.push(cardEle);
         }
 
-        let player3Hand = this.state.players[2];
+        let player3Hand = this.state.playerHands[2];
         let rightPlayerCardCmpnts = [];
         wrapperClass = "oppCardHorizWrapper";
         imgClass = "oppCardHoriz";
         imgSrc = cards.cardBackHoriz;
         player3Hand.forEach( (card, index) => {
             rightPlayerCardCmpnts.push(
-                <PlayerCard name={card.name} value={card.value} suit={card.suit} wrapperClass={wrapperClass} imgClass={imgClass} imgSrc={imgSrc} />
+                <OpponentCard name={card.name} value={card.value} suit={card.suit} wrapperClass={wrapperClass} imgClass={imgClass} imgSrc={imgSrc} onClick={this.handleCardClick} />
             );
         });
 
-        let player4Hand = this.state.players[3];
+        let player4Hand = this.state.playerHands[3];
         let bottomPlayerCardCmpnts = [];
         wrapperClass = "bottomPlayerCardWrapper";
+        let buttonClass = "bottomPlayerCardButton";
         imgClass = "bottomPlayerCard";
         player4Hand.forEach( (card, index) => {
             let imgSrc = cards["card" + card.value + card.suit];
             bottomPlayerCardCmpnts.push(
-                <PlayerCard name={card.name} value={card.value} suit={card.suit} wrapperClass={wrapperClass} imgClass={imgClass} imgSrc={imgSrc} />
+                <PlayerCardWrapper name={card.name} value={card.value} suit={card.suit} wrapperClass={wrapperClass} buttonClass={buttonClass} imgClass={imgClass} imgSrc={imgSrc} onClick={this.handleCardClick} />
             );
         });
 
@@ -131,8 +152,7 @@ class Game extends Component {
                             {leftPlayerCardCmpnts}
                         </div>
                     </div>
-                    <div className="tableArea">
-                    </div>
+                    <CardTable ref={this.cardTableRef}/>;
                     <div className="rightPlayerArea">
                         <img className="playerImage" src={players.abe} alt="Player 3"></img>
                         <div className="rightPlayerCardArea">
