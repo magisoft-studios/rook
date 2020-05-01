@@ -374,7 +374,31 @@ body {
   justify-content: center;
 }
 
+.statusPanel {
+  margin: 10px;
+  display: flex;
+  justify-content: center;
+}
+
 .dealBtn {
 
+}
+
+.updateBtn {
+
+}
+
+.statusPanel {
+  margin: 10px;
+  display: flex;
+  justify-content: center;
+}
+
+.statusText {
+  font-family: SansSerif;
+  font-size: 10px;
+  font-weight: normal;
+  color: black;
+  margin-left: 10px;
 }
 

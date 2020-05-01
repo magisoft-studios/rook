@@ -17,7 +17,7 @@ class Game extends Component {
         this.playerHandRef = React.createRef();
         this.cardTableRef = React.createRef();
         this.state = {
-            status: "initial",
+            status: "Initializing",
         }
         this.deal();
     }
@@ -40,6 +40,12 @@ class Game extends Component {
         hand.push(new Card("14 Yellow", 14, "Yellow"));
 
         this.playerHand = hand;
+    }
+
+    handleUpdateClick = () => {
+        fetch('/rook')
+            .then(res => res.json())
+            .then(response => this.setState({ status: response.status }));
     }
 
     handleDealClick = () => {
@@ -131,6 +137,10 @@ class Game extends Component {
                         </div>
                         <div className={"buttonPanel"}>
                             <button type="button" className="dealBtn" onClick={() => this.handleDealClick()}>Deal</button>
+                            <button type="button" className="updateBtn" onClick={() => this.handleUpdateClick()}>Update</button>
+                        </div>
+                        <div className={"statusPanel"}>
+                            <span className="statusText">{this.state.status}</span>
                         </div>
                     </div>
                     <div className="topPlayerArea">
