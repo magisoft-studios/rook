@@ -368,3 +368,13 @@ body {
   animation: borderBlink 1s step-end infinite;
 }
 
+.buttonPanel {
+  margin: 10px;
+  display: flex;
+  justify-content: center;
+}
+
+.dealBtn {
+
+}
+

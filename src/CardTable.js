@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import cards from './Cards'
 
 class CardTable extends Component {
     constructor(props) {
