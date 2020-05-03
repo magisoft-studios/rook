@@ -1,7 +1,9 @@
 class Card {
-    constructor(name, value, suit) {
+    constructor(id, name, value, pointValue, suit) {
+        this.id = id;
         this.name = name;
         this.value = value;
+        this.pointValue = pointValue;
         this.suit = suit;
     }
 }

@@ -3,67 +3,109 @@ import cards from './Cards'
 import players from './Players'
 import images from './Images'
 import Card from './Card';
-import PlayerCard from './PlayerCard';
 import PlayerHand from './PlayerHand';
 import OpponentCard from './OpponentCard';
 import CardTable from './CardTable';
 
-const NUM_CARDS_PER_PLAYER = 13;
-
 class Game extends Component {
     constructor(props) {
         super(props);
-        this.playerHand = [];
+        this.playerId = "player1";
         this.playerHandRef = React.createRef();
         this.cardTableRef = React.createRef();
+        this.posns = {
+            bottomPlayerId: "",
+            leftPlayerId: "",
+            topPlayerId: "",
+            rightPlayerId: "",
+        };
         this.state = {
-            status: "Initializing",
+            gameData: {
+                status: "Initializing"
+            }
         }
-        this.deal();
+        this.calcPlayerPosns(this.playerId);
     }
 
-    deal = () => {
-        let hand = [];
+    calcPlayerPosns(playerId) {
+        switch (playerId) {
+            case "player1":
+                this.posns.bottomPlayerId = "player1";
+                this.posns.leftPlayerId = "player2";
+                this.posns.topPlayerId = "player3";
+                this.posns.rightPlayerId = "player4";
+                break;
+            case "player2":
+                this.posns.bottomPlayerId = "player2";
+                this.posns.leftPlayerId = "player3";
+                this.posns.topPlayerId = "player4";
+                this.posns.rightPlayerId = "player1";
+                break;
+            case "player3":
+                this.posns.bottomPlayerId = "player3";
+                this.posns.leftPlayerId = "player4";
+                this.posns.topPlayerId = "player1";
+                this.posns.rightPlayerId = "player2";
+                break;
+            case "player4":
+                this.posns.bottomPlayerId = "player4";
+                this.posns.leftPlayerId = "player1";
+                this.posns.topPlayerId = "player2";
+                this.posns.rightPlayerId = "player3";
+                break;
+            default:
+                this.posns.bottomPlayerId = "player1";
+                this.posns.leftPlayerId = "player2";
+                this.posns.topPlayerId = "player3";
+                this.posns.rightPlayerId = "player4";
+                break;
+        }
+    }
 
-        hand.push(new Card("10 Black", 10, "Black"));
-        hand.push(new Card("11 Black", 11, "Black"));
-        hand.push(new Card("12 Black", 12, "Black"));
-        hand.push(new Card("13 Black", 13, "Black"));
-        hand.push(new Card("14 Black", 14, "Black"));
-        hand.push(new Card("10 Red", 10, "Red"));
-        hand.push(new Card("11 Red", 11, "Red"));
-        hand.push(new Card("12 Red", 12, "Red"));
-        hand.push(new Card("14 Red", 14, "Red"));
-        hand.push(new Card("13 Green", 13, "Green"));
-        hand.push(new Card("14 Green", 14, "Green"));
-        hand.push(new Card("10 Yellow", 10, "Yellow"));
-        hand.push(new Card("14 Yellow", 14, "Yellow"));
-
-        this.playerHand = hand;
+    componentDidMount = () => {
+        this.getGameData();
     }
 
     handleUpdateClick = () => {
-        fetch('/rook')
+        this.getGameData();
+    }
+
+    getGameData = () => {
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                playerId: this.playerId
+            })
+        };
+        fetch('/rook/getGameData', requestOptions)
             .then(res => res.json())
-            .then(response => this.setState({ status: response.status }));
+            .then(res => {
+                //alert("got response: " + JSON.stringify(res));
+                this.setState({ gameData: res.rookResponse.gameData });
+            });
     }
 
     handleDealClick = () => {
-        let cardTblState = {
-            topPlayerCard: null,
-            leftPlayerCard: null,
-            rightPlayerCard: null,
-            bottomPlayerCard: null,
-        }
-        this.cardTableRef.current.setState(cardTblState);
-
-        this.deal();
-        this.playerHandRef.current.setState({cardList: this.playerHand});
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                playerId: this.playerId
+            })
+        };
+        fetch('/rook/deal', requestOptions)
+            .then(res => res.json())
+            .then(res => {
+                let newData = res.rookResponse.gameData;
+                this.setState({ gameData: newData });
+            });
     }
 
-    handleCardClick = (selPlayerCard) => {
+    handleCardClick = (selCardId) => {
         //alert("Selected " + selPlayerCard.getCardName());
         // Add the card to the card table.
+        /*
         let playedCard =
             <PlayerCard
                 card={selPlayerCard.props.card}
@@ -75,14 +117,28 @@ class Game extends Component {
         this.cardTableRef.current.setState({bottomPlayerCard: playedCard});
 
         // Remove the card from the Player's hand.
-        let filteredHand = this.playerHand.filter( (item, index, array) => {
+        let filteredCards = this.playerCards.filter( (item, index, array) => {
             // if true item is pushed to results and the iteration continues
             // returns empty array if nothing found
             return (item.name !== selPlayerCard.props.card.name);
         });
 
-        this.playerHand = filteredHand;
-        this.playerHandRef.current.setState({cardList: this.playerHand});
+        this.playerCards = filteredCards;
+        this.playerHandRef.current.setState({cardList: this.playerCards});
+         */
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                playerId: this.playerId,
+                cardId: selCardId })
+        };
+        fetch('/rook/playCard', requestOptions)
+            .then(res => res.json())
+            .then(res => {
+                let newData = res.rookResponse.gameData;
+                this.setState({ gameData: newData });
+            });
     }
 
      createVertOpponentCard(player, index) {
@@ -113,17 +169,56 @@ class Game extends Component {
         );
     }
 
+    getTeamId(playerId) {
+        let teamId = "team1";
+        if (playerId === "player2" || playerId === "player4") {
+            teamId = "team2"
+        }
+        return teamId;
+    }
+
     render() {
         let topPlayerCardCmpnts = [];
-        for (let i = 0; i < NUM_CARDS_PER_PLAYER; i++) {
-            topPlayerCardCmpnts.push( this.createVertOpponentCard("top", i) );
-        }
-
         let leftPlayerCardCmpnts = [];
         let rightPlayerCardCmpnts = [];
-        for (let i = 0; i < NUM_CARDS_PER_PLAYER; i++) {
-            leftPlayerCardCmpnts.push( this.createHorizOpponentCard("left", i) );
-            rightPlayerCardCmpnts.push( this.createHorizOpponentCard("right", i) );
+        let bottomPlayerCards = [];
+
+        if (this.state.gameData.team1) {
+            let playerData = this.state.gameData[this.posns.bottomPlayerId];
+            let cards = playerData.cards;
+            if (cards) {
+                for (let i = 0; i < cards.length; i++) {
+                    let card = cards[i];
+                    bottomPlayerCards.push(new Card(card.id, card.name, card.value, card.pointValue, card.suit));
+                }
+            }
+
+            playerData = this.state.gameData[this.posns.leftPlayerId];
+            for (let i = 0; i < playerData.numCards; i++) {
+                leftPlayerCardCmpnts.push(this.createHorizOpponentCard(playerData.name, i));
+            }
+
+            playerData = this.state.gameData[this.posns.topPlayerId];
+            for (let i = 0; i < playerData.numCards; i++) {
+                topPlayerCardCmpnts.push(this.createVertOpponentCard(playerData.name, i));
+            }
+
+            playerData = this.state.gameData[this.posns.rightPlayerId];
+            for (let i = 0; i < playerData.numCards; i++) {
+                rightPlayerCardCmpnts.push(this.createHorizOpponentCard(playerData.name, i));
+            }
+        }
+
+        let topCardId = "";
+        let leftCardId = "";
+        let rightCardId = "";
+        let bottomCardId = "";
+
+        if (this.state.gameData.table) {
+            topCardId = this.state.gameData.table[this.posns.topPlayerId];
+            leftCardId = this.state.gameData.table[this.posns.leftPlayerId];
+            rightCardId = this.state.gameData.table[this.posns.rightPlayerId];
+            bottomCardId = this.state.gameData.table[this.posns.bottomPlayerId];
         }
 
         return (
@@ -140,7 +235,7 @@ class Game extends Component {
                             <button type="button" className="updateBtn" onClick={() => this.handleUpdateClick()}>Update</button>
                         </div>
                         <div className={"statusPanel"}>
-                            <span className="statusText">{this.state.status}</span>
+                            <span className="statusText">{this.state.gameData.status}</span>
                         </div>
                     </div>
                     <div className="topPlayerArea">
@@ -155,7 +250,12 @@ class Game extends Component {
                             {leftPlayerCardCmpnts}
                         </div>
                     </div>
-                    <CardTable ref={this.cardTableRef}/>;
+                    <CardTable
+                        ref={this.cardTableRef}
+                        topCardId={topCardId}
+                        leftCardId={leftCardId}
+                        rightCardId={rightCardId}
+                        bottomCardId={bottomCardId} />;
                     <div className="rightPlayerArea">
                         <img className="playerImage" src={players.abe} alt="Player 3"></img>
                         <div className="rightPlayerCardArea">
@@ -167,7 +267,7 @@ class Game extends Component {
                         <div className="bottomPlayerCardArea">
                             <PlayerHand
                                 ref={this.playerHandRef}
-                                cardList={this.playerHand}
+                                cardList={bottomPlayerCards}
                                 onClick={this.handleCardClick} />
                         </div>
                     </div>

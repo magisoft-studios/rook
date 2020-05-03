@@ -6,9 +6,24 @@ class PlayerHand extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            cardList: this.props.cardList,
+            cardList: props.cardList,
         }
     }
+
+    static getDerivedStateFromProps(nextProps, prevState) {
+        if (nextProps.cardList.length !== prevState.cardList.length) {
+            return { cardList: nextProps.cardList };
+        } else {
+            return null;
+        }
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        if (prevProps.cardList.length !== this.props.cardList.length) {
+            this.setState({cardList: this.props.cardList});
+        }
+    }
+
     render() {
         let playerCardCmpnts = [];
         let wrapperClass = "bottomPlayerCardWrapper";
@@ -16,11 +31,11 @@ class PlayerHand extends Component {
         let imgClass = "bottomPlayerCard";
 
         this.state.cardList.forEach( (card, index) => {
-            let imgSrc = cards["card" + card.value + card.suit];
+            let imgSrc = cards[card.id];
             playerCardCmpnts.push(
-                <div key={card.name} className={wrapperClass}>
+                <div key={card.id} className={wrapperClass}>
                     <PlayerCard
-                        card={card}
+                        cardId={card.id}
                         buttonClass={buttonClass}
                         onClick={this.props.onClick}
                         imgClass={imgClass}

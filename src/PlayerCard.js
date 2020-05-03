@@ -6,8 +6,8 @@ class PlayerCard extends Component {
             <button
                 type="button"
                 className={this.props.buttonClass}
-                onClick={() => this.props.onClick(this)}>
-                <img className={this.props.imgClass} src={this.props.imgSrc} alt={this.props.card.name}></img>
+                onClick={() => this.props.onClick(this.props.cardId)}>
+                <img className={this.props.imgClass} src={this.props.imgSrc} alt={this.props.cardId}></img>
             </button>
         );
     }

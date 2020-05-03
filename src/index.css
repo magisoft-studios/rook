@@ -258,7 +258,7 @@ body {
   align-items: center;
 }
 
-.tableTopPlayerCardArea {
+.tableTopCardArea {
   grid-row: 2;
   grid-column: 2;
   width: 110px;
@@ -269,7 +269,7 @@ body {
   margin-top: 20px;
 }
 
-.tableLeftPlayerCardArea {
+.tableLeftCardArea {
   grid-row: 4;
   grid-column: 1;
   width: 110px;
@@ -280,7 +280,7 @@ body {
   margin-top: 40px;
 }
 
-.tableRightPlayerCardArea {
+.tableRightCardArea {
   grid-row: 4;
   grid-column: 3;
   width: 110px;
@@ -291,7 +291,7 @@ body {
   margin-top: 40px;
 }
 
-.tableBottomPlayerCardArea {
+.tableBottomCardArea {
   grid-row: 7;
   grid-column: 2;
   width: 110px;
