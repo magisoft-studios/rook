@@ -5,11 +5,13 @@ import PlayerCard from "./PlayerCard";
 class PlayerHand extends Component {
     constructor(props) {
         super(props);
+        /*
         this.state = {
             cardList: props.cardList,
         }
+        */
     }
-
+/*
     static getDerivedStateFromProps(nextProps, prevState) {
         if (nextProps.cardList.length !== prevState.cardList.length) {
             return { cardList: nextProps.cardList };
@@ -23,14 +25,14 @@ class PlayerHand extends Component {
             this.setState({cardList: this.props.cardList});
         }
     }
-
+*/
     render() {
         let playerCardCmpnts = [];
         let wrapperClass = "bottomPlayerCardWrapper";
         let buttonClass = "bottomPlayerCardButton";
         let imgClass = "bottomPlayerCard";
 
-        this.state.cardList.forEach( (card, index) => {
+        this.props.cardList.forEach( (card, index) => {
             let imgSrc = cards[card.id];
             playerCardCmpnts.push(
                 <div key={card.id} className={wrapperClass}>
