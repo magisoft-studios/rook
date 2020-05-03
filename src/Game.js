@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import cards from './Cards'
 import players from './Players'
-import images from './Images'
 import Card from './Card';
 import PlayerHand from './PlayerHand';
 import OpponentCard from './OpponentCard';
@@ -225,10 +224,14 @@ class Game extends Component {
             <div className="gameView">
                 <div className="gameArea">
                     <div className="gameInfoArea">
-                        <div className="logoContainer">
-                            <img className="logo" src={images.logo} alt="Jennings Games"></img>
-                            <span className="logoJennings">Jennings</span>
-                            <span className="logoGames">Games</span>
+                        <div className="gameTitleArea">
+                            <span className="gameTitle">Rook</span>
+                            <span className="teamTitle">Team 1</span>
+                            <span className="teamTitle">Tom</span>
+                            <span className="teamTitle">George</span>
+                            <span className="teamTitle">Team 2</span>
+                            <span className="teamTitle">Teddy</span>
+                            <span className="teamTitle">Abe</span>
                         </div>
                         <div className={"buttonPanel"}>
                             <button type="button" className="dealBtn" onClick={() => this.handleDealClick()}>Deal</button>
