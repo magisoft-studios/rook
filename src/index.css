@@ -553,3 +553,60 @@ body {
   border-radius: 10%;
 }
 
+.loginViewDiv {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.loginFormDiv {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  margin-top: 30px;
+}
+
+.loginWelcomeMsg {
+  font-weight: bold;
+  font-size: 20px;
+  margin-top: 20px;
+}
+
+.loginInstructionMsg {
+  font-weight: normal;
+  font-size: 16px;
+  margin-top: 20px;
+}
+
+.loginUserLabel {
+  margin-top: 10px;
+}
+
+.loginUserText {
+  margin-top: 10px;
+  width: 300px;
+}
+
+.loginPasswordLabel {
+  margin-top: 20px;
+}
+
+.loginPasswordText {
+  margin-top: 10px;
+}
+
+.loginBtnDiv {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.loginSubmitBtn {
+  padding: 4px;
+  background-color: #067325;
+  color: white;
+  border-radius: 10%;
+  width: 100px;
+}
+

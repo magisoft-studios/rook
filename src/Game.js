@@ -9,7 +9,7 @@ import CardTable from './CardTable';
 class Game extends Component {
     constructor(props) {
         super(props);
-        this.playerId = "player1";
+        this.playerId = props.playerId;
         this.playerHandRef = React.createRef();
         this.cardTableRef = React.createRef();
         this.posns = {
