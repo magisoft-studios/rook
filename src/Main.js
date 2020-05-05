@@ -18,17 +18,18 @@ class Main extends Component {
             sessionInfo: {
                 isLoggedIn: false,
                 token: "",
-                playerId: ""
+                playerId: "",
+                playerName: "",
             }
         }
     }
 
-    handleLogin = (userName, password) => {
+    handleLogin = (userId, password) => {
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                userName: userName,
+                userId: userId,
                 password: password
             })
         };
@@ -41,7 +42,8 @@ class Main extends Component {
                         sessionInfo: {
                             isLoggedIn: true,
                             token: res.rookResponse.token,
-                            playerId: "",
+                            playerId: res.rookResponse.playerId,
+                            playerName: res.rookResponse.playerName,
                         }
                     });
                 } else {
@@ -51,6 +53,7 @@ class Main extends Component {
                             isLoggedIn: false,
                             token: "",
                             playerId: "",
+                            playerName: "",
                          }
                     });
                 }

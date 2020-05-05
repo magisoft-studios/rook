@@ -4,7 +4,8 @@ export const AppContext = createContext( {
     sessionInfo: {
         isLoggedIn: false,
         token: "",
-        playerId: ""
+        playerId: "",
+        playerName: "",
     }
 });
 
