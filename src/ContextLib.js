@@ -3,7 +3,7 @@ import { useContext, createContext } from "react";
 export const AppContext = createContext( {
     sessionInfo: {
         isLoggedIn: false,
-        token: "",
+        sessionId: "",
         playerId: "",
         playerName: "",
     }

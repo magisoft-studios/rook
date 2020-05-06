@@ -17,7 +17,7 @@ class Main extends Component {
         this.state = {
             sessionInfo: {
                 isLoggedIn: false,
-                token: "",
+                sessionId: "",
                 playerId: "",
                 playerName: "",
             }
@@ -37,21 +37,21 @@ class Main extends Component {
             .then(res => res.json())
             .then(res => {
                 //alert("got response: " + JSON.stringify(res));
-                if (res.rookResponse.login === "SUCCESS") {
+                if (res.rookResponse.status === "SUCCESS") {
                     this.setState({
                         sessionInfo: {
                             isLoggedIn: true,
-                            token: res.rookResponse.token,
+                            sessionId: res.rookResponse.sessionId,
                             playerId: res.rookResponse.playerId,
                             playerName: res.rookResponse.playerName,
                         }
                     });
                 } else {
-                    alert("Sorry, your credentials could not be verified, please try again");
+                    alert("Login failed: " + res.rookResponse.errorMsg);
                     this.setState({
                         sessionInfo: {
                             isLoggedIn: false,
-                            token: "",
+                            sessionId: "",
                             playerId: "",
                             playerName: "",
                          }

@@ -3,6 +3,8 @@ import NewGameDialog from './NewGameDialog';
 import GameSetupDialog from './GameSetupDialog';
 import { AppContext, useAppContext } from './ContextLib';
 
+const REFRESH_RATE = 500;
+
 class Lobby extends Component {
     constructor(props) {
         super(props);
@@ -12,13 +14,70 @@ class Lobby extends Component {
             showAvailableGames: true,
             availableGames: [],
             hasJoinedGame: false,
-            gameName: "",
-            gameType: "",
-            player1: "",
-            player2: "",
-            player3: "",
-            player4: "",
+            currentGameData: null,
         }
+    }
+
+    componentDidMount() {
+        this.checkStatus();
+    }
+
+    checkStatus = () => {
+        if (this.state.showAvailableGames) {
+            this.getAvailableGames();
+        } else if (this.state.showGameSetupDialog) {
+            this.getGameInfo(this.state.currentGameData.name);
+        }
+    }
+
+    getAvailableGames = () => {
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                sessionId: this.context.sessionId,
+            })
+        };
+        fetch('/rook/getAvailableGames', requestOptions)
+            .then(res => res.json())
+            .then(res => {
+                let status = res.rookResponse.status;
+                if (status === "SUCCESS") {
+                    if (this.state.showAvailableGames) {
+                        this.setState({
+                            availableGames: res.rookResponse.availableGames,
+                        });
+                    }
+                    setTimeout(this.checkStatus, REFRESH_RATE);
+                }
+            });
+    }
+
+    getGameInfo = (gameName) => {
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                sessionId: this.context.sessionId,
+                gameName: gameName,
+            })
+        };
+        fetch('/rook/getGameInfo', requestOptions)
+            .then(res => res.json())
+            .then(res => {
+                let status = res.rookResponse.status;
+                if (status === "SUCCESS") {
+                    this.setState({
+                        showNewGameDialog: false,
+                        showGameSetupDialog: true,
+                        showAvailableGames: false,
+                        currentGameData: res.rookResponse.gameInfo,
+                    });
+                    setTimeout(this.checkStatus, REFRESH_RATE);
+                } else {
+                    alert("Could not find game: " + res.rookResponse.errorMsg);
+                }
+            });
     }
 
     handleCreateNewGame = () => {
@@ -30,32 +89,33 @@ class Lobby extends Component {
     }
 
     handleNewGameOk = (gameName, gameType) => {
-        /*
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                playerId: this.playerId
+                sessionId: this.context.sessionId,
+                gameName: gameName,
+                gameType: gameType,
             })
         };
         fetch('/rook/newGame', requestOptions)
             .then(res => res.json())
             .then(res => {
-                let newData = res.rookResponse.gameData;
-                this.setState({ availableGames: res.rookResponse.availableGames });
+                let status = res.rookResponse.status;
+                if (status === "SUCCESS") {
+                    this.setState({
+                        showNewGameDialog: false,
+                        showGameSetupDialog: true,
+                        showAvailableGames: false,
+                        availableGames: null,
+                        hasJoinedGame: true,
+                        currentGameData: res.rookResponse.gameData,
+                    });
+                } else {
+                    alert("Failed creating new game: " + res.rookResponse.errorMsg);
+                }
+                setTimeout(this.checkStatus, REFRESH_RATE);
             });
-
-         */
-        let tmpAvailGames = this.state.availableGames.slice();
-        tmpAvailGames.push({gameName: gameName, gameType: gameType});
-        this.setState({
-            showNewGameDialog: false,
-            showGameSetupDialog: false,
-            showAvailableGames: true,
-            availableGames: tmpAvailGames,
-            gameName: gameName,
-            gameType: gameType,
-        });
     }
 
     handleNewGameCancel = (event) => {
@@ -66,20 +126,43 @@ class Lobby extends Component {
         });
     }
 
-    handleJoinGame = () => {
+    handleJoinGame = (gameName) => {
         this.setState({
-            showNewGameDialog: false,
-            showGameSetupDialog: true,
             showAvailableGames: false,
-        });
+            availableGames: [],
+        })
+        this.getGameInfo(gameName);
     }
 
-    handlePlayerJoinedGame = (playerPosn) => {
-        //alert(this.context.playerName + " joined game at position " + playerPosn);
-        let newState = JSON.parse(JSON.stringify(this.state));
-        newState.hasJoinedGame = true;
-        newState[playerPosn] = this.context.playerName;
-        this.setState(newState);
+    handlePlayerJoinedGame = (gameName, playerPosn) => {
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                sessionId: this.context.sessionId,
+                gameName: gameName,
+                playerPosn: playerPosn,
+                playerId: this.context.playerId,
+            })
+        };
+        fetch('/rook/playerJoinGame', requestOptions)
+            .then(res => res.json())
+            .then(res => {
+                let status = res.rookResponse.status;
+                if (status === "SUCCESS") {
+                    this.setState({
+                        showNewGameDialog: false,
+                        showGameSetupDialog: true,
+                        showAvailableGames: false,
+                        availableGames: null,
+                        hasJoinedGame: true,
+                        currentGameData: res.rookResponse.gameData,
+                    });
+                } else {
+                    alert("Failed to join game: " + res.rookResponse.errorMsg);
+                }
+                setTimeout(this.checkStatus, REFRESH_RATE);
+            });
     }
 
     handleStartGame(event) {
@@ -91,16 +174,16 @@ class Lobby extends Component {
             let availGameCmpnts = [];
             if (this.state.availableGames.length > 0) {
                 this.state.availableGames.forEach((game, index) => {
-                    console.log("Adding game [" + game.gameName + "]");
+                    console.log("Adding game [" + game.name + "]");
                     availGameCmpnts.push(
-                        <tr key={game.gameName}>
-                            <td>{game.gameName}</td>
-                            <td>{game.gameType}</td>
+                        <tr key={game.name}>
+                            <td>{game.name}</td>
+                            <td>{game.type}</td>
                             <td>
                                 <button
                                     type="button"
                                     className="lobbyJoinGameBtn"
-                                    onClick={() => this.handleJoinGame()}>Join
+                                    onClick={() => this.handleJoinGame(game.name)}>Join
                                 </button>
                             </td>
                         </tr>
@@ -134,15 +217,16 @@ class Lobby extends Component {
 
         let gameSetupDlg = null;
         if (this.state.showGameSetupDialog) {
+            let gameData = this.state.currentGameData;
             gameSetupDlg =
                 <GameSetupDialog
                     hasJoinedGame={this.state.hasJoinedGame}
-                    gameName={this.state.gameName}
-                    gameType={this.state.gameType}
-                    player1={this.state.player1}
-                    player2={this.state.player2}
-                    player3={this.state.player3}
-                    player4={this.state.player4}
+                    gameName={gameData.name}
+                    gameType={gameData.type}
+                    player1={gameData.player1.name}
+                    player2={gameData.player2.name}
+                    player3={gameData.player3.name}
+                    player4={gameData.player4.name}
                     onJoin={this.handlePlayerJoinedGame}
                     onStartGame={this.handleStartGame} />
         }

@@ -16,7 +16,7 @@ class GameSetupDialog extends Component {
                 playerCmpnt =
                     <button type="button"
                             className="joinGameBtn"
-                            onClick={() => this.props.onJoin(playerPosn)}>Join</button>
+                            onClick={() => this.props.onJoin(this.props.gameName, playerPosn)}>Join</button>
             } else {
                 playerCmpnt = <span className="playerNameText">"Waiting for player..."</span>
             }
@@ -25,9 +25,12 @@ class GameSetupDialog extends Component {
     }
 
     render() {
+        // Team 1
         let player1Cmpnt = this.createPlayerComponent(this.props.player1, "player1");
-        let player2Cmpnt = this.createPlayerComponent(this.props.player2, "player2");
         let player3Cmpnt = this.createPlayerComponent(this.props.player3, "player3");
+
+        // Team 2
+        let player2Cmpnt = this.createPlayerComponent(this.props.player2, "player2");
         let player4Cmpnt = this.createPlayerComponent(this.props.player4, "player4");
 
         return (
@@ -51,18 +54,18 @@ class GameSetupDialog extends Component {
                     </tr>
                     <tr>
                         <td><span className="gameSetupPlayerLabel">Player 2:</span></td>
-                        <td>{player2Cmpnt}</td>
+                        <td>{player3Cmpnt}</td>
                     </tr>
                     <tr>
                         <td><span className="gameSetupGameLabel">Team 2</span></td>
                         <td></td>
                     </tr>
                     <tr>
-                        <td><span className="gameSetupPlayerLabel">Player 3:</span></td>
-                        <td>{player3Cmpnt}</td>
+                        <td><span className="gameSetupPlayerLabel">Player 1:</span></td>
+                        <td>{player2Cmpnt}</td>
                     </tr>
                     <tr>
-                        <td><span className="gameSetupPlayerLabel">Player 4:</span></td>
+                        <td><span className="gameSetupPlayerLabel">Player 2:</span></td>
                         <td>{player4Cmpnt}</td>
                     </tr>
                 </table>
