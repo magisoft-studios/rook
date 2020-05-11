@@ -197,6 +197,69 @@ class Lobby extends Component {
         }
     }
 
+    handleLeaveGame = async (gameName) => {
+        await this.getGameInfo(gameName);
+        if (this.state.hasJoinedGame) {
+            // Need to tell server we are leaving the game.
+            const requestOptions = {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    sessionId: this.context.id,
+                    gameName: gameName,
+                    playerPosn: this.state.playerPosn,
+                })
+            };
+            try {
+                const response = await fetch('/rook/playerLeaveGame', requestOptions);
+                if (!response.ok) {
+                    throw Error(response.statusText);
+                } else {
+                    const jsonResp = await response.json();
+                    let status = jsonResp.rookResponse.status;
+                    if (status === "SUCCESS") {
+                        this.setState({
+                            ...this.state,
+                            showNewGameDialog: false,
+                            showGameSetupDialog: false,
+                            showAvailableGames: true,
+                            hasJoinedGame: false,
+                            playerPosn: null,
+                            currentGameData: null,
+                        });
+                        this.checkStatus();
+                    } else {
+                        alert("Failed to leave game: " + jsonResp.rookResponse.errorMsg);
+                    }
+                }
+            } catch (error) {
+                console.log(error);
+                this.setState({
+                    ...this.state,
+                    showNewGameDialog: false,
+                    showGameSetupDialog: false,
+                    showAvailableGames: true,
+                    hasJoinedGame: false,
+                    playerPosn: null,
+                    currentGameData: null,
+                });
+                this.checkStatus();
+            }
+        } else {
+            // We have not joined the game yet so no need to tell server.
+            this.setState({
+                ...this.state,
+                showNewGameDialog: false,
+                showGameSetupDialog: false,
+                showAvailableGames: true,
+                hasJoinedGame: false,
+                playerPosn: null,
+                currentGameData: null,
+            });
+            this.checkStatus();
+        }
+    }
+
     onEnterGame = (gameName) => {
         this.setState({
             ...this.state,
@@ -211,7 +274,7 @@ class Lobby extends Component {
         let session = this.context;
 
         let availableGameTable = null;
-        if (this.state.showAvailableGames) {
+        if (this.state.showAvailableGames && this.state.availableGames) {
             let availGameCmpnts = [];
             if (this.state.availableGames.length > 0) {
                 this.state.availableGames.forEach((game, index) => {
@@ -270,7 +333,16 @@ class Lobby extends Component {
                     player3={gameData.player3.name}
                     player4={gameData.player4.name}
                     onJoin={this.handlePlayerJoinedGame}
-                    onEnterGame={this.onEnterGame} />
+                    onEnterGame={this.onEnterGame}
+                    onLeaveGame={this.handleLeaveGame} />
+        }
+
+        let newGameBtn = null;
+        if (!this.state.hasJoinedGame && this.state.showAvailableGames) {
+            newGameBtn = <button
+                className="lobbyNewGameBtn"
+                onClick={() => this.handleCreateNewGame()}>Create New Game
+            </button>;
         }
 
         return (
@@ -283,11 +355,7 @@ class Lobby extends Component {
                     <div className="lobbyGamesArea">
                         <div className="lobbyGamesTitleArea">
                             <div className="loggyGamesTitle"><span>Available Games</span></div>
-                            <button
-                                type="button"
-                                className="lobbyNewGameBtn"
-                                onClick={() => this.handleCreateNewGame()}>Create New Game
-                            </button>
+                            {newGameBtn}
                         </div>
                         {availableGameTable}
                         {newGameDlg}

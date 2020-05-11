@@ -34,7 +34,6 @@ class GameSetupDialog extends Component {
         let enterGameBtn = null;
         if (this.props.enableEnterGameBtn) {
             enterGameBtn = <button
-                type="button"
                 className="enterGameBtn"
                 onClick={() => this.props.onEnterGame(this.props.gameName)}>Enter Game</button>
         }
@@ -77,6 +76,11 @@ class GameSetupDialog extends Component {
                     </tr>
                     </tbody>
                 </table>
+                <div className="leaveGameBtnDiv">
+                    <button
+                        className="leaveGameBtn"
+                        onClick={() => this.props.onLeaveGame(this.props.gameName)}>Leave Game</button>
+                </div>
                 <div className="enterGameBtnDiv">
                     {enterGameBtn}
                 </div>
