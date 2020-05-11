@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import NewGameDialog from './NewGameDialog';
 import GameSetupDialog from './GameSetupDialog';
 import { AppContext, useAppContext } from './ContextLib';
+import Game from './Game';
 
 const REFRESH_RATE = 500;
 
@@ -14,94 +15,110 @@ class Lobby extends Component {
             showAvailableGames: true,
             availableGames: [],
             hasJoinedGame: false,
+            playerPosn: "",
             currentGameData: null,
         }
     }
 
-    componentDidMount() {
-        this.checkStatus();
+    async componentDidMount() {
+        await this.checkStatus();
     }
 
-    checkStatus = () => {
+    checkStatus = async () => {
         if (this.state.showAvailableGames) {
-            this.getAvailableGames();
+            await this.getAvailableGames();
         } else if (this.state.showGameSetupDialog) {
-            this.getGameInfo(this.state.currentGameData.name);
+            await this.getGameInfo(this.state.currentGameData.name);
         }
     }
 
-    getAvailableGames = () => {
+    getAvailableGames = async () => {
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                sessionId: this.context.sessionId,
+                sessionId: this.context.id,
             })
         };
-        fetch('/rook/getAvailableGames', requestOptions)
-            .then(res => res.json())
-            .then(res => {
-                let status = res.rookResponse.status;
+        try {
+            const response = await fetch('/rook/getAvailableGames', requestOptions);
+            if (!response.ok) {
+                throw Error(response.statusText);
+            } else {
+                const jsonResp = await response.json();
+                let status = jsonResp.rookResponse.status;
                 if (status === "SUCCESS") {
                     if (this.state.showAvailableGames) {
                         this.setState({
-                            availableGames: res.rookResponse.availableGames,
+                            ...this.state,
+                            availableGames: jsonResp.rookResponse.availableGames,
                         });
                     }
                     setTimeout(this.checkStatus, REFRESH_RATE);
                 }
-            });
+            }
+        } catch (error) {
+            console.log(error);
+        }
     }
 
-    getGameInfo = (gameName) => {
+    getGameInfo = async (gameName) => {
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                sessionId: this.context.sessionId,
+                sessionId: this.context.id,
                 gameName: gameName,
             })
         };
-        fetch('/rook/getGameInfo', requestOptions)
-            .then(res => res.json())
-            .then(res => {
-                let status = res.rookResponse.status;
+        try {
+            const response = await fetch('/rook/getGameInfo', requestOptions);
+            if (!response.ok) {
+                throw Error(response.statusText);
+            } else {
+                const jsonResp = await response.json();
+                let status = jsonResp.rookResponse.status;
                 if (status === "SUCCESS") {
                     this.setState({
-                        showNewGameDialog: false,
-                        showGameSetupDialog: true,
-                        showAvailableGames: false,
-                        currentGameData: res.rookResponse.gameInfo,
+                        ...this.state,
+                        currentGameData: jsonResp.rookResponse.gameInfo,
                     });
                     setTimeout(this.checkStatus, REFRESH_RATE);
                 } else {
-                    alert("Could not find game: " + res.rookResponse.errorMsg);
+                    alert("Could not find game: " + jsonResp.rookResponse.errorMsg);
                 }
-            });
+            }
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     handleCreateNewGame = () => {
         this.setState({
+            ...this.state,
             showNewGameDialog: true,
             showGameSetupDialog: false,
             showAvailableGames: false,
         });
     }
 
-    handleNewGameOk = (gameName, gameType) => {
+    handleNewGameOk = async (gameName, gameType) => {
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                sessionId: this.context.sessionId,
+                sessionId: this.context.id,
                 gameName: gameName,
                 gameType: gameType,
             })
         };
-        fetch('/rook/newGame', requestOptions)
-            .then(res => res.json())
-            .then(res => {
-                let status = res.rookResponse.status;
+        try {
+            const response = await fetch('/rook/newGame', requestOptions);
+            if (!response.ok) {
+                throw Error(response.statusText);
+            } else {
+                const jsonResp = await response.json();
+                let status = jsonResp.rookResponse.status;
                 if (status === "SUCCESS") {
                     this.setState({
                         showNewGameDialog: false,
@@ -109,46 +126,57 @@ class Lobby extends Component {
                         showAvailableGames: false,
                         availableGames: null,
                         hasJoinedGame: true,
-                        currentGameData: res.rookResponse.gameData,
+                        playerPosn: "player1",
+                        currentGameData: jsonResp.rookResponse.gameData,
                     });
+                    this.checkStatus();
                 } else {
-                    alert("Failed creating new game: " + res.rookResponse.errorMsg);
+                    alert("Failed creating new game: " + jsonResp.rookResponse.errorMsg);
                 }
-                setTimeout(this.checkStatus, REFRESH_RATE);
-            });
+            }
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     handleNewGameCancel = (event) => {
         this.setState({
+            ...this.state,
             showNewGameDialog: false,
             showGameSetupDialog: false,
             showAvailableGames: true,
         });
     }
 
-    handleJoinGame = (gameName) => {
+    handleJoinGame = async (gameName) => {
+        await this.getGameInfo(gameName);
         this.setState({
+            ...this.state,
             showAvailableGames: false,
             availableGames: [],
+            showGameSetupDialog: true,
         })
-        this.getGameInfo(gameName);
+        this.checkStatus();
     }
 
-    handlePlayerJoinedGame = (gameName, playerPosn) => {
+    handlePlayerJoinedGame = async (gameName, playerPosn) => {
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                sessionId: this.context.sessionId,
+                sessionId: this.context.id,
                 gameName: gameName,
                 playerPosn: playerPosn,
                 playerId: this.context.playerId,
             })
         };
-        fetch('/rook/playerJoinGame', requestOptions)
-            .then(res => res.json())
-            .then(res => {
-                let status = res.rookResponse.status;
+        try {
+            const response = await fetch('/rook/playerJoinGame', requestOptions);
+            if (!response.ok) {
+                throw Error(response.statusText);
+            } else {
+                const jsonResp = await response.json();
+                let status = jsonResp.rookResponse.status;
                 if (status === "SUCCESS") {
                     this.setState({
                         showNewGameDialog: false,
@@ -156,19 +184,32 @@ class Lobby extends Component {
                         showAvailableGames: false,
                         availableGames: null,
                         hasJoinedGame: true,
-                        currentGameData: res.rookResponse.gameData,
+                        playerPosn: playerPosn,
+                        currentGameData: jsonResp.rookResponse.gameData,
                     });
+                    this.checkStatus();
                 } else {
-                    alert("Failed to join game: " + res.rookResponse.errorMsg);
+                    alert("Failed to join game: " + jsonResp.rookResponse.errorMsg);
                 }
-                setTimeout(this.checkStatus, REFRESH_RATE);
-            });
+            }
+        } catch (error) {
+            console.log(error);
+        }
     }
 
-    handleStartGame(event) {
+    onEnterGame = (gameName) => {
+        this.setState({
+            ...this.state,
+            showNewGameDialog: false,
+            showGameSetupDialog: false,
+            showAvailableGames: false,
+        });
+        this.props.onEnterGame(gameName, this.state.playerPosn);
     }
 
     render() {
+        let session = this.context;
+
         let availableGameTable = null;
         if (this.state.showAvailableGames) {
             let availGameCmpnts = [];
@@ -221,6 +262,7 @@ class Lobby extends Component {
             gameSetupDlg =
                 <GameSetupDialog
                     hasJoinedGame={this.state.hasJoinedGame}
+                    enableEnterGameBtn={gameData.locked}
                     gameName={gameData.name}
                     gameType={gameData.type}
                     player1={gameData.player1.name}
@@ -228,13 +270,12 @@ class Lobby extends Component {
                     player3={gameData.player3.name}
                     player4={gameData.player4.name}
                     onJoin={this.handlePlayerJoinedGame}
-                    onStartGame={this.handleStartGame} />
+                    onEnterGame={this.onEnterGame} />
         }
 
-        let sessionInfo = this.context;
         return (
             <div className="lobbyView">
-                <div className="lobbyWelcomeDiv"><span className="lobbyWelcomeMsg">Welcome to the Game Lobby {sessionInfo.playerName}</span>
+                <div className="lobbyWelcomeDiv"><span className="lobbyWelcomeMsg">Welcome to the Game Lobby {session.playerName}</span>
                 </div>
                 <div className="lobbyInfoDiv"><span className="lobbyInfoMsg">Please select a game to join</span>
                 </div>

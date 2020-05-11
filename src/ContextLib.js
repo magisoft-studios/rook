@@ -1,14 +1,7 @@
-import { useContext, createContext } from "react";
+import { createContext } from "react";
+import Session from "./Session";
 
 export const AppContext = createContext( {
-    sessionInfo: {
-        isLoggedIn: false,
-        sessionId: "",
-        playerId: "",
-        playerName: "",
-    }
+    session: new Session()
 });
 
-export function useAppContext() {
-    return useContext(AppContext);
-}

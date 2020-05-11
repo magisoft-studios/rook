@@ -10,7 +10,7 @@ class TableCard extends Component {
         let imgSrc = cards[this.props.id];
 
         return (
-            <img className="bottomPlayerCard" src={imgSrc} alt={this.props.id}></img>
+            <img className="tableCard" src={imgSrc} alt={this.props.id}></img>
         );
     }
 }

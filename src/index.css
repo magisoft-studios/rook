@@ -1,6 +1,6 @@
 
 body {
-  background-color: black;
+ background-color:black;
   width: 100%;
   height: 100%;
   margin: 0;
@@ -16,7 +16,7 @@ body {
 }
 
 .mainView {
-  width: 1200px;
+  min-width: 1200px;
   min-height: 800px;
   display: flex;
   flex-direction: column;
@@ -107,17 +107,27 @@ body {
 }
 
 .gameView {
+  width: 98%;
+  height: 98%;
   display: flex;
   justify-content: center;
+  min-width: 0;
+  min-height: 0;
 }
 
 .gameArea {
-  width: 1200px;
-  height: 800px;
+  width: 98%;
+  height: 98%;
   display: grid;
+  /*
   grid-template-columns: 200px 200px 200px 200px 200px 200px;
   grid-template-rows: 100px 100px 100px 100px 100px 100px 100px 100px;
+   */
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: repeat(8, 1fr);
   background-color: #47686b;
+  min-width: 0;
+  min-height: 0;
 }
 
 .gameInfoArea {
@@ -138,11 +148,6 @@ body {
   font-size: 14px;
 }
 
-.playerCard {
-  width: 70px;
-  height: 100px;
-}
-
 .oppCard {
   width: 90px;
   height: 120px;
@@ -151,30 +156,6 @@ body {
 .oppCardHoriz {
   width: 70px;
   height: 50px;
-}
-
-.topPlayerCardArea {
-  display: flex;
-  flex-direction: row;
-  align-content: center;
-  max-width: 400px;
-}
-
-.oppCardVertWrapper {
-  overflow: hidden;
-}
-
-.oppCardVertWrapper:last-child, .oppCardVertWrapper:hover {
-  overflow: visible;
-}
-
-.oppCardVert {
-  width: 75px;
-  height: 100px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
 }
 
 .oppCardHorizWrapper {
@@ -194,95 +175,20 @@ body {
   align-items: center;
 }
 
-
-.bottomPlayerCardArea {
-  display: flex;
-  flex-direction: row;
-  align-content: center;
-  max-width: 550px;
-}
-
-.bottomPlayerCardWrapper {
-  overflow: hidden;
-}
-
-.bottomPlayerCardWrapper:last-child, .bottomPlayerCardWrapper:hover {
-  overflow: visible;
-}
-
-.bottomPlayerCardButton {
-  width: 110px;
-  height: 140px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
-  background: none;
-  border: none;
-}
-
-.bottomPlayerCard {
-  width: 110px;
-  height: 140px;
-  overflow: hidden;
-}
-
 .leftPlayerCardArea {
   display: flex;
   flex-direction: column;
   align-content: center;
-  max-height: 400px;
-}
-
-.leftPlayerCardWrapper {
-  overflow: hidden;
-}
-
-.leftPlayerCardWrapper:last-child, .leftPlayerCardWrapper:hover {
-  overflow: visible;
-}
-
-.leftPlayerCard {
-  width: 100px;
-  height: 75px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  min-height: 300px;
+  margin-bottom: 10px;
 }
 
 .rightPlayerCardArea {
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
   align-content: center;
-  max-height: 400px;
-}
-
-.rightPlayerCardWrapper {
-  overflow: hidden;
-}
-
-.rightPlayerCardWrapper:last-child, .rightPlayerCardWrapper:hover {
-  overflow: visible;
-}
-
-.rightPlayerCard {
-  width: 100px;
-  height: 75px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-.playerImage {
-  width: 156px;
-  height: 172px;
-  border: solid;
-  border-width: 8px;
-  border-color: transparent;
-  border-radius: 50% 50%;
+  min-height: 300px;
+  margin-top: 10px;
 }
 
 .topPlayerArea {
@@ -290,19 +196,27 @@ body {
   grid-row-end: 3;
   grid-column-start: 3;
   grid-column-end: 6;
-  border: none;
-  border-width: 2px;
-  border-color: black;
-  display: flex;
-  flex-direction: row-reverse;
-  align-content: center;
-  align-items: center;
-  background-color: #b3cacc;
-  border-radius: 10%;
   border-style: inset;
   border-color: #47686b;
   border-width: 2px;
+  border-radius: 10%;
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: space-evenly;
+  align-items: center;
+  border-radius: 10%;
+  background-color: #b3cacc;
   margin: 10px;
+}
+
+.topPlayerCardArea {
+  width: 85%;
+  min-width: 300px;
+  max-width: 85%;
+  display: flex;
+  flex-direction: row;
+  align-content: center;
+  margin-left: 10px;
 }
 
 .leftPlayerArea {
@@ -310,12 +224,9 @@ body {
   grid-row-end: 9;
   grid-column-start: 2;
   grid-column-end: 3;
-  border: none;
-  border-width: 2px;
-  border-color: black;
   display: flex;
   flex-direction: column;
-  align-content: center;
+  align-content: space-evenly;
   align-items: center;
   background-color: #b3cacc;
   border-radius: 10%;
@@ -331,54 +242,48 @@ body {
   grid-column-start: 3;
   grid-column-end: 6;
   border-radius: 40% 40% 40% 40%;
-  background-image: url("/card-table.png");
-  background-size: cover;
   display: grid;
-  grid-template-columns: 200px 200px 200px;
-  grid-template-rows: 50px 50px 50px 50px 50px 50px 50px 50px;
+  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(9, 1fr);
   justify-items: center;
   align-items: center;
+  border-style: solid;
+  border-width: 2px;
+  /* background-image: url("./images/card-table.png"); */
+  background-size: cover;
 }
 
 .tableTopCardArea {
-  grid-row: 2;
-  grid-column: 2;
-  width: 110px;
-  height: 140px;
-  border: solid;
-  border-width: 1px;
-  border-color: black;
-  margin-top: 20px;
+  grid-row-start: 2;
+  grid-row-end: 5;
+  grid-column-start: 5;
+  grid-column-end: 7;
 }
 
 .tableLeftCardArea {
-  grid-row: 4;
-  grid-column: 1;
-  width: 110px;
-  height: 140px;
-  border: solid;
-  border-width: 1px;
-  border-color: black;
-  margin-top: 40px;
+  grid-row-start: 4;
+  grid-row-end: 7;
+  grid-column-start: 2;
+  grid-column-end: 4;
 }
 
 .tableRightCardArea {
-  grid-row: 4;
-  grid-column: 3;
-  width: 110px;
-  height: 140px;
-  border: solid;
-  border-width: 1px;
-  border-color: black;
-  margin-top: 40px;
+  grid-row-start: 4;
+  grid-row-end: 7;
+  grid-column-start: 8;
+  grid-column-end: 10;
 }
 
 .tableBottomCardArea {
-  grid-row: 7;
-  grid-column: 2;
-  width: 110px;
-  height: 140px;
-  margin-bottom: 20px;
+  grid-row-start: 6;
+  grid-row-end: 9;
+  grid-column-start: 5;
+  grid-column-end: 7;
+}
+
+.tableCard {
+  width: 200px;
+  height: 240px;
 }
 
 .rightPlayerArea {
@@ -386,12 +291,9 @@ body {
   grid-row-end: 7;
   grid-column-start: 6;
   grid-column-end: 7;
-  border: none;
-  border-width: 2px;
-  border-color: black;
   display: flex;
   flex-direction: column-reverse;
-  align-content: center;
+  align-content: space-evenly;
   align-items: center;
   background-color: #b3cacc;
   border-style: inset;
@@ -406,19 +308,110 @@ body {
   grid-row-end: 9;
   grid-column-start: 3;
   grid-column-end: 7;
-  border: none;
-  border-width: 2px;
-  border-color: black;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
+  margin: 10px;
   background-color: #b3cacc;
   border-style: inset;
   border-color: #47686b;
   border-width: 2px;
   border-radius: 10%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+.playerImageDiv {
+  width: 200px;
+  height: 260px;
   margin: 10px;
 }
+
+.playerImage {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border: solid;
+  border-width: 8px;
+  border-color: transparent;
+  border-radius: 50% 50%;
+}
+
+.selectedPlayerImage {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border: solid;
+  border-width: 8px;
+  border-color: transparent;
+  border-radius: 50% 50%;
+  -webkit-animation: borderBlink 1s step-end infinite;
+  animation: borderBlink 1s step-end infinite;
+}
+
+.bottomPlayerCardArea {
+  width: 85%;
+  min-width: 300px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-left: 10px;
+}
+
+.bottomPlayerCardWrapper {
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+.bottomPlayerCardWrapper:last-child, .bottomPlayerCardWrapper:hover {
+  overflow: visible;
+  margin: 0;
+  padding: 0;
+}
+
+.bottomPlayerCardButton {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  background: none;
+  border: none;
+  margin: 0;
+  padding: 0;
+  min-width: 98%;
+  min-height: 98%;
+}
+
+.bottomPlayerCard {
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  object-fit: contain;
+}
+
+.oppCardVertWrapper {
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  min-width:
+}
+
+.oppCardVertWrapper:last-child, .oppCardVertWrapper:hover {
+  overflow: visible;
+  margin: 0;
+  padding: 0;
+}
+
+.oppCardVert {
+  min-width: 75px;
+  min-height: 100px;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  object-fit: contain;
+}
+
 
 
 /* BLINKING BORDER */
@@ -439,16 +432,7 @@ body {
     border: solid 8px yellow;
   }
 }
-.selectedPlayerImage{
-  width: 156px;
-  height: 172px;
-  border: solid;
-  border-width: 8px;
-  border-color: transparent;
-  border-radius: 50% 50%;
-  -webkit-animation: borderBlink 1s step-end infinite;
-  animation: borderBlink 1s step-end infinite;
-}
+
 
 .buttonPanel {
   margin: 10px;
@@ -723,8 +707,9 @@ body {
 .gameSetupDlgDiv {
   margin-top: 20px;
   display: flex;
-  flex-direction: row;
-  justify-content: center;
+  flex-direction: column;
+  align-content: center;
+  align-items: center;
   background-color: #cce5d9;
   border-style: inset;
   border-width: 2px;
@@ -746,4 +731,14 @@ body {
   padding-left: 20px;
 }
 
+.enterGameBtnDiv {
+  margin-top: 10px;
+}
 
+.enterGameBtn {
+  padding: 4px;
+  background-color: #067325;
+  color: white;
+  border-radius: 10%;
+  width: 100px;
+}

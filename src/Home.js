@@ -6,6 +6,9 @@ class Home extends Component {
             <div>
                 <h1>Welcome to Jennings Games</h1>
                 <p>Our mission is to provide enjoyment for the whole family!</p>
+                <div>
+                    <button onClick={() => this.props.onEnterGame()}>New Window</button>
+                </div>
             </div>
         );
     }

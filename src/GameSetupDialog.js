@@ -1,6 +1,4 @@
 import React, { Component } from 'react'
-import {AppContext} from "./ContextLib";
-import Lobby from "./Lobby";
 
 class GameSetupDialog extends Component {
     constructor(props) {
@@ -33,9 +31,18 @@ class GameSetupDialog extends Component {
         let player2Cmpnt = this.createPlayerComponent(this.props.player2, "player2");
         let player4Cmpnt = this.createPlayerComponent(this.props.player4, "player4");
 
+        let enterGameBtn = null;
+        if (this.props.enableEnterGameBtn) {
+            enterGameBtn = <button
+                type="button"
+                className="enterGameBtn"
+                onClick={() => this.props.onEnterGame(this.props.gameName)}>Enter Game</button>
+        }
+
         return (
             <div className="gameSetupDlgDiv">
                 <table className="gameSetupGameTbl">
+                    <tbody>
                     <tr>
                         <td><span>Game Name:</span></td>
                         <td><span className="gameSetupGameText">{this.props.gameName}</span></td>
@@ -68,13 +75,15 @@ class GameSetupDialog extends Component {
                         <td><span className="gameSetupPlayerLabel">Player 2:</span></td>
                         <td>{player4Cmpnt}</td>
                     </tr>
+                    </tbody>
                 </table>
+                <div className="enterGameBtnDiv">
+                    {enterGameBtn}
+                </div>
             </div>
         );
     }
 }
-
-GameSetupDialog.contextType = AppContext;
 
 export default GameSetupDialog;
 
