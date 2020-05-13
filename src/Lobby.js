@@ -328,6 +328,7 @@ class Lobby extends Component {
                     enableEnterGameBtn={gameData.locked}
                     gameName={gameData.name}
                     gameType={gameData.type}
+                    gameStateText={gameData.stateText}
                     player1={gameData.player1.name}
                     player2={gameData.player2.name}
                     player3={gameData.player3.name}

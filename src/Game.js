@@ -1,12 +1,12 @@
 import React, { Component } from 'react'
 import cards from './Cards'
 import players from './Players'
+import GameInfoArea from './GameInfoArea';
 import Card from './Card';
 import PlayerHand from './PlayerHand';
 import OpponentCard from './OpponentCard';
 import CardTable from './CardTable';
 import {AppContext} from "./ContextLib";
-import GameSetupDialog from "./GameSetupDialog";
 
 const REFRESH_RATE = 5000;
 
@@ -22,13 +22,11 @@ class Game extends Component {
             rightPlayerId: "",
         };
         this.state = {
-            gameId: this.props.gameId,
-            playerPosn: this.props.playerPosn,
-            gameData: {
-                status: "Initializing"
-            }
+            gameId: props.gameId,
+            playerPosn: props.playerPosn,
+            gameData: props.gameData
         }
-        this.calcPlayerPosns(this.props.playerPosn);
+        this.calcPlayerPosns(props.playerPosn);
     }
 
     calcPlayerPosns(playerPosn) {
@@ -66,29 +64,42 @@ class Game extends Component {
         }
     }
 
-    componentDidMount = () => {
-        this.getGameData();
+    componentDidMount = async () => {
+        await this.getGameData();
     }
 
     handleUpdateClick = () => {
         this.getGameData();
     }
 
-    getGameData = () => {
+    getGameData = async () => {
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                sessionId: this.context.id
+                sessionId: this.context.id,
             })
         };
-        fetch('/rook/getGameData', requestOptions)
-            .then(res => res.json())
-            .then(res => {
-                //alert("got response: " + JSON.stringify(res));
-                this.setState({ gameData: res.rookResponse.gameData });
-                setTimeout(this.getGameData, REFRESH_RATE);
-            });
+        try {
+            const response = await fetch('/rook/getGameData', requestOptions);
+            if (!response.ok) {
+                throw Error(response.statusText);
+            } else {
+                const jsonResp = await response.json();
+                let status = jsonResp.rookResponse.status;
+                if (status === "SUCCESS") {
+                    this.setState({
+                        ...this.state,
+                        gameData: jsonResp.rookResponse.gameData
+                    });
+                    setTimeout(this.getGameData, REFRESH_RATE);
+                } else {
+                    alert("Could not find game: " + jsonResp.rookResponse.errorMsg);
+                }
+            }
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     handleDealClick = () => {
@@ -161,7 +172,10 @@ class Game extends Component {
         return teamId;
     }
 
+    // NOTE: There is currently no way to prevent an "empty" render before the first data fetch
+    //
     render() {
+        console.log("Game: render START");
         let topPlayerCardCmpnts = [];
         let leftPlayerCardCmpnts = [];
         let rightPlayerCardCmpnts = [];
@@ -211,8 +225,6 @@ class Game extends Component {
         let rightPlayerImg = "";
         let bottomPlayerImg = "";
         if (this.state.gameData.table) {
-            console.log("getting player image for top player")
-            console.log("topPlayerPosn = " + this.posns.topPlayerPosn);
             topPlayerImg = this.state.gameData[this.posns.topPlayerPosn].imgName;
             leftPlayerImg = this.state.gameData[this.posns.leftPlayerPosn].imgName;
             rightPlayerImg = this.state.gameData[this.posns.rightPlayerPosn].imgName;
@@ -222,24 +234,7 @@ class Game extends Component {
         return (
             <div className="gameView">
                 <div className="gameArea">
-                    <div className="gameInfoArea">
-                        <div className="gameTitleArea">
-                            <span className="gameTitle">Rook</span>
-                            <span className="teamTitle">Team 1</span>
-                            <span className="teamTitle">Tom</span>
-                            <span className="teamTitle">George</span>
-                            <span className="teamTitle">Team 2</span>
-                            <span className="teamTitle">Teddy</span>
-                            <span className="teamTitle">Abe</span>
-                        </div>
-                        <div className={"buttonPanel"}>
-                            <button type="button" className="dealBtn" onClick={() => this.handleDealClick()}>Deal</button>
-                            <button type="button" className="updateBtn" onClick={() => this.handleUpdateClick()}>Update</button>
-                        </div>
-                        <div className={"statusPanel"}>
-                            <span className="statusText">{this.state.gameData.status}</span>
-                        </div>
-                    </div>
+                    <GameInfoArea gameData={this.state.gameData} />
                     <div className="topPlayerArea">
                         <div className="playerImageDiv">
                             <img className="playerImage" src={players[topPlayerImg]} alt="Player 1"></img>

@@ -20,7 +20,8 @@ class Main extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            session: new Session()
+            session: new Session(),
+            gameData: null
         }
     }
 
@@ -71,14 +72,73 @@ class Main extends Component {
             });
     }
 
-    handleEnterGame = (gameName, playerPosn) =>{
+    getGameData = async () => {
+        let session = this.state.session;
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                sessionId: session.id,
+            })
+        };
+        try {
+            const response = await fetch('/rook/getGameData', requestOptions);
+            if (!response.ok) {
+                throw Error(response.statusText);
+            } else {
+                const jsonResp = await response.json();
+                let status = jsonResp.rookResponse.status;
+                if (status === "SUCCESS") {
+                    return jsonResp.rookResponse.gameData
+                } else {
+                    alert("Could not find game: " + jsonResp.rookResponse.errorMsg);
+                }
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    playerEnterGame = async () => {
+        let session = this.state.session;
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                sessionId: session.id,
+            })
+        };
+        try {
+            const response = await fetch('/rook/playerEnterGame', requestOptions);
+            if (!response.ok) {
+                throw Error(response.statusText);
+            } else {
+                const jsonResp = await response.json();
+                let status = jsonResp.rookResponse.status;
+                if (status === "SUCCESS") {
+                    return jsonResp.rookResponse.gameData
+                } else {
+                    alert("Could not find game: " + jsonResp.rookResponse.errorMsg);
+                }
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    handleEnterGame = async (gameName, playerPosn) => {
+        let gameData = await this.playerEnterGame();
         let session = this.state.session;
         session.showGameWindow = true;
         session.currentGame = {
             id: gameName,
             playerPosn: playerPosn,
         }
-        this.setState({ session: session });
+        this.setState({
+            ...this.state,
+            session: session,
+            gameData: gameData,
+        });
     }
 
     render() {
@@ -92,7 +152,8 @@ class Main extends Component {
                     center="screen">
                     <Game
                         gameId={session.currentGame.id}
-                        playerPosn={session.currentGame.playerPosn}/>
+                        playerPosn={session.currentGame.playerPosn}
+                        gameData={this.state.gameData} />
                 </NewWindow>;
             }
 

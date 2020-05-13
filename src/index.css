@@ -136,17 +136,121 @@ body {
   grid-row-end: 9;
   grid-column-start: 1;
   grid-column-end: 2;
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+  margin-left: 10px;
 }
 
 .gameTitleArea {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  justify-content: center;
 }
 
 .gameTitle {
   font-weight: bold;
-  font-size: 14px;
+  font-size: 40px;
+  color: blue;
 }
+
+.gameInfoDiv {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 10px;
+  margin-left: 10px;
+}
+
+.gameName {
+  font-weight: bold;
+  font-size: 26px;
+  color: #47686b;
+  margin-left: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.teamTitle {
+  font-weight: bold;
+  font-size: 26px;
+  color: #47686b;
+  margin-left: 10px;
+  margin-top: 10px;
+}
+
+.playerName {
+  font-weight: normal;
+  font-size: 20px;
+  color: #000000;
+  margin-left: 30px;
+}
+
+.teamScoreDiv {
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+}
+
+.teamScoreTitle {
+  font-weight: bold;
+  font-size: 20px;
+  color: #000000;
+  margin-left: 30px;
+}
+
+.teamScore {
+  font-weight: normal;
+  font-size: 20px;
+  color: #000000;
+  margin-left: 10px;
+}
+
+.gameStatusDiv {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 10px;
+  margin-left: 10px;
+}
+
+.statusTitle {
+  font-weight: bold;
+  font-size: 26px;
+  color: #47686b;
+  margin-left: 10px;
+  margin-top: 10px;
+}
+
+.statusText {
+  font-family: SansSerif;
+  font-size: 20px;
+  font-weight: normal;
+  color: black;
+  margin-left: 30px;
+}
+
+.controlPanelDiv {
+  margin: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dealBtn {
+
+}
+
+.updateBtn {
+
+}
+
+.stat {
+  font-weight: normal;
+  font-size: 16px;
+  color: #000000;
+}
+
 
 .oppCard {
   width: 90px;
@@ -434,39 +538,7 @@ body {
 }
 
 
-.buttonPanel {
-  margin: 10px;
-  display: flex;
-  justify-content: center;
-}
 
-.statusPanel {
-  margin: 10px;
-  display: flex;
-  justify-content: center;
-}
-
-.dealBtn {
-
-}
-
-.updateBtn {
-
-}
-
-.statusPanel {
-  margin: 10px;
-  display: flex;
-  justify-content: center;
-}
-
-.statusText {
-  font-family: SansSerif;
-  font-size: 10px;
-  font-weight: normal;
-  color: black;
-  margin-left: 10px;
-}
 
 .lobbyView {
   display: flex;
