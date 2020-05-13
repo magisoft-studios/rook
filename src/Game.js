@@ -7,6 +7,8 @@ import PlayerHand from './PlayerHand';
 import OpponentCard from './OpponentCard';
 import CardTable from './CardTable';
 import {AppContext} from "./ContextLib";
+import PlayerStates from './PlayerStates';
+import GameStates from './GameStates';
 
 const REFRESH_RATE = 5000;
 
@@ -208,18 +210,6 @@ class Game extends Component {
             }
         }
 
-        let topCardId = "";
-        let leftCardId = "";
-        let rightCardId = "";
-        let bottomCardId = "";
-
-        if (this.state.gameData.table) {
-            topCardId = this.state.gameData.table[this.posns.topPlayerPosn];
-            leftCardId = this.state.gameData.table[this.posns.leftPlayerPosn];
-            rightCardId = this.state.gameData.table[this.posns.rightPlayerPosn];
-            bottomCardId = this.state.gameData.table[this.posns.bottomPlayerPosn];
-        }
-
         let topPlayerImg = "";
         let leftPlayerImg = "";
         let rightPlayerImg = "";
@@ -255,10 +245,8 @@ class Game extends Component {
                     </div>
                     <CardTable
                         ref={this.cardTableRef}
-                        topCardId={topCardId}
-                        leftCardId={leftCardId}
-                        rightCardId={rightCardId}
-                        bottomCardId={bottomCardId} />
+                        gameData={this.state.gameData}
+                        onDealClick={this.handleDealClick} />
                     <div className="rightPlayerArea">
                         <div className="righttPlayerAreaImageDiv">
                             <div className="playerImageDiv">

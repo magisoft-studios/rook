@@ -50,7 +50,6 @@ class GameInfoArea extends Component {
                     <span className="statusText">{this.state.gameData.stateText}</span>
                 </div>
                 <div className="controlPanelDiv">
-                    <button type="button" className="dealBtn" onClick={() => this.handleDealClick()}>Deal</button>
                     <button type="button" className="updateBtn" onClick={() => this.handleUpdateClick()}>Update</button>
                 </div>
             </div>

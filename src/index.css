@@ -237,9 +237,6 @@ body {
   align-items: center;
 }
 
-.dealBtn {
-
-}
 
 .updateBtn {
 
@@ -362,6 +359,7 @@ body {
   grid-row-end: 5;
   grid-column-start: 5;
   grid-column-end: 7;
+  border: none;
 }
 
 .tableLeftCardArea {
@@ -369,6 +367,7 @@ body {
   grid-row-end: 7;
   grid-column-start: 2;
   grid-column-end: 4;
+  border: none;
 }
 
 .tableRightCardArea {
@@ -376,6 +375,7 @@ body {
   grid-row-end: 7;
   grid-column-start: 8;
   grid-column-end: 10;
+  border: none;
 }
 
 .tableBottomCardArea {
@@ -383,11 +383,60 @@ body {
   grid-row-end: 9;
   grid-column-start: 5;
   grid-column-end: 7;
+  border: none;
 }
 
 .tableCard {
   width: 200px;
   height: 240px;
+}
+
+.dealDiv {
+  grid-row-start: 4;
+  grid-row-end: 7;
+  grid-column-start: 3;
+  grid-column-end: 9;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.dealBtn {
+  padding: 4px;
+  background-color: #067325;
+  color: white;
+  border-radius: 10%;
+  width: 100px;
+  height: 60px;
+  font-family: SansSerif;
+  font-size: 30px;
+  font-weight: bold;
+  animation: blinkingBorder 1s step-end infinite;
+}
+
+@keyframes blinkingBorder {
+  from, to {
+    border-color: transparent
+  }
+  50% {
+    border: solid 8px yellow;
+  }
+}
+
+.dealSpan {
+  font-family: SansSerif;
+  font-size: 30px;
+  font-weight: normal;
+  color: white;
+  animation: blinkingText 1.2s infinite;
+}
+
+@keyframes blinkingText {
+  0%{     color: #000;        }
+  49%{    color: #000;        }
+  60%{    color: transparent; }
+  99%{    color: transparent; }
+  100%{   color: #000;        }
 }
 
 .rightPlayerArea {
@@ -732,7 +781,7 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  margin-top: 10px;
+  margin: 10px;
 }
 
 .newGameDlgGameNameLabel {
