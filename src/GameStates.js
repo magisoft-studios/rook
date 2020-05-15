@@ -1,5 +1,4 @@
 import PlayerStates from './PlayerStates';
-import CardTable from "./CardTable";
 
 /* Game States:
     INITIALIZING          Waiting for players to join
@@ -22,6 +21,12 @@ class GameStates {
     static READY_TO_START = 1;
     static WAIT_FOR_ENTER = 2;
     static DEAL = 4;
+    static WAIT_FOR_BID = 5;
+    static BID_WON = 6;
+    static NAME_TRUMP = 7;
+    static TAKE_KITTY = 8;
+    static FILL_KITTY = 9;
+    static WAIT_FOR_CARD = 10;
 
     static getStateText(gameData, player) {
         let text = "";
@@ -37,6 +42,24 @@ class GameStates {
                 break;
             case GameStates.DEAL:
                 text = "Waiting for " + player.name + " to deal";
+                break;
+            case GameStates.WAIT_FOR_BID:
+                text = "Waiting for " + player.name + " to bid";
+                break;
+            case GameStates.BID_WON:
+                text = player.name + " has won the bidding";
+                break;
+            case GameStates.NAME_TRUMP:
+                text = "Waiting for " + player.name + " to declare trump suit";
+                break;
+            case GameStates.TAKE_KITTY:
+                text = "Waiting for " + player.name + " to take the kitty";
+                break;
+            case GameStates.FILL_KITTY:
+                text = "Waiting for " + player.name + " to fill the kitty";
+                break;
+            case GameStates.WAIT_FOR_CARD:
+                text = "Waiting for " + player.name + " to play a card";
                 break;
             default:
                 text = "Invalid State";

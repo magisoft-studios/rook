@@ -119,13 +119,10 @@ body {
   width: 98%;
   height: 98%;
   display: grid;
-  /*
-  grid-template-columns: 200px 200px 200px 200px 200px 200px;
-  grid-template-rows: 100px 100px 100px 100px 100px 100px 100px 100px;
-   */
   grid-template-columns: repeat(6, 1fr);
   grid-template-rows: repeat(8, 1fr);
-  background-color: #47686b;
+  /* background-color: #47686b; */
+  background-color: #24756c;
   min-width: 0;
   min-height: 0;
 }
@@ -222,6 +219,14 @@ body {
   margin-top: 10px;
 }
 
+.gameStatusEntryDiv {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  margin-top: 10px;
+  margin-left: 10px;
+}
+
 .statusText {
   font-family: SansSerif;
   font-size: 20px;
@@ -236,18 +241,6 @@ body {
   flex-direction: column;
   align-items: center;
 }
-
-
-.updateBtn {
-
-}
-
-.stat {
-  font-weight: normal;
-  font-size: 16px;
-  color: #000000;
-}
-
 
 .oppCard {
   width: 90px;
@@ -352,6 +345,7 @@ body {
   border-width: 2px;
   /* background-image: url("./images/card-table.png"); */
   background-size: cover;
+  background: #ffd9b3;
 }
 
 .tableTopCardArea {
@@ -419,7 +413,7 @@ body {
     border-color: transparent
   }
   50% {
-    border: solid 8px yellow;
+    border: solid 8px blue;
   }
 }
 
@@ -437,6 +431,202 @@ body {
   60%{    color: transparent; }
   99%{    color: transparent; }
   100%{   color: #000;        }
+}
+
+.kittyDiv {
+  grid-row-start: 4;
+  grid-row-end: 7;
+  grid-column-start: 2;
+  grid-column-end: 10;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  min-width: 300px;
+  width: 95%;
+}
+
+.kittyCardWrapper {
+  overflow: hidden;
+  padding: 0;
+}
+
+.kittyCardWrapper:last-child, .kittyCardWrapper:hover {
+  overflow: visible;
+  padding: 0;
+}
+
+.kittyCardButton {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+
+.kittyCardImg {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  width: 150px;
+  height: 200px;
+  object-fit: cover;
+}
+
+.topPlayerBidArea {
+  grid-row: 1;
+  grid-column: 5 / span 2;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.leftPlayerBidArea {
+  grid-row: 5;
+  grid-column: 1;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin-left: 5px;
+}
+
+.rightPlayerBidArea {
+  grid-row: 5;
+  grid-column: 10;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin-right: 5px;
+}
+
+.bottomPlayerBidArea {
+  grid-row: 9;
+  grid-column: 5 / span 2;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+  border-style: solid;
+  border-width: 8px;
+  border-color: #ffd9b3;
+}
+
+.currentPlayerBidArea {
+  grid-row: 9;
+  grid-column: 5 / span 2;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+  border-style: solid;
+  border-width: 8px;
+  border-color: #ffd9b3;
+  animation: blinkingBorder 1s step-end infinite;
+}
+
+.bidWonBidArea {
+  grid-row: 8 / span 2;
+  grid-column: 2 / span 8;
+  display: flex;
+  flex-direction: column;
+  align-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  border-style: solid;
+  border-width: 8px;
+  border-color: #ffd9b3;
+  animation: blinkingBorder 1s step-end infinite;
+}
+
+.playerBidDiv {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+  border-style: solid;
+  border-width: 8px;
+  border-color: #ffd9b3;
+}
+
+.biddingPlayerDiv {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+  border-style: solid;
+  border-width: 8px;
+  border-color: #ffd9b3;
+  animation: blinkingBorder 1s step-end infinite;
+}
+
+.playerBidText {
+  font-family: SansSerif;
+  font-size: 30px;
+  font-weight: bold;
+  color: #24756c;
+}
+
+.playerBidTextTitle {
+  font-family: SansSerif;
+  font-size: 30px;
+  font-weight: bold;
+  color: black;
+  margin-right: 10px;
+}
+
+.biddingPlayerText{
+  font-family: SansSerif;
+  font-size: 30px;
+  font-weight: bold;
+  color: black;
+  animation: blinkingText 1.2s infinite;
+}
+
+.bidSelectInput {
+  font-family: SansSerif;
+  font-size: 26px;
+  font-weight: bold;
+  color: black;
+  width: 120px;
+}
+
+.enterBidBtn {
+  margin-left: 10px;
+  padding: 4px;
+  background-color: #067325;
+  color: white;
+  border-radius: 10%;
+  font-family: SansSerif;
+  font-size: 30px;
+  font-weight: bold;
+}
+
+.bidWonText {
+  font-family: SansSerif;
+  font-size: 30px;
+  font-weight: bold;
+  color: black;
+}
+
+.bidWonBtn {
+  margin-top: 10px;
+  padding: 4px;
+  background-color: #067325;
+  color: white;
+  border-radius: 10%;
+  font-family: SansSerif;
+  font-size: 30px;
+  font-weight: bold;
 }
 
 .rightPlayerArea {
@@ -497,8 +687,7 @@ body {
   border-width: 8px;
   border-color: transparent;
   border-radius: 50% 50%;
-  -webkit-animation: borderBlink 1s step-end infinite;
-  animation: borderBlink 1s step-end infinite;
+  animation: blinkingBorder 1s step-end infinite;
 }
 
 .bottomPlayerCardArea {
@@ -547,7 +736,6 @@ body {
   overflow: hidden;
   margin: 0;
   padding: 0;
-  min-width:
 }
 
 .oppCardVertWrapper:last-child, .oppCardVertWrapper:hover {

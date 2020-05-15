@@ -9,7 +9,8 @@ class GameInfoArea extends Component {
     }
 
     static getDerivedStateFromProps(nextProps, prevState) {
-        if (nextProps.gameData.state !== prevState.gameData.state) {
+        if ((nextProps.gameData.state !== prevState.gameData.state)  ||
+            (nextProps.gameData.stateText !== prevState.gameData.stateText)) {
             return { gameData: nextProps.gameData };
         } else {
             return null;
@@ -17,40 +18,69 @@ class GameInfoArea extends Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
-        if (prevProps.gameData.state !== this.props.gameData.state) {
+        if ((prevProps.gameData.state !== this.props.gameData.state)  ||
+            (prevProps.gameData.stateText !== this.props.gameData.stateText)) {
             this.setState({gameData: this.props.gameData});
         }
     }
 
     render() {
+        let gameData = this.state.gameData;
+        let team1Players = gameData["player1"].name + ", " + gameData["player3"].name;
+        let team2Players = gameData["player2"].name + ", " + gameData["player4"].name;
+        let highBid = "Test";
+        let highBidPlayerName = "Test";
+        if (gameData.highBidPlayer != null) {
+            highBidPlayerName = gameData[gameData.highBidPlayer].name;
+            highBid = gameData.highBid;
+        }
+        let trumpSuit = "Yellow"; //gameData.trumpSuit;
+
         return (
             <div className="gameInfoArea">
                 <div className="gameTitleArea">
                     <span className="gameTitle">Rook</span>
                 </div>
                 <div className="gameInfoDiv">
-                    <span className="gameName">{this.state.gameData.name}</span>
-                    <span className="teamTitle">{this.state.gameData.team1.name}</span>
-                    <span className="playerName">{this.state.gameData.team1.player1Id}</span>
-                    <span className="playerName">{this.state.gameData.team1.player2Id}</span>
-                    <div className="teamScoreDiv">
-                        <span className="teamScoreTitle">Score:</span>
-                        <span className="teamScore">{this.state.gameData.team1.score}</span>
+                    <span className="gameName">{gameData.name}</span>
+                </div>
+                <div className="gameInfoDiv">
+                    <span className="teamTitle">{gameData.team1.name}</span>
+                    <div className="gameStatusEntryDiv">
+                        <span className="playerName">{team1Players}</span>
                     </div>
-                    <span className="teamTitle">{this.state.gameData.team2.name}</span>
-                    <span className="playerName">{this.state.gameData.team2.player1Id}</span>
-                    <span className="playerName">{this.state.gameData.team2.player2Id}</span>
-                    <div className="teamScoreDiv">
+                    <div className="gameStatusEntryDiv">
                         <span className="teamScoreTitle">Score:</span>
-                        <span className="teamScore">{this.state.gameData.team2.score}</span>
+                        <span className="teamScore">{gameData.team1.score}</span>
                     </div>
                 </div>
-                <div className="gameStatusDiv">
+                <div className="gameInfoDiv">
+                    <span className="teamTitle">{gameData.team2.name}</span>
+                    <div className="gameStatusEntryDiv">
+                        <span className="playerName">{team2Players}</span>
+                    </div>
+                    <div className="gameStatusEntryDiv">
+                        <span className="teamScoreTitle">Score:</span>
+                        <span className="teamScore">{gameData.team2.score}</span>
+                    </div>
+                </div>
+                <div className="gameInfoDiv">
                     <span className="statusTitle">Game Status</span>
-                    <span className="statusText">{this.state.gameData.stateText}</span>
-                </div>
-                <div className="controlPanelDiv">
-                    <button type="button" className="updateBtn" onClick={() => this.handleUpdateClick()}>Update</button>
+                    <div className="gameStatusEntryDiv">
+                        <span className="statusText">{gameData.stateText}</span>
+                    </div>
+                    <div className="gameStatusEntryDiv">
+                        <span className="teamScoreTitle">High Bid:</span>
+                        <span className="teamScore">{highBid}</span>
+                    </div>
+                    <div className="gameStatusEntryDiv">
+                        <span className="teamScoreTitle">High Bidder:</span>
+                        <span className="teamScore">{highBidPlayerName}</span>
+                    </div>
+                    <div className="gameStatusEntryDiv">
+                        <span className="teamScoreTitle">Trump Suit:</span>
+                        <span className="teamScore">{trumpSuit}</span>
+                    </div>
                 </div>
             </div>
         );

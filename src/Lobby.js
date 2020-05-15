@@ -4,7 +4,7 @@ import GameSetupDialog from './GameSetupDialog';
 import { AppContext, useAppContext } from './ContextLib';
 import Game from './Game';
 
-const REFRESH_RATE = 500;
+const REFRESH_RATE = 5000;
 
 class Lobby extends Component {
     constructor(props) {
@@ -22,6 +22,11 @@ class Lobby extends Component {
 
     async componentDidMount() {
         await this.checkStatus();
+        this.updateTimerId = setInterval(async () => this.checkStatus(), REFRESH_RATE);
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.updateTimerId);
     }
 
     checkStatus = async () => {
@@ -54,7 +59,6 @@ class Lobby extends Component {
                             availableGames: jsonResp.rookResponse.availableGames,
                         });
                     }
-                    setTimeout(this.checkStatus, REFRESH_RATE);
                 }
             }
         } catch (error) {
@@ -83,7 +87,6 @@ class Lobby extends Component {
                         ...this.state,
                         currentGameData: jsonResp.rookResponse.gameInfo,
                     });
-                    setTimeout(this.checkStatus, REFRESH_RATE);
                 } else {
                     alert("Could not find game: " + jsonResp.rookResponse.errorMsg);
                 }

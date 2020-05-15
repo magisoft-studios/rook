@@ -53,6 +53,14 @@ class PlayerStates {
     static ENTERED = 2;
     static DEAL = 4;
     static WAIT_FOR_DEAL = 5;
+    static BID = 6;
+    static WAIT_FOR_BID = 7;
+    static PASSED = 8;
+    static BID_WON = 9;
+    static NAME_TRUMP = 10;
+    static WAIT_FOR_TRUMP = 11;
+    static SETUP_KITTY = 12;
+    static WAIT_FOR_KITTY = 13;
 
     static getStateText(thisPlayer, otherPlayer) {
         let text = "";
@@ -71,6 +79,30 @@ class PlayerStates {
                 break;
             case PlayerStates.WAIT_FOR_DEAL:
                 text = "Waiting for " + otherPlayer.name + " to deal";
+                break;
+            case PlayerStates.BID:
+                text = "It's your bid";
+                break;
+            case PlayerStates.WAIT_FOR_BID:
+                text = "Waiting for " + otherPlayer.name + " to bid";
+                break;
+            case PlayerStates.PASSED:
+                text = "Passed";
+                break;
+            case PlayerStates.BID_WON:
+                text = thisPlayer.name + " won the bid";
+                break;
+            case PlayerStates.NAME_TRUMP:
+                text = thisPlayer.name + " is naming trump";
+                break;
+            case PlayerStates.WAIT_FOR_TRUMP:
+                text = "Waiting for " + otherPlayer.name + " to name trump";
+                break;
+            case PlayerStates.SETUP_KITTY:
+                text = "Populate the kitty";
+                break;
+            case PlayerStates.WAIT_FOR_KITTY:
+                text = "Waiting for " + otherPlayer.name + " to populate the kitty";
                 break;
             default:
                 text = "Invalid State";

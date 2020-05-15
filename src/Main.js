@@ -14,7 +14,9 @@ import Session from './Session';
 import Game from './Game';
 
 const AUTO_LOGIN = false;
-const TEST = false;
+const TEST = true;
+const TEST_USER = "Tom";
+const TEST_PLAYER_POSN = "player1";
 
 class Main extends Component {
     constructor(props) {
@@ -29,19 +31,19 @@ class Main extends Component {
         if (TEST) {
             let session = new Session({
                 loggedIn: true,
-                id: "Tom",
-                playerId: "Tom",
-                playerName: "Tom",
+                id: TEST_USER,
+                playerId: TEST_USER,
+                playerName: TEST_USER,
                 showGameWindow: true,
                 currentGame: {
                     id: "TestGame",
-                    playerPosn: "player1"
+                    playerPosn: TEST_PLAYER_POSN,
                 }
             });
 
             this.setState({ session: session });
         } else if (AUTO_LOGIN) {
-            this.handleLogin("Tom", "secret");
+            this.handleLogin(TEST_USER, "secret");
         }
     }
 
@@ -141,6 +143,21 @@ class Main extends Component {
         });
     }
 
+    openTestGame = async () => {
+        let gameData = await this.getGameData();
+        let session = this.state.session;
+        session.showGameWindow = true;
+        session.currentGame = {
+            id: gameData.name,
+            playerPosn: TEST_PLAYER_POSN,
+        }
+        this.setState({
+            ...this.state,
+            session: session,
+            gameData: gameData,
+        });
+    }
+
     render() {
         let session = this.state.session;
         if (session.loggedIn) {
@@ -177,7 +194,7 @@ class Main extends Component {
                                 </div>
                                 <div className="contentArea">
                                     <Route exact path="/">
-                                        <Home onEnterGame={this.handleEnterGame}/>
+                                        <Home openTestGame={this.openTestGame}/>
                                     </Route>
                                     <Route path="/lobby">
                                         <Lobby onEnterGame={this.handleEnterGame}/>

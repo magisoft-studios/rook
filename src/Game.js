@@ -104,7 +104,7 @@ class Game extends Component {
         }
     }
 
-    handleDealClick = () => {
+    handleDealClick = async () => {
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -112,12 +112,55 @@ class Game extends Component {
                 sessionId: this.context.id
             })
         };
-        fetch('/rook/deal', requestOptions)
-            .then(res => res.json())
-            .then(res => {
-                let newData = res.rookResponse.gameData;
-                this.setState({ gameData: newData });
-            });
+        try {
+            const response = await fetch('/rook/deal', requestOptions);
+            if (!response.ok) {
+                throw Error(response.statusText);
+            } else {
+                const jsonResp = await response.json();
+                let status = jsonResp.rookResponse.status;
+                if (status === "SUCCESS") {
+                    this.setState({
+                        ...this.state,
+                        gameData: jsonResp.rookResponse.gameData
+                    });
+                } else {
+                    alert("Could not find game: " + jsonResp.rookResponse.errorMsg);
+                }
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    handleBidClick = async (bidValue) => {
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                sessionId: this.context.id,
+                bidValue: bidValue,
+            })
+        };
+        try {
+            const response = await fetch('/rook/bid', requestOptions);
+            if (!response.ok) {
+                throw Error(response.statusText);
+            } else {
+                const jsonResp = await response.json();
+                let status = jsonResp.rookResponse.status;
+                if (status === "SUCCESS") {
+                    this.setState({
+                        ...this.state,
+                        gameData: jsonResp.rookResponse.gameData
+                    });
+                } else {
+                    alert("Could not find game: " + jsonResp.rookResponse.errorMsg);
+                }
+            }
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     handleCardClick = (selCardId) => {
@@ -134,6 +177,10 @@ class Game extends Component {
                 let newData = res.rookResponse.gameData;
                 this.setState({ gameData: newData });
             });
+    }
+
+    handleBidWonClick = () => {
+        alert("Transition to naming trump");
     }
 
     createVertOpponentCard(player, index) {
@@ -174,51 +221,61 @@ class Game extends Component {
         return teamId;
     }
 
+    getImageClass(player) {
+        let imageClass = "playerImage";
+        if ((player.state === PlayerStates.DEAL) ||
+            (player.state === PlayerStates.BID)) {
+            imageClass = "selectedPlayerImage";
+        }
+        return imageClass;
+    }
+
     // NOTE: There is currently no way to prevent an "empty" render before the first data fetch
     //
     render() {
         console.log("Game: render START");
+
+        let gameData = this.state.gameData;
+
+        let topPlayer = gameData[this.posns.topPlayerPosn];
+        let leftPlayer = gameData[this.posns.leftPlayerPosn];
+        let rightPlayer = gameData[this.posns.rightPlayerPosn];
+        let bottomPlayer = gameData[this.posns.bottomPlayerPosn];
+
+        let topPlayerImg = topPlayer.imgName;
+        let leftPlayerImg = leftPlayer.imgName;
+        let rightPlayerImg = rightPlayer.imgName;
+        let bottomPlayerImg = bottomPlayer.imgName;
+
+        let topPlayerImgClass = this.getImageClass(topPlayer);
+        let leftPlayerImgClass = this.getImageClass(leftPlayer);
+        let rightPlayerImgClass = this.getImageClass(rightPlayer);
+        let bottomPlayerImgClass = this.getImageClass(bottomPlayer);
+
         let topPlayerCardCmpnts = [];
         let leftPlayerCardCmpnts = [];
         let rightPlayerCardCmpnts = [];
         let bottomPlayerCards = [];
 
-        if (this.state.gameData.team1) {
-            let playerData = this.state.gameData[this.posns.bottomPlayerPosn];
-            let cards = playerData.cards;
-            if (cards) {
-                for (let i = 0; i < cards.length; i++) {
-                    let card = cards[i];
-                    bottomPlayerCards.push(new Card(card.id, card.name, card.value, card.pointValue, card.suit));
-                    //bottomPlayerCards.push(new Card("card14Yellow", "card14Yellow", 14, 10, "yellow"));
-                }
-            }
-
-            playerData = this.state.gameData[this.posns.leftPlayerPosn];
-            for (let i = 0; i < playerData.numCards; i++) {
-                leftPlayerCardCmpnts.push(this.createHorizOpponentCard(playerData.name, i));
-            }
-
-            playerData = this.state.gameData[this.posns.topPlayerPosn];
-            for (let i = 0; i < playerData.numCards; i++) {
-                topPlayerCardCmpnts.push(this.createVertOpponentCard(playerData.name, i));
-            }
-
-            playerData = this.state.gameData[this.posns.rightPlayerPosn];
-            for (let i = 0; i < playerData.numCards; i++) {
-                rightPlayerCardCmpnts.push(this.createHorizOpponentCard(playerData.name, i));
-            }
+        for (let i = 0; i < topPlayer.numCards; i++) {
+            leftPlayerCardCmpnts.push(this.createHorizOpponentCard(topPlayer.name, i));
         }
 
-        let topPlayerImg = "";
-        let leftPlayerImg = "";
-        let rightPlayerImg = "";
-        let bottomPlayerImg = "";
-        if (this.state.gameData.table) {
-            topPlayerImg = this.state.gameData[this.posns.topPlayerPosn].imgName;
-            leftPlayerImg = this.state.gameData[this.posns.leftPlayerPosn].imgName;
-            rightPlayerImg = this.state.gameData[this.posns.rightPlayerPosn].imgName;
-            bottomPlayerImg = this.state.gameData[this.posns.bottomPlayerPosn].imgName;
+        for (let i = 0; i < leftPlayer.numCards; i++) {
+            topPlayerCardCmpnts.push(this.createVertOpponentCard(leftPlayer.name, i));
+        }
+
+        for (let i = 0; i < rightPlayer.numCards; i++) {
+            rightPlayerCardCmpnts.push(this.createHorizOpponentCard(rightPlayer.name, i));
+        }
+
+        let cards = bottomPlayer.cards;
+        if (cards) {
+            for (let i = 0; i < cards.length; i++) {
+                let card = cards[i];
+                bottomPlayerCards.push(new Card(card.id, card.name, card.value, card.pointValue, card.suit));
+                //bottomPlayerCards.push(new Card("card14Yellow", "card14Yellow", 14, 10, "yellow"));
+            }
         }
 
         return (
@@ -227,7 +284,7 @@ class Game extends Component {
                     <GameInfoArea gameData={this.state.gameData} />
                     <div className="topPlayerArea">
                         <div className="playerImageDiv">
-                            <img className="playerImage" src={players[topPlayerImg]} alt="Player 1"></img>
+                            <img className={topPlayerImgClass} src={players[topPlayerImg]} alt="Player 1"></img>
                         </div>
                         <div className="topPlayerCardArea">
                             {topPlayerCardCmpnts}
@@ -236,7 +293,7 @@ class Game extends Component {
                     <div className="leftPlayerArea">
                         <div className="leftPlayerAreaImageDiv">
                             <div className="playerImageDiv">
-                                <img className="playerImage" src={players[leftPlayerImg]} alt="Player 2"></img>
+                                <img className={leftPlayerImgClass} src={players[leftPlayerImg]} alt="Player 2"></img>
                             </div>
                         </div>
                         <div className="leftPlayerCardArea">
@@ -246,11 +303,14 @@ class Game extends Component {
                     <CardTable
                         ref={this.cardTableRef}
                         gameData={this.state.gameData}
-                        onDealClick={this.handleDealClick} />
+                        playerPosns={this.posns}
+                        onDealClick={this.handleDealClick}
+                        onBidClick={this.handleBidClick}
+                        onBidWonClick={this.handleBidWonClick} />
                     <div className="rightPlayerArea">
                         <div className="righttPlayerAreaImageDiv">
                             <div className="playerImageDiv">
-                                <img className="playerImage" src={players[rightPlayerImg]} alt="Player 3"></img>
+                                <img className={rightPlayerImgClass} src={players[rightPlayerImg]} alt="Player 3"></img>
                             </div>
                         </div>
                         <div className="rightPlayerCardArea">
@@ -259,7 +319,7 @@ class Game extends Component {
                     </div>
                     <div className="bottomPlayerArea">
                         <div className="playerImageDiv">
-                            <img className="playerImage" src={players[bottomPlayerImg]} alt="Player 4"></img>
+                            <img className={bottomPlayerImgClass} src={players[bottomPlayerImg]} alt="Player 4"></img>
                         </div>
                         <div className="bottomPlayerCardArea">
                             <PlayerHand

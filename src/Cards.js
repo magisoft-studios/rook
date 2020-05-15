@@ -1,5 +1,6 @@
 import CARD_BACK from './images/cardback.png';
 import CARD_BACK_HORIZ from './images/cardbackhoriz.png';
+import CARD_ROOK from './images/cardrook.png';
 import CARD_1_BLACK from './images/card1black.png';
 import CARD_2_BLACK from './images/card2black.png';
 import CARD_3_BLACK from './images/card3black.png';
@@ -60,6 +61,7 @@ import CARD_14_RED from './images/card14red.png';
 let cards = {
     cardBack: CARD_BACK,
     cardBackHoriz: CARD_BACK_HORIZ,
+    cardRook: CARD_ROOK,
     card1Black: CARD_1_BLACK,
     card2Black: CARD_2_BLACK,
     card3Black: CARD_3_BLACK,

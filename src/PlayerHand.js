@@ -32,10 +32,9 @@ class PlayerHand extends Component {
         let buttonClass = "bottomPlayerCardButton";
         let imgClass = "bottomPlayerCard";
 
-        let cntr = 0;
         this.props.cardList.forEach( (card, index) => {
             let imgSrc = cards[card.id];
-            let key = card.id + cntr;
+            let key = card.id + index;
             let wrapperKey = "wrapper" + key;
             let cardKey = "card" + key;
             playerCardCmpnts.push(
