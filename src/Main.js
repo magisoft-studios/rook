@@ -14,7 +14,7 @@ import Session from './Session';
 import Game from './Game';
 
 const AUTO_LOGIN = false;
-const TEST = true;
+const TEST = false;
 const TEST_USER = "Tom";
 const TEST_PLAYER_POSN = "player1";
 

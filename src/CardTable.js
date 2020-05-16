@@ -15,6 +15,7 @@ class CardTable extends Component {
         this.state = {
             gameData: this.props.gameData,
             bidValue: "Pass",
+            trumpValue: "Black",
         }
     }
 
@@ -75,6 +76,13 @@ class CardTable extends Component {
         });
     }
 
+    handleTrumpSelect = (event) => {
+        this.setState({
+            ...this.state,
+            trumpValue: event.target.value
+        });
+    }
+
     calcBidOptions = (gameData) => {
         let highBid = gameData.highBid;
         let bidOptions = [];
@@ -129,8 +137,16 @@ class CardTable extends Component {
             let playerState = player.state;
             console.log("CardTable: playerPosn = " + playerPosn + " playerState = " + playerState);
 
-            if (gameState === GameStates.DEAL)
-            {
+            if (gameState === GameStates.WAIT_FOR_ENTER) {
+                let tableMsgText = gameData.stateText;
+                return (
+                    <div className="tableArea" style={{backgroundImage: `url(${bgSrc})`}}>
+                        <div className="tableMsgArea">
+                            <span className="tableMsgText">{tableMsgText}</span>
+                        </div>
+                    </div>
+                );
+            } else if (gameState === GameStates.DEAL) {
                 if (playerState === PlayerStates.DEAL) {
                     return (
                         <div className="tableArea" style={{ backgroundImage: `url(${bgSrc})` }}>
@@ -140,16 +156,16 @@ class CardTable extends Component {
                         </div>
                     );
                 } else {
+                    let tableMsgText = gameData.stateText;
                     return (
-                        <div className="tableArea" style={{ backgroundImage: `url(${bgSrc})` }}>
-                            <div className="dealDiv">
-                                <span className="dealSpan">{gameData.stateText}</span>
+                        <div className="tableArea" style={{backgroundImage: `url(${bgSrc})`}}>
+                            <div className="tableMsgArea">
+                                <span className="tableMsgText">{tableMsgText}</span>
                             </div>
                         </div>
                     );
                 }
-            } else if ((gameState >= GameStates.WAIT_FOR_BID) &&
-                       (gameState <= GameStates.BID_WON)) {
+            } else if (gameState === GameStates.BIDDING) {
                 let kittyCards = this.createKittyCards(gameData.kitty, false);
                 let playerBidArea = null;
                 if (playerState === PlayerStates.BID) {
@@ -167,16 +183,6 @@ class CardTable extends Component {
                             <button
                                 className="enterBidBtn"
                                 onClick={() => this.props.onBidClick(this.state.bidValue)}>Enter Bid</button>
-                        </div>;
-                } else if (playerState === PlayerStates.BID_WON) {
-                    let kittyCards = this.createKittyCards(gameData.kitty, false);
-                    let bidText = "You won the bid at " + this.calcBidText(player);
-                    playerBidArea =
-                        <div className="bidWonBidArea">
-                            <span className="bidWonText">{bidText}</span>
-                            <button
-                                className="bidWonBtn"
-                                onClick={() => this.props.onBidWonClick()}>Name Trump</button>
                         </div>;
                 } else {
                     let bidText = this.calcBidText(player);
@@ -234,6 +240,65 @@ class CardTable extends Component {
                         {playerBidArea}
                     </div>
                 );
+            }  else if (gameState === GameStates.BID_WON) {
+                if (player.state === PlayerStates.BID_WON) {
+                    let kittyCards = this.createKittyCards(gameData.kitty, false);
+                    let bidText = "You won the bid at " + this.calcBidText(player);
+                    return (
+                        <div className="tableArea" style={{ backgroundImage: `url(${bgSrc})` }}>
+                            <div className="bidWonBidArea">
+                                <span className="bidWonText">{bidText}</span>
+                                <button
+                                    className="bidWonBtn"
+                                    onClick={() => this.props.onBidWonClick()}>Call Trump</button>
+                            </div>;
+                        </div>
+                    );
+                } else {
+                    // Just show a message saying who won the bid.
+                    let tableMsgText = gameData.stateText;
+                    return (
+                        <div className="tableArea" style={{backgroundImage: `url(${bgSrc})`}}>
+                            <div className="tableMsgArea">
+                                <span className="tableMsgText">{tableMsgText}</span>
+                            </div>
+                        </div>
+                    );
+                }
+            } else if (gameState === GameStates.NAME_TRUMP) {
+                if (player.state === PlayerStates.WAIT_FOR_TRUMP) {
+                    // Just show a message for who is naming trump.
+                    let tableMsgText = player.stateText;
+                    return (
+                        <div className="tableArea" style={{ backgroundImage: `url(${bgSrc})` }}>
+                            <div className="tableMsgArea">
+                                <span className="tableMsgText">{tableMsgText}</span>
+                            </div>
+                        </div>
+                    );
+                } else {
+                    let kittyCards = this.createKittyCards(gameData.kitty, false);
+                    return (
+                        <div className="tableArea" style={{ backgroundImage: `url(${bgSrc})` }}>
+                            <div className="nameTrumpArea">
+                                <select
+                                    className="trumpSelectInput"
+                                    id="trumpSelect"
+                                    name="trumpSelect"
+                                    value={this.state.trumpValue}
+                                    onChange={this.handleTrumpSelect}>
+                                    <option value="Black">Black</option>
+                                    <option value="Green">Green</option>
+                                    <option value="Red">Red</option>
+                                    <option value="Yellow">Yellow</option>
+                                </select>
+                                <button
+                                    className="nameTrumpBtn"
+                                    onClick={() => this.props.onNameTrumpClick(this.state.trumpValue)}>Name Trump</button>
+                            </div>;
+                        </div>
+                    );
+                }
             } else {
                 let topCardId = "";
                 let leftCardId = "";

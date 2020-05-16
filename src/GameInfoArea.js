@@ -30,8 +30,8 @@ class GameInfoArea extends Component {
         let team2Players = gameData["player2"].name + ", " + gameData["player4"].name;
         let highBid = "Test";
         let highBidPlayerName = "Test";
-        if (gameData.highBidPlayer != null) {
-            highBidPlayerName = gameData[gameData.highBidPlayer].name;
+        if (gameData.highBidPlayerPosn != null) {
+            highBidPlayerName = gameData[gameData.highBidPlayerPosn].name;
             highBid = gameData.highBid;
         }
         let trumpSuit = "Yellow"; //gameData.trumpSuit;

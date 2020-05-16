@@ -96,7 +96,7 @@ class Game extends Component {
                     });
                     setTimeout(this.getGameData, REFRESH_RATE);
                 } else {
-                    alert("Could not find game: " + jsonResp.rookResponse.errorMsg);
+                    alert(jsonResp.rookResponse.errorMsg);
                 }
             }
         } catch (error) {
@@ -125,7 +125,7 @@ class Game extends Component {
                         gameData: jsonResp.rookResponse.gameData
                     });
                 } else {
-                    alert("Could not find game: " + jsonResp.rookResponse.errorMsg);
+                    alert(jsonResp.rookResponse.errorMsg);
                 }
             }
         } catch (error) {
@@ -155,13 +155,75 @@ class Game extends Component {
                         gameData: jsonResp.rookResponse.gameData
                     });
                 } else {
-                    alert("Could not find game: " + jsonResp.rookResponse.errorMsg);
+                    alert(jsonResp.rookResponse.errorMsg);
                 }
             }
         } catch (error) {
             console.log(error);
         }
     }
+
+    handleBidWonClick = async () => {
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                sessionId: this.context.id,
+            })
+        };
+        try {
+            const response = await fetch('/rook/bidWon', requestOptions);
+            if (!response.ok) {
+                throw Error(response.statusText);
+            } else {
+                const jsonResp = await response.json();
+                let status = jsonResp.rookResponse.status;
+                if (status === "SUCCESS") {
+                    this.setState({
+                        ...this.state,
+                        gameData: jsonResp.rookResponse.gameData
+                    });
+                } else {
+                    alert(jsonResp.rookResponse.errorMsg);
+                }
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    handleNameTrumpClick = async (trumpValue) => {
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                sessionId: this.context.id,
+            })
+        };
+        try {
+            alert("Trump will be: " + trumpValue);
+/*
+            const response = await fetch('/rook/nameTrump', requestOptions);
+            if (!response.ok) {
+                throw Error(response.statusText);
+            } else {
+                const jsonResp = await response.json();
+                let status = jsonResp.rookResponse.status;
+                if (status === "SUCCESS") {
+                    this.setState({
+                        ...this.state,
+                        gameData: jsonResp.rookResponse.gameData
+                    });
+                } else {
+                    alert(jsonResp.rookResponse.errorMsg);
+                }
+            }
+*/
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
 
     handleCardClick = (selCardId) => {
         const requestOptions = {
@@ -177,10 +239,6 @@ class Game extends Component {
                 let newData = res.rookResponse.gameData;
                 this.setState({ gameData: newData });
             });
-    }
-
-    handleBidWonClick = () => {
-        alert("Transition to naming trump");
     }
 
     createVertOpponentCard(player, index) {
@@ -306,7 +364,8 @@ class Game extends Component {
                         playerPosns={this.posns}
                         onDealClick={this.handleDealClick}
                         onBidClick={this.handleBidClick}
-                        onBidWonClick={this.handleBidWonClick} />
+                        onBidWonClick={this.handleBidWonClick}
+                        onNameTrumpClick={this.handleNameTrumpClick}/>
                     <div className="rightPlayerArea">
                         <div className="righttPlayerAreaImageDiv">
                             <div className="playerImageDiv">
