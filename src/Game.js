@@ -305,9 +305,9 @@ class Game extends Component {
         let rightPlayerImg = rightPlayer.imgName;
         let bottomPlayerImg = bottomPlayer.imgName;
 
-        let topPlayerImgClass = this.getImageClass(topPlayer);
-        let leftPlayerImgClass = this.getImageClass(leftPlayer);
-        let rightPlayerImgClass = this.getImageClass(rightPlayer);
+        let topPlayerImgClass = "playerImage";
+        let leftPlayerImgClass = "playerImage";
+        let rightPlayerImgClass = "playerImage";
         let bottomPlayerImgClass = this.getImageClass(bottomPlayer);
 
         let topPlayerCardCmpnts = [];
