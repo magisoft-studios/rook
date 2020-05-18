@@ -8,6 +8,7 @@ import Game from "./Game";
 import Cards from "./Cards";
 import PlayerCard from "./PlayerCard";
 import KittyCard from "./KittyCard";
+import PlayerActions from "./PlayerActions";
 
 class CardTable extends Component {
     constructor(props) {
@@ -19,9 +20,22 @@ class CardTable extends Component {
         }
     }
 
+    static isStateChanged(gd1, gd2) {
+        if (gd1.state !== gd2.state) return true;
+        if (gd1.stateText !== gd2.stateText) return true;
+        if (gd1.kitty && gd2.kitty) {
+            if (gd1.kitty.length !== gd2.kitty.length) return true;
+        }
+        if (gd1.table.player1 !== gd2.table.player1) return true;
+        if (gd1.table.player2 !== gd2.table.player2) return true;
+        if (gd1.table.player3 !== gd2.table.player3) return true;
+        if (gd1.table.player4 !== gd2.table.player4) return true;
+
+        return false;
+    }
+
     static getDerivedStateFromProps(nextProps, prevState) {
-        if ((nextProps.gameData.state !== prevState.gameData.state)  ||
-            (nextProps.gameData.stateText !== prevState.gameData.stateText)) {
+        if (CardTable.isStateChanged(nextProps.gameData, prevState.gameData)) {
             return {
                 gameData: nextProps.gameData,
                 bidValue: "Pass",
@@ -32,8 +46,7 @@ class CardTable extends Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
-        if ((prevProps.gameData.state !== this.props.gameData.state)  ||
-            (prevProps.gameData.stateText !== this.props.gameData.stateText)) {
+        if (CardTable.isStateChanged(prevProps.gameData, this.props.gameData)) {
             this.setState({
                 gameData: this.props.gameData,
                 bidValue: "Pass",
@@ -56,7 +69,7 @@ class CardTable extends Component {
                         cardKey={cardKey}
                         cardId={cardKey}
                         buttonClass={buttonClass}
-                        onClick={this.clickedKittyCard}
+                        onClick={() => this.props.onKittyCardClick(card.id)}
                         imgClass={imgClass}
                         imgSrc={imgSrc} />
                 </div>
@@ -67,10 +80,6 @@ class CardTable extends Component {
                 {kittyCards}
             </div>
         );
-    }
-
-    clickedKittyCard = (cardId) => {
-        alert("Clicked kitty card: " + cardId);
     }
 
     handleBidSelect = (event) => {
@@ -195,6 +204,22 @@ class CardTable extends Component {
         );
     }
 
+    setupCardArea = (player, cardId, cardAreaClass) => {
+        let cardArea = null;
+        if (player.state === PlayerStates.PLAY_CARD) {
+            cardArea = (
+                <div className={cardAreaClass}>
+                    <span className="waitCardText">?</span>
+                </div>
+            );
+        } else {
+            cardArea = (
+                <div className={cardAreaClass}><TableCard id={cardId} /></div>
+            )
+        }
+        return cardArea;
+    }
+
     /*  Tried different ways to load the table background image from the public folder.
           <div className="tableArea" style={{ backgroundImage: `url(${TABLE_BG})` }}>
           <div className="tableArea" style={{ backgroundImage: `url(${bgSrc})` }}>
@@ -210,6 +235,11 @@ class CardTable extends Component {
         let player = gameData[playerPosn];
         let playerState = player.state;
         let playerPosns = this.props.playerPosns;
+
+        let topPlayer = gameData[playerPosns.topPlayerPosn];
+        let leftPlayer = gameData[playerPosns.leftPlayerPosn];
+        let rightPlayer = gameData[playerPosns.rightPlayerPosn];
+        let bottomPlayer = gameData[playerPosns.bottomPlayerPosn];
 
         let tableMsgArea = null;
         let playerActionArea = null;
@@ -235,7 +265,7 @@ class CardTable extends Component {
                     playerActionArea = this.setupPlayerActionArea({
                         msgText: "Press the button to deal",
                         btnText: "Deal",
-                        btnHandler: this.props.onDealClick,
+                        btnHandler: () => this.props.onPlayerAction(PlayerActions.DEAL),
                     });
                 }
                 break;
@@ -254,7 +284,7 @@ class CardTable extends Component {
                         selHandler: this.handleBidSelect,
                         selOptions: bidOptions,
                         btnText: "Enter Bid",
-                        btnHandler: () => this.props.onBidClick(this.state.bidValue),
+                        btnHandler: () => this.props.onPlayerAction(PlayerActions.BID, this.state.bidValue),
                     });
                 } else {
                     bottomBidArea = this.setupBidArea(gameData, playerPosns.bottomPlayerPosn, "bottomPlayerBidArea");
@@ -271,7 +301,7 @@ class CardTable extends Component {
                         selHandler: null,
                         selOptions: null,
                         btnText: "Call Trump",
-                        btnHandler: this.props.onBidWonClick,
+                        btnHandler: () => this.props.onPlayerAction(PlayerActions.BID_WON),
                     });
                 } else {
                     // Just show a message saying who won the bid.
@@ -298,9 +328,44 @@ class CardTable extends Component {
                         selHandler: this.handleTrumpSelect,
                         selOptions: selOptions,
                         btnText: "Name Trump",
-                        btnHandler: () => this.props.onNameTrumpClick(this.state.trumpValue),
+                        btnHandler: () => this.props.onPlayerAction(PlayerActions.NAME_TRUMP, this.state.trumpValue),
                     });
                 }
+                break;
+
+            case GameStates.POPULATE_KITTY:
+                if (player.state === PlayerStates.WAIT_FOR_KITTY) {
+                    tableMsgArea = this.setupTableMsgArea(player.stateText);
+                } else {
+                    kittyArea = this.createKittyCardArea(gameData.kitty, true);
+                    let msgText = "Click a card to move it between the kitty and your hand.";
+                    playerActionArea = this.setupPlayerActionArea({
+                        msgText: msgText,
+                        btnText: "Finished Kitty",
+                        btnHandler: () => this.props.onKittyDone(PlayerActions.KITTY_DONE),
+                    });
+                }
+                break;
+
+            case GameStates.WAIT_FOR_CARD:
+                let topCardId = gameData.table[playerPosns.topPlayerPosn];
+                let leftCardId = gameData.table[playerPosns.leftPlayerPosn];
+                let rightCardId = gameData.table[playerPosns.rightPlayerPosn];
+                let bottomCardId = gameData.table[playerPosns.bottomPlayerPosn];
+
+                topCardArea = this.setupCardArea(topPlayer, topCardId, 'tableTopCardArea');
+                leftCardArea = this.setupCardArea(leftPlayer, leftCardId, 'tableLeftCardArea');
+                rightCardArea = this.setupCardArea(rightPlayer, rightCardId, 'tableRightCardArea');
+                bottomCardArea = this.setupCardArea(bottomPlayer, bottomCardId, 'tableBottomCardArea');
+
+                return (
+                    <div className="tableArea">
+                        {topCardArea}
+                        {leftCardArea}
+                        {rightCardArea}
+                        {bottomCardArea}
+                    </div>
+                );
                 break;
 
             default:

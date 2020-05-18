@@ -28,13 +28,13 @@ class GameInfoArea extends Component {
         let gameData = this.state.gameData;
         let team1Players = gameData["player1"].name + ", " + gameData["player3"].name;
         let team2Players = gameData["player2"].name + ", " + gameData["player4"].name;
-        let highBid = "Test";
-        let highBidPlayerName = "Test";
+        let highBid = "";
+        let highBidPlayerName = "";
         if (gameData.highBidPlayerPosn != null) {
             highBidPlayerName = gameData[gameData.highBidPlayerPosn].name;
             highBid = gameData.highBid;
         }
-        let trumpSuit = "Yellow"; //gameData.trumpSuit;
+        let trumpSuit = gameData.trumpSuit ? gameData.trumpSuit : "";
 
         return (
             <div className="gameInfoArea">

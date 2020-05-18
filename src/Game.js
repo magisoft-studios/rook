@@ -1,4 +1,6 @@
 import React, { Component } from 'react'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import cards from './Cards'
 import players from './Players'
 import GameInfoArea from './GameInfoArea';
@@ -9,6 +11,7 @@ import CardTable from './CardTable';
 import {AppContext} from "./ContextLib";
 import PlayerStates from './PlayerStates';
 import GameStates from './GameStates';
+import PlayerActions from "./PlayerActions";
 
 const REFRESH_RATE = 5000;
 
@@ -29,7 +32,115 @@ class Game extends Component {
             gameData: props.gameData
         }
         this.calcPlayerPosns(props.playerPosn);
+        this.updateTimerId = null;
     }
+
+    componentDidMount = async () => {
+        await this.checkStatus();
+        this.updateTimerId = setInterval(async () => this.checkStatus(), REFRESH_RATE);
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.updateTimerId);
+    }
+
+    checkStatus = async () => {
+        await this.getGameData();
+    }
+
+    setupRequestOptions = (bodyProps) => {
+        return {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                sessionId: this.context.id,
+                ...bodyProps,
+            }),
+        };
+    }
+
+    sendRequest = async(cmd, options) => {
+        try {
+            let url = "/rook/" + cmd;
+            const response = await fetch(url, options);
+            if (!response.ok) {
+                throw Error(response.statusText);
+            } else {
+                const jsonResp = await response.json();
+                let status = jsonResp.rookResponse.status;
+                if (status === "SUCCESS") {
+                    this.setState({
+                        ...this.state,
+                        gameData: jsonResp.rookResponse.gameData
+                    });
+                } else {
+                    alert(jsonResp.rookResponse.errorMsg);
+                }
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    getGameData = async () => {
+        let requestOptions = this.setupRequestOptions();
+        this.sendRequest("getGameData", requestOptions);
+    }
+
+    handlePlayerAction = async(action, value) => {
+        let requestOptions = this.setupRequestOptions({
+            action: action,
+            value: value ? value : "NA",
+        });
+        this.sendRequest("playerAction", requestOptions);
+    }
+
+    handleKittyCardClick = async (cardId) => {
+        if (this.state.gameData.state === GameStates.POPULATE_KITTY) {
+            let requestOptions = this.setupRequestOptions({cardId: cardId});
+            this.sendRequest("takeKittyCard", requestOptions);
+        }
+    }
+
+    handleCardClick = async (cardId) => {
+        let requestOptions = this.setupRequestOptions({cardId: cardId});
+        if (this.state.gameData.state === GameStates.POPULATE_KITTY) {
+            this.sendRequest("putKittyCard", requestOptions);
+        } else if (this.state.gameData.state === GameStates.WAIT_FOR_CARD) {
+            this.sendRequest("playCard", requestOptions);
+        }
+    }
+
+    handleKittyDone = (event) => {
+        let gameData = this.state.gameData;
+        let playerPosn = this.context.currentGame.playerPosn;
+        let player = gameData[playerPosn];
+        if (gameData.state === GameStates.POPULATE_KITTY) {
+            if (player.state === PlayerStates.SETUP_KITTY) {
+                let errMsg = "";
+                if (gameData.kitty.length === 5) {
+                    gameData.kitty.forEach( (card) => {
+                        if (card.pointValue > 0) {
+                            errMsg = "Oops, kitty must not contain any point cards";
+                        }
+                    });
+                } else {
+                    errMsg = "Oops, kitty must contain 5 cards!";
+                }
+
+                if (errMsg.length === 0) {
+                    let requestOptions = this.setupRequestOptions({
+                        action: PlayerActions.KITTY_DONE,
+                        value: "NA",
+                    });
+                    this.sendRequest("playerAction", requestOptions);
+                } else {
+                    this.showErrorToast(errMsg);
+                }
+            }
+        }
+    }
+
 
     calcPlayerPosns(playerPosn) {
         switch (playerPosn) {
@@ -66,179 +177,16 @@ class Game extends Component {
         }
     }
 
-    componentDidMount = async () => {
-        await this.getGameData();
-    }
-
-    handleUpdateClick = () => {
-        this.getGameData();
-    }
-
-    getGameData = async () => {
-        const requestOptions = {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                sessionId: this.context.id,
-            })
-        };
-        try {
-            const response = await fetch('/rook/getGameData', requestOptions);
-            if (!response.ok) {
-                throw Error(response.statusText);
-            } else {
-                const jsonResp = await response.json();
-                let status = jsonResp.rookResponse.status;
-                if (status === "SUCCESS") {
-                    this.setState({
-                        ...this.state,
-                        gameData: jsonResp.rookResponse.gameData
-                    });
-                    setTimeout(this.getGameData, REFRESH_RATE);
-                } else {
-                    alert(jsonResp.rookResponse.errorMsg);
-                }
-            }
-        } catch (error) {
-            console.log(error);
-        }
-    }
-
-    handleDealClick = async () => {
-        const requestOptions = {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                sessionId: this.context.id
-            })
-        };
-        try {
-            const response = await fetch('/rook/deal', requestOptions);
-            if (!response.ok) {
-                throw Error(response.statusText);
-            } else {
-                const jsonResp = await response.json();
-                let status = jsonResp.rookResponse.status;
-                if (status === "SUCCESS") {
-                    this.setState({
-                        ...this.state,
-                        gameData: jsonResp.rookResponse.gameData
-                    });
-                } else {
-                    alert(jsonResp.rookResponse.errorMsg);
-                }
-            }
-        } catch (error) {
-            console.log(error);
-        }
-    }
-
-    handleBidClick = async (bidValue) => {
-        const requestOptions = {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                sessionId: this.context.id,
-                bidValue: bidValue,
-            })
-        };
-        try {
-            const response = await fetch('/rook/bid', requestOptions);
-            if (!response.ok) {
-                throw Error(response.statusText);
-            } else {
-                const jsonResp = await response.json();
-                let status = jsonResp.rookResponse.status;
-                if (status === "SUCCESS") {
-                    this.setState({
-                        ...this.state,
-                        gameData: jsonResp.rookResponse.gameData
-                    });
-                } else {
-                    alert(jsonResp.rookResponse.errorMsg);
-                }
-            }
-        } catch (error) {
-            console.log(error);
-        }
-    }
-
-    handleBidWonClick = async () => {
-        const requestOptions = {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                sessionId: this.context.id,
-            })
-        };
-        try {
-            const response = await fetch('/rook/bidWon', requestOptions);
-            if (!response.ok) {
-                throw Error(response.statusText);
-            } else {
-                const jsonResp = await response.json();
-                let status = jsonResp.rookResponse.status;
-                if (status === "SUCCESS") {
-                    this.setState({
-                        ...this.state,
-                        gameData: jsonResp.rookResponse.gameData
-                    });
-                } else {
-                    alert(jsonResp.rookResponse.errorMsg);
-                }
-            }
-        } catch (error) {
-            console.log(error);
-        }
-    }
-
-    handleNameTrumpClick = async (trumpValue) => {
-        const requestOptions = {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                sessionId: this.context.id,
-            })
-        };
-        try {
-            alert("Trump will be: " + trumpValue);
-/*
-            const response = await fetch('/rook/nameTrump', requestOptions);
-            if (!response.ok) {
-                throw Error(response.statusText);
-            } else {
-                const jsonResp = await response.json();
-                let status = jsonResp.rookResponse.status;
-                if (status === "SUCCESS") {
-                    this.setState({
-                        ...this.state,
-                        gameData: jsonResp.rookResponse.gameData
-                    });
-                } else {
-                    alert(jsonResp.rookResponse.errorMsg);
-                }
-            }
-*/
-        } catch (error) {
-            console.log(error);
-        }
-    }
-
-
-    handleCardClick = (selCardId) => {
-        const requestOptions = {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                sessionId: this.context.id,
-                cardId: selCardId })
-        };
-        fetch('/rook/playCard', requestOptions)
-            .then(res => res.json())
-            .then(res => {
-                let newData = res.rookResponse.gameData;
-                this.setState({ gameData: newData });
-            });
+    showErrorToast = (msg) => {
+        toast.error(msg, {
+            position: "top-center",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+        });
     }
 
     createVertOpponentCard(player, index) {
@@ -282,7 +230,9 @@ class Game extends Component {
     getImageClass(player) {
         let imageClass = "playerImage";
         if ((player.state === PlayerStates.DEAL) ||
-            (player.state === PlayerStates.BID)) {
+            (player.state === PlayerStates.BID) ||
+            (player.state === PlayerStates.PLAY_CARD))
+        {
             imageClass = "selectedPlayerImage";
         }
         return imageClass;
@@ -362,10 +312,10 @@ class Game extends Component {
                         ref={this.cardTableRef}
                         gameData={this.state.gameData}
                         playerPosns={this.posns}
-                        onDealClick={this.handleDealClick}
-                        onBidClick={this.handleBidClick}
-                        onBidWonClick={this.handleBidWonClick}
-                        onNameTrumpClick={this.handleNameTrumpClick}/>
+                        onPlayerAction={this.handlePlayerAction}
+                        onKittyCardClick={this.handleKittyCardClick}
+                        onKittyDone={this.handleKittyDone}>
+                    </CardTable>
                     <div className="rightPlayerArea">
                         <div className="righttPlayerAreaImageDiv">
                             <div className="playerImageDiv">
@@ -388,6 +338,7 @@ class Game extends Component {
                         </div>
                     </div>
                 </div>
+                <ToastContainer />
             </div>
         );
     }

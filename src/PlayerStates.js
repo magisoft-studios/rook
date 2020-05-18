@@ -1,66 +1,23 @@
 
-/* Player States:
-    LOBBY                 Opened game in Lobby but not joined yet
-    JOINED                Joined game in Lobby but did not enter game yet
-    ENTERED               Entered game
-    DEAL                  It's this player's turn to deal
-    WAIT_FOR_DEAL         Waiting for another player to deal
-    BID                   It's this player's turn to bid
-    WAIT_BID              Waiting for other player's to bid
-    PASSED                This player has passed and is done bidding
-    BID_WON               This player won the bidding
-    NAME_TRUMP            This player is naming trump
-    WAIT_FOR_TRUMP        Waiting for another player to name trump
-    TAKE_KITTY            This player is taking kitty
-    WAIT_KITTY            Waiting for another player to fill the kitty
-    FILL_KITTY            This player is filling kitty
-    WAIT_KITTY            Waiting for another player to fill the kitty
-    WAIT_FOR_CARD         Waiting for another player to play a card
-    PLAY_CARD             It is this player's turn to play a card
-    TRICK_WON             This player has won the trick
-    TAKE_TRICK            This player is taking the trick
-    END_OF_HAND           End of Hand - Announce score, then go back to DEAL
-*/
-/*
-module.exports = Object.freeze({
-    LOBBY: 0,
-    JOINED: 1,
-    ENTERED: 2,
-    WAIT_FOR_DEAL: 3
-    DEAL: 3,
-    WAIT_BID: 4,
-    BID: 5,
-    PASSED: 6,
-    BID_WON: 7,
-    NAME_TRUMP: 8,
-    WAIT_FOR_TRUMP: 9,
-    TAKE_KITTY: 10,
-    WAIT_KITTY: 11,
-    FILL_KITTY: 12,
-    WAIT_KITTY: 13,
-    WAIT_FOR_CARD: 14,
-    PLAY_CARD: 15,
-    TRICK_WON: 16,
-    TAKE_TRICK: 17,
-    END_OF_HAND: 18,
-});
- */
-import GameStates from "./GameStates";
-
 class PlayerStates {
-    static LOBBY = 0;
-    static JOINED = 1;
-    static ENTERED = 2;
-    static DEAL = 4;
-    static WAIT_FOR_DEAL = 5;
-    static BID = 6;
-    static WAIT_FOR_BID = 7;
-    static PASSED = 8;
-    static BID_WON = 9;
-    static NAME_TRUMP = 10;
-    static WAIT_FOR_TRUMP = 11;
-    static SETUP_KITTY = 12;
-    static WAIT_FOR_KITTY = 13;
+    static LOBBY = 0;               // Opened game in Lobby but not joined yet
+    static JOINED = 1;              // Joined game in Lobby but did not enter game yet
+    static ENTERED = 2;             // Entered game
+    static DEAL = 4;                // It's this player's turn to deal
+    static WAIT_FOR_DEAL = 5;       // Waiting for another player to deal
+    static BID = 6;                 // It's this player's turn to bid
+    static WAIT_FOR_BID = 7;        // Waiting for other player's to bid
+    static PASSED = 8;              // This player has passed and is done bidding
+    static BID_WON = 9;             // This player won the bidding
+    static NAME_TRUMP = 10;         // This player is naming trump
+    static WAIT_FOR_TRUMP = 11;     // Waiting for another player to name trump
+    static SETUP_KITTY = 12;        // This player is taking kitty
+    static WAIT_FOR_KITTY = 13;     // Waiting for another player to fill the kitty
+    static PLAY_CARD = 14;          // It is this player's turn to play a card
+    static WAIT_FOR_CARD = 15;      // Waiting for another player to play a card
+    static TRICK_WON = 16;          // This player has won the trick
+    static TAKE_TRICK = 17;         // This player is taking the trick
+    static END_OF_HAND = 18;        // End of Hand - Announce score, then go back to DEAL
 
     static getStateText(thisPlayer, otherPlayer) {
         let text = "";
@@ -103,6 +60,12 @@ class PlayerStates {
                 break;
             case PlayerStates.WAIT_FOR_KITTY:
                 text = "Waiting for " + otherPlayer.name + " to populate the kitty";
+                break;
+            case PlayerStates.PLAY_CARD:
+                text = thisPlayer.name + " is playing a card";
+                break;
+            case PlayerStates.WAIT_FOR_CARD:
+                text = "Waiting for " + otherPlayer.name + " to play a card";
                 break;
             default:
                 text = "Invalid State";
