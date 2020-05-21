@@ -11,6 +11,7 @@ class GameStates {
     static POPULATE_KITTY = 8;          // Bid winner is populating kitty
     static WAIT_FOR_CARD = 9;           // Waiting for someone to play a card
     static TAKE_TRICK = 10;             // Waiting for the winner of the trick to take it
+    static END_OF_HAND = 11;            // Announce end of hand
 
     static getStateText(gameData, player) {
         let text = "";
@@ -45,6 +46,9 @@ class GameStates {
             case GameStates.TAKE_TRICK:
                 text = "Waiting for " + player.name + " to take the trick";
                 break;
+            case GameStates.END_OF_HAND:
+                text = "End of hand";
+                break;
             default:
                 text = "Invalid State";
                 break;
@@ -78,7 +82,6 @@ class GameStates {
             (gameData.player4.state === PlayerStates.ENTERED)
         );
     }
-
 }
 
 export default GameStates;

@@ -3,6 +3,7 @@ import NewGameDialog from './NewGameDialog';
 import GameSetupDialog from './GameSetupDialog';
 import { AppContext, useAppContext } from './ContextLib';
 import Game from './Game';
+import MyButton from "./MyButton";
 
 const REFRESH_RATE = 5000;
 
@@ -17,7 +18,7 @@ class Lobby extends Component {
             hasJoinedGame: false,
             playerPosn: "",
             currentGameData: null,
-        }
+        };
     }
 
     async componentDidMount() {
@@ -40,7 +41,7 @@ class Lobby extends Component {
     getAvailableGames = async () => {
         const requestOptions = {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 sessionId: this.context.id,
             })
@@ -69,7 +70,7 @@ class Lobby extends Component {
     getGameInfo = async (gameName) => {
         const requestOptions = {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 sessionId: this.context.id,
                 gameName: gameName,
@@ -103,12 +104,13 @@ class Lobby extends Component {
             showGameSetupDialog: false,
             showAvailableGames: false,
         });
+        this.requestInProgress = false;
     }
 
     handleNewGameOk = async (gameName, gameType) => {
         const requestOptions = {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 sessionId: this.context.id,
                 gameName: gameName,
@@ -132,7 +134,7 @@ class Lobby extends Component {
                         playerPosn: "player1",
                         currentGameData: jsonResp.rookResponse.gameData,
                     });
-                    this.checkStatus();
+                    await this.checkStatus();
                 } else {
                     alert("Failed creating new game: " + jsonResp.rookResponse.errorMsg);
                 }
@@ -159,13 +161,13 @@ class Lobby extends Component {
             availableGames: [],
             showGameSetupDialog: true,
         })
-        this.checkStatus();
+        await this.checkStatus();
     }
 
     handlePlayerJoinedGame = async (gameName, playerPosn) => {
         const requestOptions = {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 sessionId: this.context.id,
                 gameName: gameName,
@@ -287,11 +289,12 @@ class Lobby extends Component {
                             <td>{game.name}</td>
                             <td>{game.type}</td>
                             <td>
-                                <button
-                                    type="button"
-                                    className="lobbyJoinGameBtn"
-                                    onClick={() => this.handleJoinGame(game.name)}>Join
-                                </button>
+                                <MyButton
+                                    btnClass="lobbyJoinGameBtn"
+                                    btnText="Join"
+                                    onClick={this.handleJoinGame}
+                                    onClickValue={game.name}>
+                                </MyButton>
                             </td>
                         </tr>
                     )
@@ -343,10 +346,12 @@ class Lobby extends Component {
 
         let newGameBtn = null;
         if (!this.state.hasJoinedGame && this.state.showAvailableGames) {
-            newGameBtn = <button
-                className="lobbyNewGameBtn"
-                onClick={() => this.handleCreateNewGame()}>Create New Game
-            </button>;
+            newGameBtn =
+                <MyButton
+                    btnClass="lobbyNewGameBtn"
+                    btnText="Create New Game"
+                    onClick={this.handleCreateNewGame}>
+                </MyButton>
         }
 
         return (

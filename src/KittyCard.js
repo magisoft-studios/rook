@@ -1,21 +1,21 @@
 import React, { Component } from 'react'
+import MyButton from "./MyButton";
 
 class KittyCard extends Component {
     render() {
         let btnKey = this.props.cardKey + "btn";
         let imgKey = this.props.cardKey + "image;"
         return (
-            <button
+            <MyButton
                 key={btnKey}
-                className={this.props.buttonClass}
-                onClick={() => this.props.onClick(this.props.cardId)}>
-                <img
-                    key={imgKey}
-                    className={this.props.imgClass}
-                    src={this.props.imgSrc}
-                    alt={this.props.cardId}>
-                </img>
-            </button>
+                btnClass={this.props.buttonClass}
+                onClick={this.props.onClick}
+                onClickValue={this.props.cardId}
+                imgKey={imgKey}
+                imgClass={this.props.imgClass}
+                imgSrc={this.props.imgSrc}
+                imgAlt={this.props.cardId}>
+            </MyButton>
         );
     }
 }

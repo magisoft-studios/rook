@@ -47,7 +47,8 @@ class Main extends Component {
         }
     }
 
-    handleLogin = (userId, password) => {
+    handleLogin = async (userId, password) => {
+        console.log("handleLogin START");
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -56,22 +57,29 @@ class Main extends Component {
                 password: password
             })
         };
-        fetch('/rook/login', requestOptions)
-            .then(res => res.json())
-            .then(res => {
-                //alert("got response: " + JSON.stringify(res));
-                if (res.rookResponse.status === "SUCCESS") {
+        try {
+            const response = await fetch('/rook/login', requestOptions);
+            if (!response.ok) {
+                throw Error(response.statusText);
+            } else {
+                const jsonResp = await response.json();
+                let status = jsonResp.rookResponse.status;
+                if (status === "SUCCESS") {
+                    console.log("Login success");
                     let session = new Session();
                     session.loggedIn = true;
-                    session.id = res.rookResponse.sessionId;
-                    session.playerId = res.rookResponse.playerId;
-                    session.playerName = res.rookResponse.playerName;
+                    session.id = jsonResp.rookResponse.sessionId;
+                    session.playerId = jsonResp.rookResponse.playerId;
+                    session.playerName = jsonResp.rookResponse.playerName;
                     this.setState({ session: session });
                 } else {
-                    alert("Login failed: " + res.rookResponse.errorMsg);
+                    alert("Login failed: " + jsonResp.rookResponse.errorMsg);
                     this.setState({ session: new Session() });
                 }
-            });
+            }
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     getGameData = async () => {
@@ -160,6 +168,7 @@ class Main extends Component {
 
     render() {
         let session = this.state.session;
+        console.log("render: loggedIn = " + session.loggedIn);
         if (session.loggedIn) {
             let gameWindow = null;
             if (session.showGameWindow) {

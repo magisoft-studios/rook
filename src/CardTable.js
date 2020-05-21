@@ -9,6 +9,7 @@ import Cards from "./Cards";
 import PlayerCard from "./PlayerCard";
 import KittyCard from "./KittyCard";
 import PlayerActions from "./PlayerActions";
+import MyButton from "./MyButton";
 
 class CardTable extends Component {
     constructor(props) {
@@ -97,20 +98,32 @@ class CardTable extends Component {
     }
 
     calcBidOptions = (gameData) => {
-        let highBid = gameData.highBid;
         let bidOptions = [];
+
+        let highBid = gameData.highBid;
         let minBid = 70;
         let nextBid = (highBid >= minBid) ? highBid + 5 : minBid;
-        let maxBid = 180;
-        bidOptions.push(
-            <option key="Pass" value="Pass">Pass</option>
-        )
+        let maxBid = 180
+
+        // Only include PASS as an option if all other players have not PASSED.
+        let passCntr = 0;
+        if (gameData.player1.bid < 0) passCntr++;
+        if (gameData.player2.bid < 0) passCntr++;
+        if (gameData.player3.bid < 0) passCntr++;
+        if (gameData.player4.bid < 0) passCntr++;
+        if (passCntr < 3) {
+            bidOptions.push(
+                <option key="Pass" value="Pass">Pass</option>
+            );
+        }
+
         for (let i = nextBid; i <= maxBid; i+=5) {
             console.log("Adding bid option: " + i);
             bidOptions.push(
                 <option key={i} value={i}>{i}</option>
             )
         }
+
         return bidOptions;
     }
 
@@ -131,10 +144,15 @@ class CardTable extends Component {
         return bidText;
     }
 
-    setupTableMsgArea(msg) {
+    setupTableMsgArea(msgs) {
+        let msgSpans = [];
+        for (let i = 0; i < msgs.length; i++) {
+            msgSpans.push(<span key={"tableMsg"+i} className="tableMsgText">{msgs[i]}</span>);
+        }
+
         return (
             <div className="tableMsgArea">
-                <span className="tableMsgText">{msg}</span>
+                {msgSpans}
             </div>
         )
     }
@@ -149,12 +167,17 @@ class CardTable extends Component {
     //              btnHandler: this.props.onBidWonClick,
     //
     setupPlayerActionArea(params) {
-        let msgSpan = null;
+        let msg1Span = null;
+        let msg2Span = null;
         let select = null;
         let btn = null;
 
-        if (params.msgText != null) {
-            msgSpan = <span className="playerActionText">{params.msgText}</span>;
+        if (params.msg1Text != null) {
+            msg1Span = <span className="playerActionText">{params.msg1Text}</span>;
+        }
+
+        if (params.msg2Text != null) {
+            msg2Span = <span className="playerActionText">{params.msg2Text}</span>;
         }
 
         if (params.selValue != null) {
@@ -171,16 +194,20 @@ class CardTable extends Component {
 
         if (params.btnText != null) {
             btn =
-                <button
-                    className="playerActionBtn"
-                    onClick={params.btnHandler}>
-                    {params.btnText}
-                </button>;
+                <MyButton
+                    btnClass="playerActionBtn"
+                    btnText={params.btnText}
+                    onClick={params.btnHandler}
+                    onClickValue={params.btnValue}>
+                </MyButton>
         }
 
+        let actionAreaClass = params.areaClass ? params.areaClass : "playerActionArea";
+
         return (
-            <div className="playerActionArea">
-                {msgSpan}
+            <div className={actionAreaClass}>
+                {msg1Span}
+                {msg2Span}
                 {select}
                 {btn}
             </div>
@@ -209,13 +236,19 @@ class CardTable extends Component {
         if (player.state === PlayerStates.PLAY_CARD) {
             cardArea = (
                 <div className={cardAreaClass}>
-                    <span className="waitCardText">?</span>
+                    <span className="playerWaitCardText">?</span>
                 </div>
             );
-        } else {
+        } else if (cardId != null) {
             cardArea = (
                 <div className={cardAreaClass}><TableCard id={cardId} /></div>
             )
+        } else {
+            cardArea = (
+                <div className={cardAreaClass}>
+                    <span className="waitCardText">?</span>
+                </div>
+            );
         }
         return cardArea;
     }
@@ -256,22 +289,22 @@ class CardTable extends Component {
         switch (gameState) {
 
             case GameStates.WAIT_FOR_ENTER:
-                tableMsgArea = this.setupTableMsgArea(gameData.stateText);
+                tableMsgArea = this.setupTableMsgArea([gameData.stateText]);
                 break;
 
             case GameStates.DEAL:
-                tableMsgArea = this.setupTableMsgArea(gameData.stateText);
+                tableMsgArea = this.setupTableMsgArea([gameData.stateText]);
                 if (playerState === PlayerStates.DEAL) {
                     playerActionArea = this.setupPlayerActionArea({
-                        msgText: "Press the button to deal",
+                        msg1Text: "Press the button to deal",
                         btnText: "Deal",
-                        btnHandler: () => this.props.onPlayerAction(PlayerActions.DEAL),
+                        btnHandler: this.props.onPlayerAction,
+                        btnValue: {action: PlayerActions.DEAL},
                     });
                 }
                 break;
 
             case GameStates.BIDDING:
-                kittyArea = this.createKittyCardArea(gameData.kitty, false);
                 topBidArea = this.setupBidArea(gameData, playerPosns.topPlayerPosn, "topPlayerBidArea");
                 leftBidArea = this.setupBidArea(gameData, playerPosns.leftPlayerPosn, "leftPlayerBidArea");
                 rightBidArea = this.setupBidArea(gameData, playerPosns.rightPlayerPosn, "rightPlayerBidArea");
@@ -279,41 +312,41 @@ class CardTable extends Component {
                 if (playerState === PlayerStates.BID) {
                     let bidOptions = this.calcBidOptions(gameData);
                     playerActionArea = this.setupPlayerActionArea({
-                        msgText: "Select bid and press the button",
                         selValue: this.state.bidValue,
                         selHandler: this.handleBidSelect,
                         selOptions: bidOptions,
                         btnText: "Enter Bid",
-                        btnHandler: () => this.props.onPlayerAction(PlayerActions.BID, this.state.bidValue),
+                        btnHandler: this.props.onPlayerAction,
+                        btnValue: {action: PlayerActions.BID, value: this.state.bidValue},
                     });
                 } else {
+                    kittyArea = this.createKittyCardArea(gameData.kitty, false);
                     bottomBidArea = this.setupBidArea(gameData, playerPosns.bottomPlayerPosn, "bottomPlayerBidArea");
                 }
                 break;
 
             case GameStates.BID_WON:
                 if (player.state === PlayerStates.BID_WON) {
-                    kittyArea = this.createKittyCardArea(gameData.kitty, false);
                     let msgText = "You won the bid at " + this.calcBidText(player);
                     playerActionArea = this.setupPlayerActionArea({
-                        msgText: msgText,
+                        msg1Text: msgText,
                         selValue: null,
                         selHandler: null,
                         selOptions: null,
                         btnText: "Call Trump",
-                        btnHandler: () => this.props.onPlayerAction(PlayerActions.BID_WON),
+                        btnHandler: this.props.onPlayerAction,
+                        btnValue: {action: PlayerActions.BID_WON},
                     });
                 } else {
                     // Just show a message saying who won the bid.
-                    tableMsgArea = this.setupTableMsgArea(gameData.stateText);
+                    tableMsgArea = this.setupTableMsgArea([gameData.stateText]);
                 }
                 break;
 
             case GameStates.NAME_TRUMP:
                 if (player.state === PlayerStates.WAIT_FOR_TRUMP) {
-                    tableMsgArea = this.setupTableMsgArea(player.stateText);
+                    tableMsgArea = this.setupTableMsgArea([player.stateText]);
                 } else {
-                    kittyArea = this.createKittyCardArea(gameData.kitty, false);
                     let msgText = "Select your trump suit and press the button";
                     let selOptions = [
                         <option key="suitBlack" value="Black">Black</option>,
@@ -323,31 +356,47 @@ class CardTable extends Component {
                     ];
 
                     playerActionArea = this.setupPlayerActionArea({
-                        msgText: msgText,
+                        msg1Text: msgText,
                         selValue: this.state.trumpValue,
                         selHandler: this.handleTrumpSelect,
                         selOptions: selOptions,
                         btnText: "Name Trump",
-                        btnHandler: () => this.props.onPlayerAction(PlayerActions.NAME_TRUMP, this.state.trumpValue),
+                        btnHandler: this.props.onPlayerAction,
+                        btnValue: {action: PlayerActions.NAME_TRUMP, value: this.state.trumpValue},
                     });
                 }
                 break;
 
             case GameStates.POPULATE_KITTY:
                 if (player.state === PlayerStates.WAIT_FOR_KITTY) {
-                    tableMsgArea = this.setupTableMsgArea(player.stateText);
+                    tableMsgArea = this.setupTableMsgArea([player.stateText]);
                 } else {
                     kittyArea = this.createKittyCardArea(gameData.kitty, true);
                     let msgText = "Click a card to move it between the kitty and your hand.";
                     playerActionArea = this.setupPlayerActionArea({
-                        msgText: msgText,
+                        areaClass: "kittyActionArea",
+                        msg1Text: msgText,
                         btnText: "Finished Kitty",
-                        btnHandler: () => this.props.onKittyDone(PlayerActions.KITTY_DONE),
+                        btnHandler: this.props.onKittyDone,
+                        btnValue: {action: PlayerActions.KITTY_DONE},
                     });
                 }
                 break;
 
-            case GameStates.WAIT_FOR_CARD:
+            case GameStates.WAIT_FOR_CARD: {
+                let topCardId = gameData.table[playerPosns.topPlayerPosn];
+                let leftCardId = gameData.table[playerPosns.leftPlayerPosn];
+                let rightCardId = gameData.table[playerPosns.rightPlayerPosn];
+                let bottomCardId = gameData.table[playerPosns.bottomPlayerPosn];
+
+                topCardArea = this.setupCardArea(topPlayer, topCardId, 'tableTopCardArea');
+                leftCardArea = this.setupCardArea(leftPlayer, leftCardId, 'tableLeftCardArea');
+                rightCardArea = this.setupCardArea(rightPlayer, rightCardId, 'tableRightCardArea');
+                bottomCardArea = this.setupCardArea(bottomPlayer, bottomCardId, 'tableBottomCardArea');
+                break;
+            }
+
+            case GameStates.TAKE_TRICK: {
                 let topCardId = gameData.table[playerPosns.topPlayerPosn];
                 let leftCardId = gameData.table[playerPosns.leftPlayerPosn];
                 let rightCardId = gameData.table[playerPosns.rightPlayerPosn];
@@ -358,15 +407,49 @@ class CardTable extends Component {
                 rightCardArea = this.setupCardArea(rightPlayer, rightCardId, 'tableRightCardArea');
                 bottomCardArea = this.setupCardArea(bottomPlayer, bottomCardId, 'tableBottomCardArea');
 
-                return (
-                    <div className="tableArea">
-                        {topCardArea}
-                        {leftCardArea}
-                        {rightCardArea}
-                        {bottomCardArea}
-                    </div>
-                );
+                if (player.state === PlayerStates.TRICK_WON) {
+                    playerActionArea = this.setupPlayerActionArea({
+                        btnText: "Take Trick",
+                        btnHandler: this.props.onPlayerAction,
+                        btnValue: {action: PlayerActions.TAKE_TRICK},
+                    });
+                } else {
+                    let trickWinner = gameData[gameData.trick.winnerPosn];
+                    let msg = trickWinner.name + " wins";
+                    tableMsgArea = this.setupTableMsgArea([msg]);
+                }
                 break;
+            }
+
+            case GameStates.END_OF_HAND: {
+                let team1Msg = "Team 1 scored " + gameData.team1.handScore + " points!";
+                if (gameData.highBidTeamId === "team1") {
+                    if (gameData.team1.handScore < gameData.highBid) {
+                        team1Msg = "Team 1 lost " + gameData.highBid + " points";
+                    }
+                }
+
+                let team2Msg = "Team 2 scored " + gameData.team2.handScore + " points!";
+                if (gameData.highBidTeamId === "team2") {
+                    if (gameData.team2.handScore < gameData.highBid) {
+                        team1Msg = "Team 2 lost " + gameData.highBid + " points";
+                    }
+                }
+
+                if (player.state === PlayerStates.END_HAND) {
+                    playerActionArea = this.setupPlayerActionArea({
+                        msg1Text: team1Msg,
+                        msg2Text: team2Msg,
+                        btnText: "End Hand",
+                        btnHandler: this.props.onPlayerAction,
+                        btnValue: {action: PlayerActions.END_HAND},
+                    });
+                } else {
+                    let msgs = [team1Msg,team2Msg];
+                    tableMsgArea = this.setupTableMsgArea(msgs);
+                }
+                break;
+            }
 
             default:
                 break;
@@ -380,11 +463,11 @@ class CardTable extends Component {
                 {leftBidArea}
                 {rightBidArea}
                 {bottomBidArea}
-                {playerActionArea}
                 {topCardArea}
                 {leftCardArea}
                 {rightCardArea}
                 {bottomCardArea}
+                {playerActionArea}
             </div>
         )
     }

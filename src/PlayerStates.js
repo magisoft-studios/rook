@@ -16,8 +16,9 @@ class PlayerStates {
     static PLAY_CARD = 14;          // It is this player's turn to play a card
     static WAIT_FOR_CARD = 15;      // Waiting for another player to play a card
     static TRICK_WON = 16;          // This player has won the trick
-    static TAKE_TRICK = 17;         // This player is taking the trick
-    static END_OF_HAND = 18;        // End of Hand - Announce score, then go back to DEAL
+    static WAIT_FOR_TAKE_TRICK = 17;    // Waiting for the trick winner to take the trick.
+    static END_HAND = 18;           // End of Hand - Announce score, then go back to DEAL
+    static WAIT_FOR_END_HAND = 18;  // Wait for other player to end the hand
 
     static getStateText(thisPlayer, otherPlayer) {
         let text = "";
@@ -66,6 +67,18 @@ class PlayerStates {
                 break;
             case PlayerStates.WAIT_FOR_CARD:
                 text = "Waiting for " + otherPlayer.name + " to play a card";
+                break;
+            case PlayerStates.TRICK_WON:
+                text = thisPlayer.name + " won the trick";
+                break;
+            case PlayerStates.WAIT_FOR_TAKE_TRICK:
+                text = "Waiting for " + otherPlayer.name + " to take the trick";
+                break;
+            case PlayerStates.END_HAND:
+                text = "End of hand";
+                break;
+            case PlayerStates.WAIT_FOR_END_HAND:
+                text = "End of hand";
                 break;
             default:
                 text = "Invalid State";

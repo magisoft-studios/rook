@@ -35,6 +35,9 @@ class GameInfoArea extends Component {
             highBid = gameData.highBid;
         }
         let trumpSuit = gameData.trumpSuit ? gameData.trumpSuit : "";
+        let trickWinner = gameData.trick.winner ? gameData.trick.winner : "";
+        let team1Score = gameData.team1.handScore;
+        let team2Score = gameData.team2.handScore;
 
         return (
             <div className="gameInfoArea">
@@ -65,21 +68,32 @@ class GameInfoArea extends Component {
                     </div>
                 </div>
                 <div className="gameInfoDiv">
-                    <span className="statusTitle">Game Status</span>
+                    <span className="statusTitle">Hand Status</span>
                     <div className="gameStatusEntryDiv">
-                        <span className="statusText">{gameData.stateText}</span>
+                        <span className="teamScoreTitle">High Bidder:</span>
+                        <span className="teamScore">{highBidPlayerName}</span>
                     </div>
                     <div className="gameStatusEntryDiv">
                         <span className="teamScoreTitle">High Bid:</span>
                         <span className="teamScore">{highBid}</span>
                     </div>
                     <div className="gameStatusEntryDiv">
-                        <span className="teamScoreTitle">High Bidder:</span>
-                        <span className="teamScore">{highBidPlayerName}</span>
-                    </div>
-                    <div className="gameStatusEntryDiv">
                         <span className="teamScoreTitle">Trump Suit:</span>
                         <span className="teamScore">{trumpSuit}</span>
+                    </div>
+                    <div className="gameStatusEntryDiv">
+                        <span className="teamScoreTitle">Team 1 Score:</span>
+                        <span className="teamScore">{team1Score}</span>
+                    </div>
+                    <div className="gameStatusEntryDiv">
+                        <span className="teamScoreTitle">Team 2 Score:</span>
+                        <span className="teamScore">{team2Score}</span>
+                    </div>
+                </div>
+                <div className="gameInfoDiv">
+                    <span className="statusTitle">Current Status</span>
+                    <div className="gameStatusEntryDiv">
+                        <span className="statusText">{gameData.stateText}</span>
                     </div>
                 </div>
             </div>

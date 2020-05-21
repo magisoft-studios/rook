@@ -1,8 +1,13 @@
 import React, { Component } from 'react'
+import MyButton from "./MyButton";
 
 class GameSetupDialog extends Component {
     constructor(props) {
         super(props);
+    }
+
+    handlePlayerJoinBtnClick = (playerPosn) => {
+        this.props.onJoin(this.props.gameName, playerPosn)
     }
 
     createPlayerComponent = (playerName, playerPosn) => {
@@ -12,9 +17,12 @@ class GameSetupDialog extends Component {
         } else {
             if (! this.props.hasJoinedGame) {
                 playerCmpnt =
-                    <button type="button"
-                            className="joinGameBtn"
-                            onClick={() => this.props.onJoin(this.props.gameName, playerPosn)}>Join</button>
+                    <MyButton
+                        btnClass="joinGameBtn"
+                        btnText="Join"
+                        onClick={this.handlePlayerJoinBtnClick}
+                        onClickValue={playerPosn}>
+                    </MyButton>
             } else {
                 playerCmpnt = <span className="playerNameText">"Waiting for player..."</span>
             }
@@ -31,11 +39,23 @@ class GameSetupDialog extends Component {
         let player2Cmpnt = this.createPlayerComponent(this.props.player2, "player2");
         let player4Cmpnt = this.createPlayerComponent(this.props.player4, "player4");
 
+        let leaveGameBtn =
+            <MyButton
+                btnClass="leaveGameBtn"
+                btnText="Leave Game"
+                onClick={this.props.onLeaveGame}
+                onClickValue={this.props.gameName}>
+            </MyButton>
+
         let enterGameBtn = null;
         if (this.props.enableEnterGameBtn) {
-            enterGameBtn = <button
-                className="enterGameBtn"
-                onClick={() => this.props.onEnterGame(this.props.gameName)}>Enter Game</button>
+            enterGameBtn =
+                <MyButton
+                    btnClass="enterGameBtn"
+                    btnText="Enter Game"
+                    onClick={this.props.onEnterGame}
+                    onClickValue={this.props.gameName}>
+                </MyButton>
         }
 
         return (
@@ -80,12 +100,8 @@ class GameSetupDialog extends Component {
                     </tr>
                     </tbody>
                 </table>
-                <div className="leaveGameBtnDiv">
-                    <button
-                        className="leaveGameBtn"
-                        onClick={() => this.props.onLeaveGame(this.props.gameName)}>Leave Game</button>
-                </div>
-                <div className="enterGameBtnDiv">
+                <div className="gameSetupBtnPnl">
+                    {leaveGameBtn}
                     {enterGameBtn}
                 </div>
             </div>

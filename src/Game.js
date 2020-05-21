@@ -59,7 +59,7 @@ class Game extends Component {
         };
     }
 
-    sendRequest = async(cmd, options) => {
+    sendRequest = async (cmd, options) => {
         try {
             let url = "/rook/" + cmd;
             const response = await fetch(url, options);
@@ -84,34 +84,42 @@ class Game extends Component {
 
     getGameData = async () => {
         let requestOptions = this.setupRequestOptions();
-        this.sendRequest("getGameData", requestOptions);
+        await this.sendRequest("getGameData", requestOptions);
     }
 
-    handlePlayerAction = async(action, value) => {
+    handlePlayerAction = async (params) => {
         let requestOptions = this.setupRequestOptions({
-            action: action,
-            value: value ? value : "NA",
+            action: params.action,
+            value: params.value ? params.value : "NA",
         });
-        this.sendRequest("playerAction", requestOptions);
+        await this.sendRequest("playerAction", requestOptions);
     }
 
     handleKittyCardClick = async (cardId) => {
         if (this.state.gameData.state === GameStates.POPULATE_KITTY) {
             let requestOptions = this.setupRequestOptions({cardId: cardId});
-            this.sendRequest("takeKittyCard", requestOptions);
+            await this.sendRequest("takeKittyCard", requestOptions);
         }
     }
 
     handleCardClick = async (cardId) => {
         let requestOptions = this.setupRequestOptions({cardId: cardId});
+
         if (this.state.gameData.state === GameStates.POPULATE_KITTY) {
             this.sendRequest("putKittyCard", requestOptions);
         } else if (this.state.gameData.state === GameStates.WAIT_FOR_CARD) {
-            this.sendRequest("playCard", requestOptions);
+            let gameData = this.state.gameData;
+            let playerPosn = this.context.currentGame.playerPosn;
+            let player = gameData[playerPosn];
+            if (gameData[playerPosn].state === PlayerStates.PLAY_CARD) {
+                if (this.isValidPlay(player, cardId, gameData.trick.suit)) {
+                    await this.sendRequest("playCard", requestOptions);
+                }
+            }
         }
     }
 
-    handleKittyDone = (event) => {
+    handleKittyDone = async () => {
         let gameData = this.state.gameData;
         let playerPosn = this.context.currentGame.playerPosn;
         let player = gameData[playerPosn];
@@ -119,7 +127,7 @@ class Game extends Component {
             if (player.state === PlayerStates.SETUP_KITTY) {
                 let errMsg = "";
                 if (gameData.kitty.length === 5) {
-                    gameData.kitty.forEach( (card) => {
+                    gameData.kitty.forEach((card) => {
                         if (card.pointValue > 0) {
                             errMsg = "Oops, kitty must not contain any point cards";
                         }
@@ -133,7 +141,7 @@ class Game extends Component {
                         action: PlayerActions.KITTY_DONE,
                         value: "NA",
                     });
-                    this.sendRequest("playerAction", requestOptions);
+                    await this.sendRequest("playerAction", requestOptions);
                 } else {
                     this.showErrorToast(errMsg);
                 }
@@ -141,6 +149,34 @@ class Game extends Component {
         }
     }
 
+    isValidPlay = (player, cardId, trickSuit) => {
+        let isValid = false;
+
+        let card = player.cards.find( (card) => {
+            return (card.id === cardId);
+        })
+
+        // Check if card suit equals trick suit.
+        if (trickSuit.length == 0) {
+            isValid = true;
+        } else {
+            if (card.suit === trickSuit) {
+                isValid = true;
+            } else {
+                // Check if player has any cards of that suit.
+                let cardOfTrickSuit = player.cards.find((card) => {
+                    return (card.suit == trickSuit);
+                });
+
+                if (cardOfTrickSuit === undefined) {
+                    isValid = true;
+                } else {
+                    this.showErrorToast("That play is invalid, please follow suit!");
+                }
+            }
+        }
+        return isValid;
+    }
 
     calcPlayerPosns(playerPosn) {
         switch (playerPosn) {
