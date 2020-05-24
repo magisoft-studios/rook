@@ -14,7 +14,7 @@ import Session from './Session';
 import Game from './Game';
 
 const AUTO_LOGIN = false;
-const TEST = false;
+const TEST = true;
 const TEST_USER = "Tom";
 const TEST_PLAYER_POSN = "player1";
 
@@ -171,6 +171,7 @@ class Main extends Component {
         console.log("render: loggedIn = " + session.loggedIn);
         if (session.loggedIn) {
             let gameWindow = null;
+/*
             if (session.showGameWindow) {
                 gameWindow = <NewWindow
                     features="width=100%,height=100%"
@@ -181,6 +182,20 @@ class Main extends Component {
                         playerPosn={session.currentGame.playerPosn}
                         gameData={this.state.gameData} />
                 </NewWindow>;
+            }
+*/
+
+            let gameMenuItem = null;
+            let gameRoute = null;
+            let game = null;
+            if (session.showGameWindow) {
+                game =
+                    <Game
+                        gameId={session.currentGame.id}
+                        playerPosn={session.currentGame.playerPosn}
+                        gameData={this.state.gameData} />;
+                gameMenuItem = <li className="mainMenuItem"><NavLink to="/game">Game</NavLink></li>;
+                gameRoute = <Route path="/game">{game}</Route>;
             }
 
             return (
@@ -193,12 +208,13 @@ class Main extends Component {
                                         <div className="logoContainer">
                                             <img className="logo" src={images.logo} alt="Jennings Games"></img>
                                             <span className="logoJennings">Jennings</span>
-                                            <span className="logoGames">Games</span>
+                                            <span className="logoGames">Gaming</span>
                                         </div>
                                     </div>
                                     <ul className="mainMenuHeader">
                                         <li className="mainMenuItem"><NavLink to="/" exact>Home</NavLink></li>
                                         <li className="mainMenuItem"><NavLink to="/lobby">Lobby</NavLink></li>
+                                        {gameMenuItem}
                                     </ul>
                                 </div>
                                 <div className="contentArea">
@@ -208,6 +224,7 @@ class Main extends Component {
                                     <Route path="/lobby">
                                         <Lobby onEnterGame={this.handleEnterGame}/>
                                     </Route>
+                                    {gameRoute}
                                 </div>
                             </div>
                         </div>

@@ -12,6 +12,7 @@ import {AppContext} from "./ContextLib";
 import PlayerStates from './PlayerStates';
 import GameStates from './GameStates';
 import PlayerActions from "./PlayerActions";
+import Cam from "./Cam.js";
 
 const REFRESH_RATE = 5000;
 
@@ -327,8 +328,8 @@ class Game extends Component {
                 <div className="gameArea">
                     <GameInfoArea gameData={this.state.gameData} />
                     <div className="topPlayerArea">
-                        <div className="playerImageDiv">
-                            <img className={topPlayerImgClass} src={players[topPlayerImg]} alt="Player 1"></img>
+                        <div className="otherPlayerImageDiv">
+                            <img className="playerImage" alt={topPlayer.name}></img>
                         </div>
                         <div className="topPlayerCardArea">
                             {topPlayerCardCmpnts}
@@ -336,8 +337,8 @@ class Game extends Component {
                     </div>
                     <div className="leftPlayerArea">
                         <div className="leftPlayerAreaImageDiv">
-                            <div className="playerImageDiv">
-                                <img className={leftPlayerImgClass} src={players[leftPlayerImg]} alt="Player 2"></img>
+                            <div className="otherPlayerImageDiv">
+                                <img className="playerImage" alt={leftPlayer.name}></img>
                             </div>
                         </div>
                         <div className="leftPlayerCardArea">
@@ -353,9 +354,9 @@ class Game extends Component {
                         onKittyDone={this.handleKittyDone}>
                     </CardTable>
                     <div className="rightPlayerArea">
-                        <div className="righttPlayerAreaImageDiv">
-                            <div className="playerImageDiv">
-                                <img className={rightPlayerImgClass} src={players[rightPlayerImg]} alt="Player 3"></img>
+                        <div className="rightPlayerAreaImageDiv">
+                            <div className="otherPlayerImageDiv">
+                                <img className="playerImage" alt={rightPlayer.name}></img>
                             </div>
                         </div>
                         <div className="rightPlayerCardArea">
@@ -363,9 +364,7 @@ class Game extends Component {
                         </div>
                     </div>
                     <div className="bottomPlayerArea">
-                        <div className="playerImageDiv">
-                            <img className={bottomPlayerImgClass} src={players[bottomPlayerImg]} alt="Player 4"></img>
-                        </div>
+                        <Cam />
                         <div className="bottomPlayerCardArea">
                             <PlayerHand
                                 ref={this.playerHandRef}
@@ -379,6 +378,10 @@ class Game extends Component {
         );
     }
 }
+
+/*
+  <img className={bottomPlayerImgClass} src={players[bottomPlayerImg]} alt="Player 4"></img>
+ */
 
 Game.contextType = AppContext;
 

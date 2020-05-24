@@ -103,7 +103,7 @@ class CardTable extends Component {
         let highBid = gameData.highBid;
         let minBid = 70;
         let nextBid = (highBid >= minBid) ? highBid + 5 : minBid;
-        let maxBid = 180
+        let maxBid = 180;
 
         // Only include PASS as an option if all other players have not PASSED.
         let passCntr = 0;
@@ -293,7 +293,6 @@ class CardTable extends Component {
                 break;
 
             case GameStates.DEAL:
-                tableMsgArea = this.setupTableMsgArea([gameData.stateText]);
                 if (playerState === PlayerStates.DEAL) {
                     playerActionArea = this.setupPlayerActionArea({
                         msg1Text: "Press the button to deal",
@@ -301,6 +300,8 @@ class CardTable extends Component {
                         btnHandler: this.props.onPlayerAction,
                         btnValue: {action: PlayerActions.DEAL},
                     });
+                } else {
+                    tableMsgArea = this.setupTableMsgArea([gameData.stateText]);
                 }
                 break;
 

@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import Cam from "./Cam";
 
 class Home extends Component {
     render() {
@@ -8,6 +9,8 @@ class Home extends Component {
                 <p>Our mission is to provide enjoyment for the whole family!</p>
                 <div>
                     <button onClick={() => this.props.openTestGame()}>Test Game</button>
+                </div>
+                <div>
                 </div>
             </div>
         );
