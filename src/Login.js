@@ -45,7 +45,7 @@ class Login extends Component {
                         <label className="loginPasswordLabel" htmlFor="password">Password</label>
                         <input
                             className="loginPasswordText"
-                            type="text"
+                            type="password"
                             id="password"
                             name="password"
                             value={this.state.password}

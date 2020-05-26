@@ -6,6 +6,13 @@ body {
   margin: 0;
 }
 
+.homeDiv {
+  display: flex;
+  flex-direction: column;
+  align-content: flex-start;
+  align-items: center;
+}
+
 .mainPage {
   display: flex;
   flex-direction: row;
