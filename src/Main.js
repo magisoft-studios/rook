@@ -14,14 +14,17 @@ import Session from './Session';
 import Game from './Game';
 
 const AUTO_LOGIN = false;
-const TEST = false;
-const TEST_USER = "Tom";
-const TEST_PLAYER_POSN = "player1";
+const TEST = true;
+const TEST_USER1 = "Tom";
+const TEST_PLAYER1_POSN = "player1";
+const TEST_USER2 = "Tom";
+const TEST_PLAYER2_POSN = "player1";
 
 class Main extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            loggedIn: false,
             session: new Session(),
             gameData: null
         }
@@ -29,21 +32,24 @@ class Main extends Component {
 
     componentDidMount() {
         if (TEST) {
-            let session = new Session({
-                loggedIn: true,
-                id: TEST_USER,
-                playerId: TEST_USER,
-                playerName: TEST_USER,
-                showGameWindow: true,
-                currentGame: {
-                    id: "TestGame",
-                    playerPosn: TEST_PLAYER_POSN,
-                }
+            /*
+        let session = new Session({
+            loggedIn: true,
+            id: TEST_USER1,
+            playerId: TEST_USER1,
+            playerName: TEST_USER1,
+            showGameWindow: true,
+            currentGame: {
+                id: "TestGame",
+                playerPosn: TEST_PLAYER1_POSN,
+            }
             });
 
             this.setState({ session: session });
+            */
+            this.setState({ ...this.state, loggedIn: true});
         } else if (AUTO_LOGIN) {
-            this.handleLogin(TEST_USER, "secret");
+            this.handleLogin(TEST_USER1, "secret");
         }
     }
 
@@ -151,25 +157,33 @@ class Main extends Component {
         });
     }
 
-    openTestGame = async () => {
-        let gameData = await this.getGameData();
-        let session = this.state.session;
-        session.showGameWindow = true;
-        session.currentGame = {
-            id: gameData.name,
-            playerPosn: TEST_PLAYER_POSN,
-        }
-        this.setState({
-            ...this.state,
-            session: session,
-            gameData: gameData,
+    openTestGame = async (user, posn) => {
+        let session = new Session({
+            loggedIn: true,
+            id: user,
+            playerId: user,
+            playerName: user,
+            showGameWindow: false,
+            currentGame: {
+                id: "TestGame",
+                playerPosn: posn,
+            }
+        });
+
+        this.setState({ session: session }, async () => {
+            let gameData = await this.getGameData();
+            session.showGameWindow = true;
+            this.setState({
+                ...this.state,
+                session: session,
+                gameData: gameData,
+            });
         });
     }
 
     render() {
         let session = this.state.session;
-        console.log("render: loggedIn = " + session.loggedIn);
-        if (session.loggedIn) {
+        if (this.state.loggedIn) {
             let gameWindow = null;
 /*
             if (session.showGameWindow) {

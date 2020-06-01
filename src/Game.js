@@ -8,11 +8,14 @@ import Card from './Card';
 import PlayerHand from './PlayerHand';
 import OpponentCard from './OpponentCard';
 import CardTable from './CardTable';
-import {AppContext} from "./ContextLib";
+import {AppContext} from './ContextLib';
 import PlayerStates from './PlayerStates';
 import GameStates from './GameStates';
-import PlayerActions from "./PlayerActions";
-import Cam from "./Cam.js";
+import PlayerActions from './PlayerActions';
+import Cam from './Cam.js';
+import RemoteCam from './RemoteCam.js';
+import CamConn from './CamConn.js';
+import socketIOClient from 'socket.io-client';
 
 const REFRESH_RATE = 5000;
 
@@ -22,23 +25,70 @@ class Game extends Component {
         this.playerHandRef = React.createRef();
         this.cardTableRef = React.createRef();
         this.posns = {
-            bottomPlayerId: "",
-            leftPlayerId: "",
-            topPlayerId: "",
-            rightPlayerId: "",
+            bottomPlayerPosn: "",
+            leftPlayerPosn: "",
+            topPlayerPosn: "",
+            rightPlayerPosn: "",
         };
         this.state = {
             gameId: props.gameId,
             playerPosn: props.playerPosn,
-            gameData: props.gameData
+            gameData: props.gameData,
+            streams: {
+                player1: null,
+                player2: null,
+                player3: null,
+                player4: null,
+            },
         }
         this.calcPlayerPosns(props.playerPosn);
         this.updateTimerId = null;
+        this.socket = null;
+        this.camConnMap = new Map();
     }
 
     componentDidMount = async () => {
         await this.checkStatus();
+        this.initSocketIo();
+        this.initCameraConnections();
         this.updateTimerId = setInterval(async () => this.checkStatus(), REFRESH_RATE);
+    }
+
+    initSocketIo = async () => {
+        try {
+            //this.socket = socketIOClient(window.location.href);
+            this.socket = await socketIOClient('/game', {
+                query: {
+                    sessionId: this.context.id,
+                }
+            });
+            this.socket.on(`message`, this.rcvSocketMsg);
+        } catch(error) {
+            console.log(`Error initializing socket IO: ${error.message}`);
+        }
+    }
+
+    rcvSocketMsg = (message) => {
+        //console.log(`Received message: ${JSON.stringify(message)}`);
+        if (message.source = "camera") {
+            let camConn = this.camConnMap.get(message.fromPlayerPosn);
+            camConn.handleMsg(message);
+        } else {
+            console.log("Received a socket message not from a camera");
+        }
+    }
+
+    sendSocketMsg = async (message) => {
+        try {
+            let socketMsg = {
+                sessionId: this.context.id,
+                fromPlayerPosn: this.state.playerPosn,
+                ...message,
+            }
+            this.socket.emit(`message`, socketMsg);
+        } catch (error) {
+            console.log(`Error sending socket msg: ${error.message}`);
+        }
     }
 
     componentWillUnmount() {
@@ -47,6 +97,41 @@ class Game extends Component {
 
     checkStatus = async () => {
         await this.getGameData();
+    }
+
+    initCameraConnections = () => {
+        this.initCamConn("topCamConn", this.posns.topPlayerPosn);
+        this.initCamConn("leftCamConn", this.posns.leftPlayerPosn);
+        this.initCamConn("rightCamConn", this.posns.rightPlayerPosn);
+    }
+
+    initCamConn = (name, posn) => {
+        let camConn = new CamConn({
+            name: name,
+            playerPosn: this.state.playerPosn,
+            peerPosn: posn,
+            gameData: this.state.gameData,
+            sendMessage: this.sendSocketMsg,
+            handleAddStream: this.handleAddStream,
+        });
+        this.camConnMap.set(posn, camConn);
+    }
+
+    handleStreamIsReady = (mediaStream) => {
+        this.camConnMap.forEach( (camConn) => {
+           camConn.streamIsReady(mediaStream);
+        });
+        let newState = { ...this.state };
+        newState.streams[this.posns.bottomPlayerPosn] = mediaStream;
+        this.setState(newState);
+    }
+
+    handleAddStream = (posn, mediaStream) => {
+        console.log(`Game::handleAddStream called for ${posn}`);
+        let newState = { ...this.state };
+        newState.streams[posn] = mediaStream;
+        console.log(`Game::handleAddStream: adding media stream: ${mediaStream.id}`);
+        this.setState(newState);
     }
 
     setupRequestOptions = (bodyProps) => {
@@ -323,24 +408,24 @@ class Game extends Component {
             }
         }
 
+        let topCam = <RemoteCam name="topCam" mediaStream={this.state.streams[this.posns.topPlayerPosn]} />;
+        let leftCam = <RemoteCam name="leftCam" mediaStream={this.state.streams[this.posns.leftPlayerPosn]} />;
+        let rightCam = <RemoteCam name="rightCam" mediaStream={this.state.streams[this.posns.rightPlayerPosn]} />;
+        let bottomCam = <Cam name="bottomCam" mediaStream={this.state.streams[this.posns.bottomPlayerPosn]} onStreamReady={this.handleStreamIsReady} />;
+
+
         return (
             <div className="gameView">
                 <div className="gameArea">
-                    <GameInfoArea gameData={this.state.gameData} />
+                    <GameInfoArea gameData={this.state.gameData} socketHndl={this.sendSocketMsg} />
                     <div className="topPlayerArea">
-                        <div className="otherPlayerImageDiv">
-                            <img className="playerImage" alt={topPlayer.name}></img>
-                        </div>
+                        {topCam}
                         <div className="topPlayerCardArea">
                             {topPlayerCardCmpnts}
                         </div>
                     </div>
                     <div className="leftPlayerArea">
-                        <div className="leftPlayerAreaImageDiv">
-                            <div className="otherPlayerImageDiv">
-                                <img className="playerImage" alt={leftPlayer.name}></img>
-                            </div>
-                        </div>
+                        {leftCam}
                         <div className="leftPlayerCardArea">
                             {leftPlayerCardCmpnts}
                         </div>
@@ -354,17 +439,13 @@ class Game extends Component {
                         onKittyDone={this.handleKittyDone}>
                     </CardTable>
                     <div className="rightPlayerArea">
-                        <div className="rightPlayerAreaImageDiv">
-                            <div className="otherPlayerImageDiv">
-                                <img className="playerImage" alt={rightPlayer.name}></img>
-                            </div>
-                        </div>
+                        {rightCam}
                         <div className="rightPlayerCardArea">
                             {rightPlayerCardCmpnts}
                         </div>
                     </div>
                     <div className="bottomPlayerArea">
-                        <Cam />
+                        {bottomCam}
                         <div className="bottomPlayerCardArea">
                             <PlayerHand
                                 ref={this.playerHandRef}

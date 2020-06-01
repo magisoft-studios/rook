@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import MyButton from "./MyButton";
 
 class GameInfoArea extends Component {
     constructor(props) {
@@ -95,6 +96,13 @@ class GameInfoArea extends Component {
                     <div className="gameStatusEntryDiv">
                         <span className="statusText">{gameData.stateText}</span>
                     </div>
+                </div>
+                <div className="gameInfoDiv">
+                    <MyButton
+                        btnClass="lobbyNewGameBtn"
+                        btnText="Send Socket Msg"
+                        onClick={() => this.props.socketHndl("Hello T")}>
+                    </MyButton>
                 </div>
             </div>
         );

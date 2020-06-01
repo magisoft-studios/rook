@@ -7,14 +7,15 @@ class Home extends Component {
             <div className="homeDiv">
                 <h1>Welcome to Jennings Gaming</h1>
                 <p>Our mission is to spread happiness around the world through the enjoyment of gaming.</p>
+                <div>
+                    <button onClick={() => this.props.openTestGame("Tom", "player1")}>Player 1</button>
+                    <button onClick={() => this.props.openTestGame("Abe", "player2")}>Player 2</button>
+                </div>
             </div>
         );
     }
 
 /*
-                <div>
-                    <button onClick={() => this.props.openTestGame()}>Test Game</button>
-                </div>
  */
 }
 

@@ -1,9 +1,12 @@
 import React, { Component } from 'react'
-import Game from "./Game";
 
 class Cam extends Component {
     constructor(props) {
         super(props);
+        this.videoEleRef = React.createRef();
+        this.state = {
+            mediaStream: props.mediaStream,
+        };
     }
 
     componentDidMount = async () => {
@@ -11,23 +14,30 @@ class Cam extends Component {
     }
 
     streamCamVideo = async () => {
-        var constraints = { audio: true, video: { width: 150, height: 170 } };
+        var mediaStreamConstraints = { audio: true, video: { width: 150, height: 170 } };
         try {
-            let mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-            var video = document.querySelector("video");
-            video.srcObject = mediaStream;
-            video.onloadedmetadata = function(e) {
-                video.play();
+            let mediaStream = await navigator.mediaDevices.getUserMedia(mediaStreamConstraints);
+            var videoEle = this.videoEleRef.current;
+            videoEle.srcObject = mediaStream;
+            videoEle.onloadedmetadata = (e) => {
+                videoEle.play();
+                this.props.onStreamReady(mediaStream);
             };
-        } catch (err) {
-            console.log(err.name + ": " + err.message);
+        } catch (error) {
+            console.log(`Cam[${this.props.name}] cant get user media: ${error.message}`);
         }
     }
 
     render() {
         return (
             <div className="playerImageDiv">
-                <video className="playerImage" autoPlay={true} id="videoElement" controls></video>
+                <video
+                    ref={this.videoEleRef}
+                    className="playerImage"
+                    autoPlay={true}
+                    playsInline={true}
+                    controls>
+                </video>
             </div>
         );
     }
