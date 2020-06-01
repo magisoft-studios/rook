@@ -1,24 +1,25 @@
 
 class PlayerStates {
-    static LOBBY = 0;               // Opened game in Lobby but not joined yet
-    static JOINED = 1;              // Joined game in Lobby but did not enter game yet
-    static ENTERED = 2;             // Entered game
-    static DEAL = 4;                // It's this player's turn to deal
-    static WAIT_FOR_DEAL = 5;       // Waiting for another player to deal
-    static BID = 6;                 // It's this player's turn to bid
-    static WAIT_FOR_BID = 7;        // Waiting for other player's to bid
-    static PASSED = 8;              // This player has passed and is done bidding
-    static BID_WON = 9;             // This player won the bidding
-    static NAME_TRUMP = 10;         // This player is naming trump
-    static WAIT_FOR_TRUMP = 11;     // Waiting for another player to name trump
-    static SETUP_KITTY = 12;        // This player is taking kitty
-    static WAIT_FOR_KITTY = 13;     // Waiting for another player to fill the kitty
-    static PLAY_CARD = 14;          // It is this player's turn to play a card
-    static WAIT_FOR_CARD = 15;      // Waiting for another player to play a card
-    static TRICK_WON = 16;          // This player has won the trick
-    static WAIT_FOR_TAKE_TRICK = 17;    // Waiting for the trick winner to take the trick.
-    static END_HAND = 18;           // End of Hand - Announce score, then go back to DEAL
-    static WAIT_FOR_END_HAND = 18;  // Wait for other player to end the hand
+    static LOBBY                =  0;   // Opened game in Lobby but not joined yet
+    static JOINED               =  1;   // Joined game in Lobby but did not enter game yet
+    static ENTERED              =  2;   // Entered game
+    static INIT_CONN            =  3;   // Initializing connections
+    static DEAL                 =  4;   // It's this player's turn to deal
+    static WAIT_FOR_DEAL        =  5;   // Waiting for another player to deal
+    static BID                  =  6;   // It's this player's turn to bid
+    static WAIT_FOR_BID         =  7;   // Waiting for other player's to bid
+    static PASSED               =  8;   // This player has passed and is done bidding
+    static BID_WON              =  9;   // This player won the bidding
+    static NAME_TRUMP           = 10;   // This player is naming trump
+    static WAIT_FOR_TRUMP       = 11;   // Waiting for another player to name trump
+    static SETUP_KITTY          = 12;   // This player is taking kitty
+    static WAIT_FOR_KITTY       = 13;   // Waiting for another player to fill the kitty
+    static PLAY_CARD            = 14;   // It is this player's turn to play a card
+    static WAIT_FOR_CARD        = 15;   // Waiting for another player to play a card
+    static TRICK_WON            = 16;   // This player has won the trick
+    static WAIT_FOR_TAKE_TRICK  = 17;   // Waiting for the trick winner to take the trick
+    static END_HAND             = 18;   // End of Hand - Announce score, then go back to DEAL
+    static WAIT_FOR_END_HAND    = 19    // Wait for other player to end the hand
 
     static getStateText(thisPlayer, otherPlayer) {
         let text = "";
@@ -31,6 +32,9 @@ class PlayerStates {
                 break;
             case PlayerStates.ENTERED:
                 text = "Entered";
+                break;
+            case PlayerStates.INIT_CONN:
+                text = "Initializing Connections";
                 break;
             case PlayerStates.DEAL:
                 text = "Dealing";

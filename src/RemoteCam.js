@@ -19,8 +19,8 @@ class RemoteCam extends Component {
     }
 */
     componentDidUpdate(prevProps) {
-        console.log(`RemoteCam[${this.props.name}] componentDidUpdate: prevProps = ${JSON.stringify(prevProps)}`);
-        console.log(`RemoteCam[${this.props.name}] componentDidUpdate: newProps = ${JSON.stringify(this.props)}`);
+        //console.log(`RemoteCam[${this.props.name}] componentDidUpdate: prevProps = ${JSON.stringify(prevProps)}`);
+        //console.log(`RemoteCam[${this.props.name}] componentDidUpdate: newProps = ${JSON.stringify(this.props)}`);
         if ((prevProps.mediaStream == null) && (this.props.mediaStream != null)) {
             this.updateMediaStream(this.props.mediaStream);
         }

@@ -4,6 +4,7 @@ class GameStates {
     static INITIALIZING = 0;            // Waiting for players to join
     static READY_TO_START = 1;          // All players joined, can now enter game
     static WAIT_FOR_ENTER = 2;          // Waiting for all players to enter
+    static INIT_CONN = 3;               // All players entered, initializing connections
     static DEAL = 4;                    // Dealing - waiting for a player to deal
     static BIDDING = 5;                 // Going around the table bidding
     static BID_WON = 6;                 // Announcing Winner of Bid
@@ -24,6 +25,9 @@ class GameStates {
                 break;
             case GameStates.WAIT_FOR_ENTER:
                 text = "Waiting for players to enter";
+                break;
+            case GameStates.INIT_CONN:
+                text = "Initializing connections";
                 break;
             case GameStates.DEAL:
                 text = "Waiting for " + player.name + " to deal";

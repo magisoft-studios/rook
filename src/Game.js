@@ -54,6 +54,10 @@ class Game extends Component {
         this.updateTimerId = setInterval(async () => this.checkStatus(), REFRESH_RATE);
     }
 
+    componentWillUnmount() {
+        clearInterval(this.updateTimerId);
+    }
+
     initSocketIo = async () => {
         try {
             //this.socket = socketIOClient(window.location.href);
@@ -91,12 +95,9 @@ class Game extends Component {
         }
     }
 
-    componentWillUnmount() {
-        clearInterval(this.updateTimerId);
-    }
-
     checkStatus = async () => {
         await this.getGameData();
+        this.checkConnectionStates();
     }
 
     initCameraConnections = () => {
@@ -115,6 +116,62 @@ class Game extends Component {
             handleAddStream: this.handleAddStream,
         });
         this.camConnMap.set(posn, camConn);
+    }
+
+    checkConnectionStates = async () => {
+        let gameData = this.state.gameData;
+        if (gameData.state === GameStates.INIT_CONN) {
+            if (this.camConnMap && (this.camConnMap.size == 3)) {
+                let allConnected = true;
+                this.camConnMap.forEach( (camConn) => {
+                    allConnected = allConnected && camConn.connected;
+                });
+
+                if (!allConnected) {
+                    this.sendCamOffers();
+                } else {
+                    let requestOptions = this.setupRequestOptions();
+                    await this.sendRequest("connectionsInitialized", requestOptions);
+                }
+            }
+        }
+    }
+
+    sendCamOffers = () => {
+        switch (this.state.playerPosn) {
+            case "player1": {
+                // Nothing to do, just wait for offers.
+                break;
+            }
+            case "player2": {
+                // Send offer to player 1.
+                let camConn = this.camConnMap.get("player1");
+                camConn.createAndSendOffer();
+                break;
+            }
+            case "player3": {
+                // Send offers to player 1 and player 2.
+                let camConn = this.camConnMap.get("player1");
+                camConn.createAndSendOffer();
+                camConn = this.camConnMap.get("player2");
+                camConn.createAndSendOffer();
+                break;
+            }
+            case "player4": {
+                // Send offers to player 1, player 2 and player 3.
+                let camConn = this.camConnMap.get("player1");
+                camConn.createAndSendOffer();
+                camConn = this.camConnMap.get("player2");
+                camConn.createAndSendOffer();
+                camConn = this.camConnMap.get("player3");
+                camConn.createAndSendOffer();
+                break;
+            }
+            default: {
+                // Nothing to do, just wait for offers.
+                break;
+            }
+        }
     }
 
     handleStreamIsReady = (mediaStream) => {
@@ -360,11 +417,11 @@ class Game extends Component {
         return imageClass;
     }
 
+
     // NOTE: There is currently no way to prevent an "empty" render before the first data fetch
     //
     render() {
         console.log("Game: render START");
-
         let gameData = this.state.gameData;
 
         let topPlayer = gameData[this.posns.topPlayerPosn];

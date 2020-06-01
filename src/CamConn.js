@@ -7,6 +7,9 @@ class CamConn {
         this.peerConn = null;
         this.sendSocketMessage = params.sendMessage;
         this.handleAddStream = params.handleAddStream;
+        this.mediaStream = null;
+        this.connecting = false;
+        this.connected = false;
     }
 
     /*
@@ -35,10 +38,19 @@ class CamConn {
         }
     }
 
-    async streamIsReady(mediaStream) {
+    streamIsReady(mediaStream) {
         console.log(`CamConn[${this.name}]: streamIsReady`);
+        this.mediaStream = mediaStream;
         this.initPeerConnection(mediaStream);
-        if (this.gameData[this.peerPosn].enteredGame) {
+    }
+
+    createAndSendOffer() {
+        if ((this.mediaStream != null) &&
+            (this.peerConn != null) &&
+            (!this.connecting) &&
+            (!this.connected))
+        {
+            this.connecting = true;
             this.createOffer();
         }
     }
@@ -55,8 +67,8 @@ class CamConn {
         this.peerConn.onicecandidate = this.onIceCandidate;
         this.peerConn.onconnectionstatechange = this.handleConnectionChange;
         this.peerConn.oniceconnectionstatechange = this.handleIceStateChange;
-        //this.peerConn.addEventListener('addstream', this.onAddStream);
         this.peerConn.ontrack = this.onAddTrack;
+
         if (mediaStream != null) {
             console.log(`CamConn[${this.name}]: mediaStream is not null, adding stream`);
             for (const track of mediaStream.getTracks()) {
@@ -75,11 +87,6 @@ class CamConn {
         };
         this.sendSocketMessage(message);
     }
-
-    //onAddStream = (event) => {
-    //    console.log(`CamConn[${this.name}]: onAddStream called`);
-    //    this.handleAddStream(this.peerPosn, event.stream);
-    //}
 
     onAddTrack = (event) => {
         console.log(`CamConn[${this.name}]: onAddTrack called`);
@@ -122,6 +129,7 @@ class CamConn {
     }
 
     offerRcvd = async (message) => {
+        this.connecting = true;
         let offer = message.msg.offer;
         console.log(`CamConn: offer received from ${message.fromPlayerPosn}`);
         try {
@@ -147,7 +155,9 @@ class CamConn {
         console.log(`CamConn: answer received from ${message.fromPlayerPosn}`);
         try {
             await this.peerConn.setRemoteDescription(new RTCSessionDescription(answer));
-            console.log(`CamConn[${this.name}]: Successfully setRemoteDescription`)
+            console.log(`CamConn[${this.name}]: Successfully setRemoteDescription`);
+            this.connected = true;
+            this.connecting = false;
         } catch (error) {
             console.log(`CamConn[${this.name}] cant set remote description: ${error.message}`);
         }
@@ -181,6 +191,10 @@ class CamConn {
 
     handleConnectionChange = (event) => {
         console.log(`CamConn[${this.name}] handleConnectionChange: connection state =  ${this.peerConn.connectionState}`);
+        if (this.peerConn.connectionState.toLowerCase() === "connected") {
+            this.connected = true;
+            this.connecting = false;
+        }
     }
 
     handleIceStateChange = (event) => {
