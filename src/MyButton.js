@@ -7,6 +7,11 @@ class MyButton extends Component {
         this.state = {
             disabled: false
         }
+        this.disableTimerId = null;
+    }
+
+    componentWillUnmount() {
+        clearTimeout(this.disableTimerId);
     }
 
     handleClick = (event) => {
@@ -14,7 +19,7 @@ class MyButton extends Component {
             return;
         }
         this.setState({disabled: true});
-        setTimeout( () => { this.setState({disabled: false}) }, 5000);
+        this.disableTimerId = setTimeout( () => { this.setState({disabled: false}) }, 5000);
         this.props.onClick(this.props.onClickValue);
     }
 

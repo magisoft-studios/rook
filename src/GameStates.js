@@ -1,18 +1,19 @@
 import PlayerStates from './PlayerStates';
 
 class GameStates {
-    static INITIALIZING = 0;            // Waiting for players to join
-    static READY_TO_START = 1;          // All players joined, can now enter game
-    static WAIT_FOR_ENTER = 2;          // Waiting for all players to enter
-    static INIT_CONN = 3;               // All players entered, initializing connections
-    static DEAL = 4;                    // Dealing - waiting for a player to deal
-    static BIDDING = 5;                 // Going around the table bidding
-    static BID_WON = 6;                 // Announcing Winner of Bid
-    static NAME_TRUMP = 7;              // Bid winner is declaring trump
-    static POPULATE_KITTY = 8;          // Bid winner is populating kitty
-    static WAIT_FOR_CARD = 9;           // Waiting for someone to play a card
-    static TAKE_TRICK = 10;             // Waiting for the winner of the trick to take it
-    static END_OF_HAND = 11;            // Announce end of hand
+    static INITIALIZING     =  0;   // Waiting for players to join
+    static READY_TO_START   =  1;   // All players joined, can now enter game
+    static WAIT_FOR_ENTER   =  2;   // Waiting for all players to enter
+    static INIT_STREAM      =  3;   // All players entered, initializing streams
+    static INIT_CONN        =  4;   // All players entered, initializing connections
+    static DEAL             =  5;   // Dealing - waiting for a player to deal
+    static BIDDING          =  6;   // Going around the table bidding
+    static BID_WON          =  7;   // Announcing Winner of Bid
+    static NAME_TRUMP       =  8;   // Bid winner is declaring trump
+    static POPULATE_KITTY   =  9;   // Bid winner is populating kitty
+    static WAIT_FOR_CARD    = 10;   // Waiting for someone to play a card
+    static TAKE_TRICK       = 11;   // Waiting for the winner of the trick to take it
+    static END_OF_HAND      = 12;   // Announce end of hand
 
     static getStateText(gameData, player) {
         let text = "";
@@ -25,6 +26,9 @@ class GameStates {
                 break;
             case GameStates.WAIT_FOR_ENTER:
                 text = "Waiting for players to enter";
+                break;
+            case GameStates.INIT_STREAM:
+                text = "Initializing streams";
                 break;
             case GameStates.INIT_CONN:
                 text = "Initializing connections";
@@ -78,7 +82,7 @@ class GameStates {
         );
     }
 
-    static isAllPlayersEntered(gameData) {
+    static areAllPlayersEntered(gameData) {
         return (
             (gameData.player1.state === PlayerStates.ENTERED) &&
             (gameData.player2.state === PlayerStates.ENTERED) &&
@@ -86,6 +90,25 @@ class GameStates {
             (gameData.player4.state === PlayerStates.ENTERED)
         );
     }
+
+    static areAllStreamsInitialized(gameData) {
+        return (
+            (gameData.player1.state === PlayerStates.INIT_CONN) &&
+            (gameData.player2.state === PlayerStates.INIT_CONN) &&
+            (gameData.player3.state === PlayerStates.INIT_CONN) &&
+            (gameData.player4.state === PlayerStates.INIT_CONN)
+        );
+    }
+
+    static areAllConnectionsInitialized(gameData) {
+        return (
+            (gameData.player1.state === PlayerStates.WAIT_FOR_DEAL) &&
+            (gameData.player2.state === PlayerStates.WAIT_FOR_DEAL) &&
+            (gameData.player3.state === PlayerStates.WAIT_FOR_DEAL) &&
+            (gameData.player4.state === PlayerStates.WAIT_FOR_DEAL)
+        );
+    }
+
 }
 
 export default GameStates;

@@ -292,7 +292,11 @@ class CardTable extends Component {
                 tableMsgArea = this.setupTableMsgArea([gameData.stateText]);
                 break;
 
-            case GameStates.CONN_INIT:
+            case GameStates.INIT_STREAM:
+                tableMsgArea = this.setupTableMsgArea([gameData.stateText]);
+                break;
+
+            case GameStates.INIT_CONN:
                 tableMsgArea = this.setupTableMsgArea([gameData.stateText]);
                 break;
 

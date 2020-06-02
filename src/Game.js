@@ -45,12 +45,12 @@ class Game extends Component {
         this.updateTimerId = null;
         this.socket = null;
         this.camConnMap = new Map();
+        this.initCameraConnections();
     }
 
     componentDidMount = async () => {
         await this.checkStatus();
         this.initSocketIo();
-        this.initCameraConnections();
         this.updateTimerId = setInterval(async () => this.checkStatus(), REFRESH_RATE);
     }
 
@@ -120,7 +120,14 @@ class Game extends Component {
 
     checkConnectionStates = async () => {
         let gameData = this.state.gameData;
-        if (gameData.state === GameStates.INIT_CONN) {
+        if (gameData.state === GameStates.INIT_STREAM) {
+            if (this.camConnMap && (this.camConnMap.size == 3)) {
+                if (this.state.streams[this.posns.bottomPlayerPosn] != null) {
+                    let requestOptions = this.setupRequestOptions();
+                    await this.sendRequest("streamInitialized", requestOptions);
+                }
+            }
+        } else if (gameData.state === GameStates.INIT_CONN) {
             if (this.camConnMap && (this.camConnMap.size == 3)) {
                 let allConnected = true;
                 this.camConnMap.forEach( (camConn) => {
@@ -175,6 +182,7 @@ class Game extends Component {
     }
 
     handleStreamIsReady = (mediaStream) => {
+        console.log(`Game::handleStreamIsReady for stream ${mediaStream.id}`);
         this.camConnMap.forEach( (camConn) => {
            camConn.streamIsReady(mediaStream);
         });

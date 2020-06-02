@@ -14,7 +14,7 @@ import Session from './Session';
 import Game from './Game';
 
 const AUTO_LOGIN = false;
-const TEST = true;
+const TEST = false;
 const TEST_USER1 = "Tom";
 const TEST_PLAYER1_POSN = "player1";
 const TEST_USER2 = "Tom";
@@ -183,7 +183,7 @@ class Main extends Component {
 
     render() {
         let session = this.state.session;
-        if (this.state.loggedIn) {
+        if (session.loggedIn) {
             let gameWindow = null;
 /*
             if (session.showGameWindow) {
