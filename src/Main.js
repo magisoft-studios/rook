@@ -14,7 +14,7 @@ import Session from './Session';
 import Game from './Game';
 
 const AUTO_LOGIN = false;
-const TEST = true;
+const TEST = false;
 
 class Main extends Component {
     constructor(props) {
