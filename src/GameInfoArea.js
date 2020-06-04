@@ -97,6 +97,7 @@ class GameInfoArea extends Component {
                         <span className="statusText">{gameData.stateText}</span>
                     </div>
                 </div>
+                {/*
                 <div className="gameInfoDiv">
                     <MyButton
                         btnClass="lobbyNewGameBtn"
@@ -104,6 +105,7 @@ class GameInfoArea extends Component {
                         onClick={() => this.props.socketHndl("Hello T")}>
                     </MyButton>
                 </div>
+                */}
             </div>
         );
     }

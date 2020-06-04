@@ -14,43 +14,22 @@ import Session from './Session';
 import Game from './Game';
 
 const AUTO_LOGIN = false;
-const TEST = false;
-const TEST_USER1 = "Tom";
-const TEST_PLAYER1_POSN = "player1";
-const TEST_USER2 = "Tom";
-const TEST_PLAYER2_POSN = "player1";
+const TEST = true;
 
 class Main extends Component {
     constructor(props) {
         super(props);
+        let session = new Session();
+        if (TEST) {
+            session.loggedIn = true;
+        }
         this.state = {
-            loggedIn: false,
-            session: new Session(),
+            session: session,
             gameData: null
         }
     }
 
     componentDidMount() {
-        if (TEST) {
-            /*
-        let session = new Session({
-            loggedIn: true,
-            id: TEST_USER1,
-            playerId: TEST_USER1,
-            playerName: TEST_USER1,
-            showGameWindow: true,
-            currentGame: {
-                id: "TestGame",
-                playerPosn: TEST_PLAYER1_POSN,
-            }
-            });
-
-            this.setState({ session: session });
-            */
-            this.setState({ ...this.state, loggedIn: true});
-        } else if (AUTO_LOGIN) {
-            this.handleLogin(TEST_USER1, "secret");
-        }
     }
 
     handleLogin = async (userId, password) => {

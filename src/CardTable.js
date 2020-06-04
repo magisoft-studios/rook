@@ -39,7 +39,7 @@ class CardTable extends Component {
         if (CardTable.isStateChanged(nextProps.gameData, prevState.gameData)) {
             return {
                 gameData: nextProps.gameData,
-                bidValue: "Pass",
+                bidValue: CardTable.calcDefaultBidValue(nextProps.gameData),
             };
         } else {
             return null;
@@ -50,7 +50,7 @@ class CardTable extends Component {
         if (CardTable.isStateChanged(prevProps.gameData, this.props.gameData)) {
             this.setState({
                 gameData: this.props.gameData,
-                bidValue: "Pass",
+                bidValue: CardTable.calcDefaultBidValue(this.props.gameData),
             });
         }
     }
@@ -97,6 +97,29 @@ class CardTable extends Component {
         });
     }
 
+    static calcDefaultBidValue = (gameData) => {
+        let defaultBid = "";
+
+        let highBid = gameData.highBid;
+        let minBid = 70;
+        let nextBid = (highBid >= minBid) ? highBid + 5 : minBid;
+        let maxBid = 180;
+
+        // Only include PASS as an option if all other players have not PASSED.
+        let passCntr = 0;
+        if (gameData.player1.bid < 0) passCntr++;
+        if (gameData.player2.bid < 0) passCntr++;
+        if (gameData.player3.bid < 0) passCntr++;
+        if (gameData.player4.bid < 0) passCntr++;
+        if (passCntr < 3) {
+            defaultBid = "Pass";
+        } else {
+            defaultBid = nextBid.toString();
+        }
+
+        return defaultBid;
+    }
+
     calcBidOptions = (gameData) => {
         let bidOptions = [];
 
@@ -118,7 +141,6 @@ class CardTable extends Component {
         }
 
         for (let i = nextBid; i <= maxBid; i+=5) {
-            console.log("Adding bid option: " + i);
             bidOptions.push(
                 <option key={i} value={i}>{i}</option>
             )
