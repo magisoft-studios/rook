@@ -5,9 +5,13 @@ import {
     HashRouter
 } from "react-router-dom";
 import { AppContext } from './ContextLib';
-import Login from './Login';
-import Home from './Home';
-import Lobby from './Lobby';
+import LoginView from './views/LoginView';
+import HomeView from './views/HomeView';
+import LobbyView from './views/LobbyView';
+import StoreView from './views/StoreView';
+import GuidesView from './views/GuidesView';
+import ReviewsView from './views/ReviewsView';
+import TestView from './views/TestView';
 import images from "./Images";
 import NewWindow from 'react-new-window';
 import Session from './Session';
@@ -50,7 +54,7 @@ class Main extends Component {
                 const jsonResp = await response.json();
                 let status = jsonResp.rookResponse.status;
                 if (status === "SUCCESS") {
-                    console.log("Login success");
+                    console.log("LoginView success");
                     let session = new Session();
                     session.loggedIn = true;
                     session.id = jsonResp.rookResponse.sessionId;
@@ -58,7 +62,7 @@ class Main extends Component {
                     session.playerName = jsonResp.rookResponse.playerName;
                     this.setState({ session: session });
                 } else {
-                    alert("Login failed: " + jsonResp.rookResponse.errorMsg);
+                    alert("LoginView failed: " + jsonResp.rookResponse.errorMsg);
                     this.setState({ session: new Session() });
                 }
             }
@@ -162,89 +166,108 @@ class Main extends Component {
 
     render() {
         let session = this.state.session;
-        if (session.loggedIn) {
-            let gameWindow = null;
-/*
-            if (session.showGameWindow) {
-                gameWindow = <NewWindow
-                    features="width=100%,height=100%"
-                    copyStyles={true}
-                    center="screen">
-                    <Game
-                        gameId={session.currentGame.id}
-                        playerPosn={session.currentGame.playerPosn}
-                        gameData={this.state.gameData} />
-                </NewWindow>;
-            }
-*/
+        let gameWindow = null;
+        /*
+                if (session.showGameWindow) {
+                    gameWindow = <NewWindow
+                        features="width=100%,height=100%"
+                        copyStyles={true}
+                        center="screen">
+                        <Game
+                            gameId={session.currentGame.id}
+                            playerPosn={session.currentGame.playerPosn}
+                            gameData={this.state.gameData} />
+                    </NewWindow>;
+                }
+        */
 
-            let gameMenuItem = null;
-            let gameRoute = null;
-            let game = null;
-            if (session.showGameWindow) {
-                game =
-                    <Game
-                        gameId={session.currentGame.id}
-                        playerPosn={session.currentGame.playerPosn}
-                        gameData={this.state.gameData} />;
-                gameMenuItem = <li className="mainMenuItem"><NavLink to="/game">Game</NavLink></li>;
-                gameRoute = <Route path="/game">{game}</Route>;
-            }
+        let gameMenuItem = null;
+        let gameRoute = null;
+        let game = null;
+        if (session.showGameWindow) {
+            game =
+                <Game
+                    gameId={session.currentGame.id}
+                    playerPosn={session.currentGame.playerPosn}
+                    gameData={this.state.gameData}/>;
+            gameMenuItem = <li className="mainMenuItem"><NavLink to="/game">Game</NavLink></li>;
+            gameRoute = <Route path="/game">{game}</Route>;
+        }
 
-            return (
-                <AppContext.Provider value={session}>
-                    <HashRouter>
-                        <div className="mainPage">
-                            <div className="mainView">
-                                <div className="mainMenu">
-                                    <div className="mainMenuLogoDiv">
-                                        <div className="logoContainer">
-                                            <img className="logo" src={images.logo} alt="Jennings Games"></img>
-                                            <span className="logoJennings">Jennings</span>
-                                            <span className="logoGames">Gaming</span>
-                                        </div>
-                                    </div>
-                                    <ul className="mainMenuHeader">
-                                        <li className="mainMenuItem"><NavLink to="/" exact>Home</NavLink></li>
-                                        <li className="mainMenuItem"><NavLink to="/lobby">Lobby</NavLink></li>
-                                        {gameMenuItem}
-                                    </ul>
-                                </div>
-                                <div className="contentArea">
-                                    <Route exact path="/">
-                                        <Home openTestGame={this.openTestGame}/>
-                                    </Route>
-                                    <Route path="/lobby">
-                                        <Lobby onEnterGame={this.handleEnterGame}/>
-                                    </Route>
-                                    {gameRoute}
-                                </div>
-                            </div>
-                        </div>
-                    </HashRouter>
-                    {gameWindow}
-                </AppContext.Provider>
+        let testRoute = null;
+        let testMenuItem = null;
+        if (TEST) {
+            testRoute = (
+                <Route path="/test">
+                    <TestView openTestGame={this.openTestGame} />
+                </Route>
             )
+            testMenuItem = <li className="mainMenuItem"><NavLink to="/test">Test</NavLink></li>;
+        }
+
+        let contentArea = null;
+        if (session.loggedIn) {
+            contentArea = (
+                <div className="contentArea">
+                    <Route exact path="/">
+                        <HomeView/>
+                    </Route>
+                    <Route path="/store">
+                        <StoreView/>
+                    </Route>
+                    <Route path="/guides">
+                        <GuidesView/>
+                    </Route>
+                    <Route path="/reviews">
+                        <ReviewsView/>
+                    </Route>
+                    <Route path="/lobby">
+                        <LobbyView onEnterGame={this.handleEnterGame}/>
+                    </Route>
+                    {testRoute}
+                    {gameRoute}
+                </div>
+            );
         } else {
-            return (
-                <div className="mainPage">
-                    <div className="mainView">
-                        <div className="mainMenu">
-                            <div className="mainMenuLogoDiv">
-                                <div className="logoContainer">
-                                    <img className="logo" src={images.logo} alt="Jennings Games"></img>
-                                    <span className="logoJennings">Jennings</span>
-                                    <span className="logoGames">Games</span>
+            contentArea = (
+                <LoginView onSubmit={this.handleLogin}/>
+            );
+        }
+
+        return (
+            <AppContext.Provider value={session}>
+                <HashRouter>
+                    <div className="mainPage">
+                        <div className="topPageArea">
+                            <div className="logoContainer">
+                                <div className="logoIconContainer">
+                                    <img className="logoImage" src={images.logo} alt="Jennings Gaming"></img>
+                                </div>
+                                <div className="logoTextContainer">
+                                    <span className="logoJenningsText">Jennings</span>
+                                    <span className="logoGamingText">Gaming</span>
                                 </div>
                             </div>
+                            <div className="mainMenu">
+                                <ul className="mainMenuHeader">
+                                    <li className="mainMenuItem"><NavLink to="/" exact>Home</NavLink></li>
+                                    <li className="mainMenuItem"><NavLink to="/store">Store</NavLink></li>
+                                    <li className="mainMenuItem"><NavLink to="/guides">Guides</NavLink></li>
+                                    <li className="mainMenuItem"><NavLink to="/reviews">Reviews</NavLink></li>
+                                    <li className="mainMenuItem"><NavLink to="/lobby">Lobby</NavLink></li>
+                                    {testMenuItem}
+                                    {gameMenuItem}
+                                </ul>
+                            </div>
                         </div>
-                        <div className="contentArea">
-                            <Login onSubmit={this.handleLogin}/>
+                        <div className="mainView">
+                            {contentArea}
                         </div>
                     </div>
-                </div>
-            )
-        }
+                </HashRouter>
+                {gameWindow}
+            </AppContext.Provider>
+        );
     }
 }
 

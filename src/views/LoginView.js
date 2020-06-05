@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
-import MyButton from "./MyButton";
+import MyButton from "../MyButton";
 
-class Login extends Component {
+class LoginView extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -30,8 +30,9 @@ class Login extends Component {
     render() {
         return (
             <div className="loginViewDiv">
-                <div className="loginWelcomeMsg"><span>Welcome to Jennings Games!</span></div>
-                <div className="loginInstructionMsg"><span>Please login to continue</span></div>
+                <div className="loginWelcomeMsg"><span>Welcome to Jennings Gaming!</span></div>
+                <div className="loginInstructionMsg">
+                    <span className="loginInstructionText">Please login to continue</span></div>
                     <div className="loginFormDiv">
                         <label className="loginUserLabel" htmlFor="user">Email Address</label>
                         <input
@@ -63,7 +64,4 @@ class Login extends Component {
     }
 }
 
-/*
-<input className="loginSubmitBtn" type="submit" value="Login"/>
-*/
-export default Login;
+export default LoginView;

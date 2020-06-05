@@ -486,8 +486,9 @@ class CardTable extends Component {
                 break;
         }
 
+        let bg = `${process.env.PUBLIC_URL}/card-table.png`;
         return (
-            <div className="tableArea">
+            <div className="tableArea" style={{backgroundImage: `url(${bg})`}}>
                 {tableMsgArea}
                 {kittyArea}
                 {topBidArea}

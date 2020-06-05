@@ -1,13 +1,12 @@
 import React, { Component } from "react";
-import NewGameDialog from './NewGameDialog';
-import GameSetupDialog from './GameSetupDialog';
-import { AppContext, useAppContext } from './ContextLib';
-import Game from './Game';
-import MyButton from "./MyButton";
+import NewGameDialog from '../NewGameDialog';
+import GameSetupDialog from '../GameSetupDialog';
+import { AppContext, useAppContext } from '../ContextLib';
+import MyButton from "../MyButton";
 
 const REFRESH_RATE = 5000;
 
-class Lobby extends Component {
+class LobbyView extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -356,9 +355,11 @@ class Lobby extends Component {
 
         return (
             <div className="lobbyView">
-                <div className="lobbyWelcomeDiv"><span className="lobbyWelcomeMsg">Welcome to the Game Lobby {session.playerName}</span>
+                <div className="lobbyWelcomeDiv">
+                    <span className="lobbyWelcomeMsg">Welcome to the Game Lobby</span>
                 </div>
-                <div className="lobbyInfoDiv"><span className="lobbyInfoMsg">Please select a game to join</span>
+                <div className="lobbyInfoDiv">
+                    <span className="lobbyInfoMsg">Please select a game to join</span>
                 </div>
                 <div className="lobbyItemsArea">
                     <div className="lobbyGamesArea">
@@ -376,6 +377,6 @@ class Lobby extends Component {
     }
 }
 
-Lobby.contextType = AppContext;
+LobbyView.contextType = AppContext;
 
-export default Lobby;
+export default LobbyView;
