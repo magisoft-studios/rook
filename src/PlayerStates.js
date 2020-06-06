@@ -1,26 +1,27 @@
 
 class PlayerStates {
-    static LOBBY                =  0;   // Opened game in Lobby but not joined yet
-    static JOINED               =  1;   // Joined game in Lobby but did not enter game yet
-    static ENTERED              =  2;   // Entered game
-    static INIT_STREAM          =  3;   // Initializing streams
-    static INIT_CONN            =  4;   // Initializing connections
-    static DEAL                 =  5;   // It's this player's turn to deal
-    static WAIT_FOR_DEAL        =  6;   // Waiting for another player to deal
-    static BID                  =  7;   // It's this player's turn to bid
-    static WAIT_FOR_BID         =  8;   // Waiting for other player's to bid
-    static PASSED               =  9;   // This player has passed and is done bidding
-    static BID_WON              = 10;   // This player won the bidding
-    static NAME_TRUMP           = 11;   // This player is naming trump
-    static WAIT_FOR_TRUMP       = 12;   // Waiting for another player to name trump
-    static SETUP_KITTY          = 13;   // This player is taking kitty
-    static WAIT_FOR_KITTY       = 14;   // Waiting for another player to fill the kitty
-    static PLAY_CARD            = 15;   // It is this player's turn to play a card
-    static WAIT_FOR_CARD        = 16;   // Waiting for another player to play a card
-    static TRICK_WON            = 17;   // This player has won the trick
-    static WAIT_FOR_TAKE_TRICK  = 18;   // Waiting for the trick winner to take the trick
-    static END_HAND             = 19;   // End of Hand - Announce score, then go back to DEAL
-    static WAIT_FOR_END_HAND    = 20    // Wait for other player to end the hand
+    static LOBBY                =  0;   // In Lobby but not joined a game yet
+    static JOINED_GAME          =  1;   // Opened game in Lobby but not joined a team yet
+    static JOINED_TEAM          =  2;   // Joined a team in the game
+    static ENTERED              =  3;   // Entered game
+    static INIT_STREAM          =  4;   // Initializing streams
+    static INIT_CONN            =  5;   // Initializing connections
+    static DEAL                 =  6;   // It's this player's turn to deal
+    static WAIT_FOR_DEAL        =  7;   // Waiting for another player to deal
+    static BID                  =  8;   // It's this player's turn to bid
+    static WAIT_FOR_BID         =  9;   // Waiting for other player's to bid
+    static PASSED               = 10;   // This player has passed and is done bidding
+    static BID_WON              = 11;   // This player won the bidding
+    static NAME_TRUMP           = 12;   // This player is naming trump
+    static WAIT_FOR_TRUMP       = 13;   // Waiting for another player to name trump
+    static SETUP_KITTY          = 14;   // This player is taking kitty
+    static WAIT_FOR_KITTY       = 15;   // Waiting for another player to fill the kitty
+    static PLAY_CARD            = 16;   // It is this player's turn to play a card
+    static WAIT_FOR_CARD        = 17;   // Waiting for another player to play a card
+    static TRICK_WON            = 18;   // This player has won the trick
+    static WAIT_FOR_TAKE_TRICK  = 19;   // Waiting for the trick winner to take the trick
+    static END_HAND             = 20;   // End of Hand - Announce score, then go back to DEAL
+    static WAIT_FOR_END_HAND    = 21;   // Wait for other player to end the hand
 
     static getStateText(thisPlayer, otherPlayer) {
         let text = "";
@@ -28,8 +29,11 @@ class PlayerStates {
             case PlayerStates.LOBBY:
                 text = "Viewing game in lobby";
                 break;
-            case PlayerStates.JOINED:
-                text = "Joined";
+            case PlayerStates.JOINED_GAME:
+                text = "Joined Game";
+                break;
+            case PlayerStates.JOINED_TEAM:
+                text = "Joined Team";
                 break;
             case PlayerStates.ENTERED:
                 text = "Entered";

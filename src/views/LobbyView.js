@@ -3,6 +3,8 @@ import NewGameDialog from '../NewGameDialog';
 import GameSetupDialog from '../GameSetupDialog';
 import { AppContext, useAppContext } from '../ContextLib';
 import MyButton from "../MyButton";
+import socketIOClient from "socket.io-client";
+import SocketMsg from '../SocketMsg';
 
 const REFRESH_RATE = 5000;
 
@@ -15,85 +17,130 @@ class LobbyView extends Component {
             showAvailableGames: true,
             availableGames: [],
             hasJoinedGame: false,
+            hasJoinedTeam: false,
             playerPosn: "",
             currentGameData: null,
         };
     }
 
     async componentDidMount() {
-        await this.checkStatus();
-        this.updateTimerId = setInterval(async () => this.checkStatus(), REFRESH_RATE);
+//        await this.checkStatus();
+        await this.initSocketIo();
+        this.getAvailGames();
+//        this.updateTimerId = setInterval(async () => this.checkStatus(), REFRESH_RATE);
     }
 
-    componentWillUnmount() {
-        clearInterval(this.updateTimerId);
-    }
+//    componentWillUnmount() {
+//        clearInterval(this.updateTimerId);
+//    }
 
-    checkStatus = async () => {
-        if (this.state.showAvailableGames) {
-            await this.getAvailableGames();
-        } else if (this.state.showGameSetupDialog) {
-            await this.getGameInfo(this.state.currentGameData.name);
+    initSocketIo = async () => {
+        try {
+            this.socket = await socketIOClient('/lobby', {
+                query: {
+                    sessionId: this.context.id,
+                }
+            });
+            this.socket.on(`message`, this.rcvSocketMsg);
+        } catch(error) {
+            console.log(`Error initializing Lobby socket IO: ${error.message}`);
         }
     }
 
-    getAvailableGames = async () => {
-        const requestOptions = {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                sessionId: this.context.id,
-            })
-        };
-        try {
-            const response = await fetch('/rook/getAvailableGames', requestOptions);
-            if (!response.ok) {
-                throw Error(response.statusText);
-            } else {
-                const jsonResp = await response.json();
-                let status = jsonResp.rookResponse.status;
-                if (status === "SUCCESS") {
+    rcvSocketMsg = (message) => {
+        console.log(`Received message: ${JSON.stringify(message)}`);
+        if (message.status === "SUCCESS") {
+            switch (message.msgId) {
+                case "availGames": {
                     if (this.state.showAvailableGames) {
                         this.setState({
                             ...this.state,
-                            availableGames: jsonResp.rookResponse.availableGames,
+                            availableGames: message.msg.availGames,
                         });
                     }
+                    break;
+                }
+                case "newGame": {
+                    this.setState({
+                        showNewGameDialog: false,
+                        showGameSetupDialog: true,
+                        showAvailableGames: false,
+                        availableGames: [],
+                        hasJoinedGame: true,
+                        hasJoinedTeam: true,
+                        playerPosn: "player1",
+                        currentGameData: message.msg.gameData,
+                    });
+                    break;
+                }
+                case "joinedGame": {
+                    this.setState({
+                        ...this.state,
+                        showAvailableGames: false,
+                        availableGames: [],
+                        showGameSetupDialog: true,
+                        hasJoinedGame: true,
+                        hasJoinedTeam: false,
+                        currentGameData: message.msg.gameData,
+                    })
+                    break;
+                }
+                case "leftGame": {
+                    this.setState({
+                        ...this.state,
+                        showNewGameDialog: false,
+                        showGameSetupDialog: false,
+                        showAvailableGames: true,
+                        hasJoinedGame: false,
+                        hasJoinedTeam: false,
+                        playerPosn: null,
+                        currentGameData: null,
+                        availableGames: message.msg.availGames,
+                    });
+                    break;
+                }
+                case "joinedTeam": {
+                    this.setState({
+                        showNewGameDialog: false,
+                        showGameSetupDialog: true,
+                        showAvailableGames: false,
+                        availableGames: [],
+                        hasJoinedGame: true,
+                        hasJoinedTeam: true,
+                        playerPosn: message.msg.playerPosn,
+                        currentGameData: message.msg.gameData,
+                    });
+                }
+                case "gameDataChanged": {
+                    this.setState({
+                        ...this.state,
+                        showAvailableGames: false,
+                        availableGames: [],
+                        showGameSetupDialog: true,
+                        currentGameData: message.msg.gameData,
+                    })
+                    break;
+                }
+                default: {
+                    console.log(`Received invalid msgId on Lobby socket: ${message.msgId}`);
                 }
             }
-        } catch (error) {
-            console.log(error);
         }
     }
 
-    getGameInfo = async (gameName) => {
-        const requestOptions = {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                sessionId: this.context.id,
-                gameName: gameName,
-            })
-        };
+    sendSocketMsg = (socketMsg) => {
         try {
-            const response = await fetch('/rook/getGameInfo', requestOptions);
-            if (!response.ok) {
-                throw Error(response.statusText);
-            } else {
-                const jsonResp = await response.json();
-                let status = jsonResp.rookResponse.status;
-                if (status === "SUCCESS") {
-                    this.setState({
-                        ...this.state,
-                        currentGameData: jsonResp.rookResponse.gameInfo,
-                    });
-                } else {
-                    alert("Could not find game: " + jsonResp.rookResponse.errorMsg);
-                }
-            }
+            console.log(`Sending message: ${JSON.stringify(socketMsg)}`);
+            this.socket.emit(`message`, socketMsg);
         } catch (error) {
-            console.log(error);
+            console.log(`Error sending socket msg: ${error.message}`);
         }
+    }
+
+    getAvailGames = () => {
+        let socketMsg = new SocketMsg(this.context.id);
+        socketMsg.msgId = 'getAvailGames';
+        this.sendSocketMsg(socketMsg);
     }
 
     handleCreateNewGame = () => {
@@ -107,40 +154,13 @@ class LobbyView extends Component {
     }
 
     handleNewGameOk = async (gameName, gameType) => {
-        const requestOptions = {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                sessionId: this.context.id,
-                gameName: gameName,
-                gameType: gameType,
-            })
+        let socketMsg = new SocketMsg(this.context.id);
+        socketMsg.msgId = 'newGame';
+        socketMsg.msg = {
+            gameName: gameName,
+            gameType: gameType,
         };
-        try {
-            const response = await fetch('/rook/newGame', requestOptions);
-            if (!response.ok) {
-                throw Error(response.statusText);
-            } else {
-                const jsonResp = await response.json();
-                let status = jsonResp.rookResponse.status;
-                if (status === "SUCCESS") {
-                    this.setState({
-                        showNewGameDialog: false,
-                        showGameSetupDialog: true,
-                        showAvailableGames: false,
-                        availableGames: null,
-                        hasJoinedGame: true,
-                        playerPosn: "player1",
-                        currentGameData: jsonResp.rookResponse.gameData,
-                    });
-                    await this.checkStatus();
-                } else {
-                    alert("Failed creating new game: " + jsonResp.rookResponse.errorMsg);
-                }
-            }
-        } catch (error) {
-            console.log(error);
-        }
+        this.sendSocketMsg(socketMsg);
     }
 
     handleNewGameCancel = (event) => {
@@ -153,54 +173,36 @@ class LobbyView extends Component {
     }
 
     handleJoinGame = async (gameName) => {
-        await this.getGameInfo(gameName);
-        this.setState({
-            ...this.state,
-            showAvailableGames: false,
-            availableGames: [],
-            showGameSetupDialog: true,
-        })
-        await this.checkStatus();
-    }
-
-    handlePlayerJoinedGame = async (gameName, playerPosn) => {
-        const requestOptions = {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                sessionId: this.context.id,
-                gameName: gameName,
-                playerPosn: playerPosn,
-                playerId: this.context.playerId,
-            })
+        let socketMsg = new SocketMsg(this.context.id);
+        socketMsg.msgId = 'joinGame';
+        socketMsg.msg = {
+            gameName: gameName,
         };
-        try {
-            const response = await fetch('/rook/playerJoinGame', requestOptions);
-            if (!response.ok) {
-                throw Error(response.statusText);
-            } else {
-                const jsonResp = await response.json();
-                let status = jsonResp.rookResponse.status;
-                if (status === "SUCCESS") {
-                    this.setState({
-                        showNewGameDialog: false,
-                        showGameSetupDialog: true,
-                        showAvailableGames: false,
-                        availableGames: null,
-                        hasJoinedGame: true,
-                        playerPosn: playerPosn,
-                        currentGameData: jsonResp.rookResponse.gameData,
-                    });
-                    this.checkStatus();
-                } else {
-                    alert("Failed to join game: " + jsonResp.rookResponse.errorMsg);
-                }
-            }
-        } catch (error) {
-            console.log(error);
-        }
+        this.sendSocketMsg(socketMsg);
     }
 
+    handleLeaveGame = async (gameName) => {
+        let socketMsg = new SocketMsg(this.context.id);
+        socketMsg.msgId = 'leaveGame';
+        socketMsg.msg = {
+            gameName: gameName,
+            playerPosn: this.state.playerPosn,
+        };
+        this.sendSocketMsg(socketMsg);
+    }
+
+    handleJoinTeam = async (gameName, playerPosn) => {
+        let socketMsg = new SocketMsg(this.context.id);
+        socketMsg.msgId = 'joinTeam';
+        socketMsg.msg = {
+            gameName: gameName,
+            playerId: this.context.playerId,
+            playerPosn: playerPosn,
+        };
+        this.sendSocketMsg(socketMsg);
+    }
+
+    /*
     handleLeaveGame = async (gameName) => {
         await this.getGameInfo(gameName);
         if (this.state.hasJoinedGame) {
@@ -231,7 +233,7 @@ class LobbyView extends Component {
                             playerPosn: null,
                             currentGameData: null,
                         });
-                        this.checkStatus();
+                        //this.checkStatus();
                     } else {
                         alert("Failed to leave game: " + jsonResp.rookResponse.errorMsg);
                     }
@@ -247,7 +249,7 @@ class LobbyView extends Component {
                     playerPosn: null,
                     currentGameData: null,
                 });
-                this.checkStatus();
+                //this.checkStatus();
             }
         } else {
             // We have not joined the game yet so no need to tell server.
@@ -260,10 +262,10 @@ class LobbyView extends Component {
                 playerPosn: null,
                 currentGameData: null,
             });
-            this.checkStatus();
+            //this.checkStatus();
         }
     }
-
+*/
     onEnterGame = (gameName) => {
         this.setState({
             ...this.state,
@@ -282,7 +284,6 @@ class LobbyView extends Component {
             let availGameCmpnts = [];
             if (this.state.availableGames.length > 0) {
                 this.state.availableGames.forEach((game, index) => {
-                    console.log("Adding game [" + game.name + "]");
                     availGameCmpnts.push(
                         <tr key={game.name}>
                             <td>{game.name}</td>
@@ -290,7 +291,7 @@ class LobbyView extends Component {
                             <td>
                                 <MyButton
                                     btnClass="lobbyJoinGameBtn"
-                                    btnText="Join"
+                                    btnText="View Game"
                                     onClick={this.handleJoinGame}
                                     onClickValue={game.name}>
                                 </MyButton>
@@ -329,16 +330,16 @@ class LobbyView extends Component {
             let gameData = this.state.currentGameData;
             gameSetupDlg =
                 <GameSetupDialog
-                    hasJoinedGame={this.state.hasJoinedGame}
+                    hasJoinedTeam={this.state.hasJoinedTeam}
                     enableEnterGameBtn={gameData.locked}
                     gameName={gameData.name}
                     gameType={gameData.type}
                     gameStateText={gameData.stateText}
-                    player1={gameData.player1.name}
-                    player2={gameData.player2.name}
-                    player3={gameData.player3.name}
-                    player4={gameData.player4.name}
-                    onJoin={this.handlePlayerJoinedGame}
+                    player1={(gameData.player1 != null) ? gameData.player1.name : ""}
+                    player2={(gameData.player2 != null) ? gameData.player2.name : ""}
+                    player3={(gameData.player3 != null) ? gameData.player3.name : ""}
+                    player4={(gameData.player4 != null) ? gameData.player4.name : ""}
+                    onJoinTeam={this.handleJoinTeam}
                     onEnterGame={this.onEnterGame}
                     onLeaveGame={this.handleLeaveGame} />
         }

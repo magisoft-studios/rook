@@ -124,6 +124,7 @@ class Game extends Component {
             if (this.camConnMap && (this.camConnMap.size == 3)) {
                 if (this.state.streams[this.posns.bottomPlayerPosn] != null) {
                     let requestOptions = this.setupRequestOptions();
+                    console.log(`Game::checkConnectionStates: sending streamInitiliazed to server`);
                     await this.sendRequest("streamInitialized", requestOptions);
                 }
             }
@@ -138,6 +139,7 @@ class Game extends Component {
                     this.sendCamOffers();
                 } else {
                     let requestOptions = this.setupRequestOptions();
+                    console.log(`Game::checkConnectionStates: sending connectionsInitialized to server`);
                     await this.sendRequest("connectionsInitialized", requestOptions);
                 }
             }

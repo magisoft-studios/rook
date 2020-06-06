@@ -2,7 +2,8 @@ import React, { Component, useState } from 'react'
 import {
     Route,
     NavLink,
-    HashRouter
+    HashRouter,
+    Redirect
 } from "react-router-dom";
 import { AppContext } from './ContextLib';
 import LoginView from './views/LoginView';
@@ -29,6 +30,8 @@ class Main extends Component {
         }
         this.state = {
             session: session,
+            showGameWindow: false,
+            redirectToGame: false,
             gameData: null
         }
     }
@@ -49,20 +52,23 @@ class Main extends Component {
         try {
             const response = await fetch('/rook/login', requestOptions);
             if (!response.ok) {
+                console.log("handleLogin: response is NOT OK");
                 throw Error(response.statusText);
             } else {
+                console.log("handleLogin: response is OK");
                 const jsonResp = await response.json();
-                let status = jsonResp.rookResponse.status;
+                console.log(`Received response: ${JSON.stringify(jsonResp)}`);
+                let status = jsonResp.reply.status;
                 if (status === "SUCCESS") {
-                    console.log("LoginView success");
+                    console.log("handleLogin success");
                     let session = new Session();
                     session.loggedIn = true;
-                    session.id = jsonResp.rookResponse.sessionId;
-                    session.playerId = jsonResp.rookResponse.playerId;
-                    session.playerName = jsonResp.rookResponse.playerName;
+                    session.id = jsonResp.reply.sessionId;
+                    session.playerId = jsonResp.reply.playerId;
+                    session.playerName = jsonResp.reply.playerName;
                     this.setState({ session: session });
                 } else {
-                    alert("LoginView failed: " + jsonResp.rookResponse.errorMsg);
+                    alert("handleLogin failed: " + jsonResp.reply.errorMsg);
                     this.setState({ session: new Session() });
                 }
             }
@@ -128,7 +134,6 @@ class Main extends Component {
     handleEnterGame = async (gameName, playerPosn) => {
         let gameData = await this.playerEnterGame();
         let session = this.state.session;
-        session.showGameWindow = true;
         session.currentGame = {
             id: gameName,
             playerPosn: playerPosn,
@@ -136,6 +141,8 @@ class Main extends Component {
         this.setState({
             ...this.state,
             session: session,
+            showGameWindow: true,
+            redirectToGame: true,
             gameData: gameData,
         });
     }
@@ -146,7 +153,6 @@ class Main extends Component {
             id: user,
             playerId: user,
             playerName: user,
-            showGameWindow: false,
             currentGame: {
                 id: "TestGame",
                 playerPosn: posn,
@@ -155,10 +161,11 @@ class Main extends Component {
 
         this.setState({ session: session }, async () => {
             let gameData = await this.getGameData();
-            session.showGameWindow = true;
             this.setState({
                 ...this.state,
                 session: session,
+                showGameWindow: true,
+                redirectToGame: true,
                 gameData: gameData,
             });
         });
@@ -168,7 +175,7 @@ class Main extends Component {
         let session = this.state.session;
         let gameWindow = null;
         /*
-                if (session.showGameWindow) {
+                if (this.state.showGameWindow) {
                     gameWindow = <NewWindow
                         features="width=100%,height=100%"
                         copyStyles={true}
@@ -184,14 +191,18 @@ class Main extends Component {
         let gameMenuItem = null;
         let gameRoute = null;
         let game = null;
-        if (session.showGameWindow) {
-            game =
-                <Game
-                    gameId={session.currentGame.id}
-                    playerPosn={session.currentGame.playerPosn}
-                    gameData={this.state.gameData}/>;
+        let gameRedirect = null;
+        if (this.state.showGameWindow) {
+            game = <Game
+                gameId={session.currentGame.id}
+                playerPosn={session.currentGame.playerPosn}
+                gameData={this.state.gameData}/>;
             gameMenuItem = <li className="mainMenuItem"><NavLink to="/game">Game</NavLink></li>;
             gameRoute = <Route path="/game">{game}</Route>;
+
+            if (this.state.redirectToGame) {
+                gameRedirect = <Redirect to={'/game'} />
+            }
         }
 
         let testRoute = null;
@@ -226,6 +237,7 @@ class Main extends Component {
                     </Route>
                     {testRoute}
                     {gameRoute}
+                    {gameRedirect}
                 </div>
             );
         } else {

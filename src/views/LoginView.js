@@ -23,6 +23,13 @@ class LoginView extends Component {
         this.setState({password: event.target.value});
     }
 
+    handleKeyPress = (event) => {
+        console.log(`Key pressed: ${event.key}`);
+        if (event.key === "Enter") {
+            this.handleSubmit(event);
+        }
+    }
+
     handleSubmit = (event) => {
         this.props.onSubmit(this.state.userName, this.state.password);
     }
@@ -50,7 +57,8 @@ class LoginView extends Component {
                             id="password"
                             name="password"
                             value={this.state.password}
-                            onChange={this.handlePasswordChange} />
+                            onChange={this.handlePasswordChange}
+                            onKeyPress={this.handleKeyPress} />
                         <div className="loginBtnDiv">
                             <MyButton
                                 btnClass="loginSubmitBtn"

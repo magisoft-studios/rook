@@ -7,7 +7,7 @@ class GameSetupDialog extends Component {
     }
 
     handlePlayerJoinBtnClick = (playerPosn) => {
-        this.props.onJoin(this.props.gameName, playerPosn)
+        this.props.onJoinTeam(this.props.gameName, playerPosn)
     }
 
     createPlayerComponent = (playerName, playerPosn) => {
@@ -15,7 +15,7 @@ class GameSetupDialog extends Component {
         if (playerName) {
             playerCmpnt = <span className="playerNameText">{playerName}</span>
         } else {
-            if (! this.props.hasJoinedGame) {
+            if (! this.props.hasJoinedTeam) {
                 playerCmpnt =
                     <MyButton
                         btnClass="joinGameBtn"
