@@ -5,6 +5,7 @@ import {
     HashRouter,
     Redirect
 } from "react-router-dom";
+import adapter from 'webrtc-adapter';
 import { AppContext } from './ContextLib';
 import LoginView from './views/LoginView';
 import HomeView from './views/HomeView';
@@ -36,45 +37,13 @@ class Main extends Component {
         }
     }
 
-    componentDidMount() {
-    }
-
-    handleLogin = async (userId, password) => {
-        console.log("handleLogin START");
-        const requestOptions = {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                userId: userId,
-                password: password
-            })
-        };
-        try {
-            const response = await fetch('/rook/login', requestOptions);
-            if (!response.ok) {
-                console.log("handleLogin: response is NOT OK");
-                throw Error(response.statusText);
-            } else {
-                console.log("handleLogin: response is OK");
-                const jsonResp = await response.json();
-                console.log(`Received response: ${JSON.stringify(jsonResp)}`);
-                let status = jsonResp.reply.status;
-                if (status === "SUCCESS") {
-                    console.log("handleLogin success");
-                    let session = new Session();
-                    session.loggedIn = true;
-                    session.id = jsonResp.reply.sessionId;
-                    session.playerId = jsonResp.reply.playerId;
-                    session.playerName = jsonResp.reply.playerName;
-                    this.setState({ session: session });
-                } else {
-                    alert("handleLogin failed: " + jsonResp.reply.errorMsg);
-                    this.setState({ session: new Session() });
-                }
-            }
-        } catch (error) {
-            console.log(error);
-        }
+    handleLogin = (reply) => {
+        let session = new Session();
+        session.loggedIn = true;
+        session.id = reply.sessionId;
+        session.playerId = reply.playerId;
+        session.playerName = reply.playerName;
+        this.setState({ session: session });
     }
 
     getGameData = async () => {
@@ -104,38 +73,10 @@ class Main extends Component {
         }
     }
 
-    playerEnterGame = async () => {
-        let session = this.state.session;
-        const requestOptions = {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                sessionId: session.id,
-            })
-        };
-        try {
-            const response = await fetch('/rook/playerEnterGame', requestOptions);
-            if (!response.ok) {
-                throw Error(response.statusText);
-            } else {
-                const jsonResp = await response.json();
-                let status = jsonResp.rookResponse.status;
-                if (status === "SUCCESS") {
-                    return jsonResp.rookResponse.gameData
-                } else {
-                    alert("Could not find game: " + jsonResp.rookResponse.errorMsg);
-                }
-            }
-        } catch (error) {
-            console.log(error);
-        }
-    }
-
-    handleEnterGame = async (gameName, playerPosn) => {
-        let gameData = await this.playerEnterGame();
+    handleEnterGame = async (gameData, playerPosn) => {
         let session = this.state.session;
         session.currentGame = {
-            id: gameName,
+            id: gameData.id,
             playerPosn: playerPosn,
         }
         this.setState({
@@ -194,6 +135,7 @@ class Main extends Component {
         let gameRedirect = null;
         if (this.state.showGameWindow) {
             game = <Game
+                sessionId={session.id}
                 gameId={session.currentGame.id}
                 playerPosn={session.currentGame.playerPosn}
                 gameData={this.state.gameData}/>;
@@ -242,7 +184,7 @@ class Main extends Component {
             );
         } else {
             contentArea = (
-                <LoginView onSubmit={this.handleLogin}/>
+                <LoginView onLogin={this.handleLogin}/>
             );
         }
 

@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import adapter from 'webrtc-adapter';
 import NewGameDialog from '../NewGameDialog';
 import GameSetupDialog from '../GameSetupDialog';
 import { AppContext, useAppContext } from '../ContextLib';
@@ -24,120 +25,159 @@ class LobbyView extends Component {
     }
 
     async componentDidMount() {
-//        await this.checkStatus();
         await this.initSocketIo();
-        this.getAvailGames();
-//        this.updateTimerId = setInterval(async () => this.checkStatus(), REFRESH_RATE);
+        await this.getAvailGames();
     }
 
-//    componentWillUnmount() {
-//        clearInterval(this.updateTimerId);
-//    }
+    componentWillUnmount() {
+        if (this.socket) {
+            this.socket.disconnect();
+        }
+    }
 
     initSocketIo = async () => {
         try {
             this.socket = await socketIOClient('/lobby', {
+                transports: ['websocket'],
                 query: {
                     sessionId: this.context.id,
                 }
             });
-            this.socket.on(`message`, this.rcvSocketMsg);
+            this.socket.on('disconnect', () => {
+                console.log(`Disconnected from Lobby socket`);
+            });
+            this.socket.on(`message`, this.rcvdSocketMsg);
         } catch(error) {
             console.log(`Error initializing Lobby socket IO: ${error.message}`);
         }
     }
 
-    rcvSocketMsg = (message) => {
+    //
+    // RECEIVED MESSAGES
+    //
+
+    rcvdSocketMsg = (message) => {
         console.log(`Received message: ${JSON.stringify(message)}`);
         if (message.status === "SUCCESS") {
             switch (message.msgId) {
                 case "availGames": {
-                    if (this.state.showAvailableGames) {
-                        this.setState({
-                            ...this.state,
-                            availableGames: message.msg.availGames,
-                        });
-                    }
+                    this.rcvdAvailGamesMsg(message);
                     break;
                 }
                 case "newGame": {
-                    this.setState({
-                        showNewGameDialog: false,
-                        showGameSetupDialog: true,
-                        showAvailableGames: false,
-                        availableGames: [],
-                        hasJoinedGame: true,
-                        hasJoinedTeam: true,
-                        playerPosn: "player1",
-                        currentGameData: message.msg.gameData,
-                    });
+                    this.rcvdNewGameMsg(message);
                     break;
                 }
                 case "joinedGame": {
-                    this.setState({
-                        ...this.state,
-                        showAvailableGames: false,
-                        availableGames: [],
-                        showGameSetupDialog: true,
-                        hasJoinedGame: true,
-                        hasJoinedTeam: false,
-                        currentGameData: message.msg.gameData,
-                    })
+                    this.rcvdJoinedGameMsg(message);
                     break;
                 }
                 case "leftGame": {
-                    this.setState({
-                        ...this.state,
-                        showNewGameDialog: false,
-                        showGameSetupDialog: false,
-                        showAvailableGames: true,
-                        hasJoinedGame: false,
-                        hasJoinedTeam: false,
-                        playerPosn: null,
-                        currentGameData: null,
-                        availableGames: message.msg.availGames,
-                    });
+                    this.rcvdLeftGameMsg(message);
                     break;
                 }
                 case "joinedTeam": {
-                    this.setState({
-                        showNewGameDialog: false,
-                        showGameSetupDialog: true,
-                        showAvailableGames: false,
-                        availableGames: [],
-                        hasJoinedGame: true,
-                        hasJoinedTeam: true,
-                        playerPosn: message.msg.playerPosn,
-                        currentGameData: message.msg.gameData,
-                    });
+                    this.rcvdJoinedTeamMsg(message);
                 }
                 case "gameDataChanged": {
-                    this.setState({
-                        ...this.state,
-                        showAvailableGames: false,
-                        availableGames: [],
-                        showGameSetupDialog: true,
-                        currentGameData: message.msg.gameData,
-                    })
+                    this.rcvdGameDataChangedMsg(message);
                     break;
                 }
                 default: {
                     console.log(`Received invalid msgId on Lobby socket: ${message.msgId}`);
                 }
             }
+        } else {
+            console.log(`Lobby socket error: ${message.errorMsg}`);
         }
     }
 
-    sendSocketMsg = (socketMsg) => {
+    rcvdAvailGamesMsg(message) {
+        if (this.state.showAvailableGames) {
+            this.setState({
+                ...this.state,
+                availableGames: message.msg.availGames,
+            });
+        }
+    }
+
+    rcvdNewGameMsg(message) {
+        this.setState({
+            showNewGameDialog: false,
+            showGameSetupDialog: true,
+            showAvailableGames: false,
+            availableGames: [],
+            hasJoinedGame: true,
+            hasJoinedTeam: true,
+            playerPosn: "player1",
+            currentGameData: message.msg.gameData,
+        });
+    }
+
+    rcvdJoinedGameMsg(message) {
+        this.setState({
+            ...this.state,
+            showAvailableGames: false,
+            availableGames: [],
+            showGameSetupDialog: true,
+            hasJoinedGame: true,
+            hasJoinedTeam: false,
+            currentGameData: message.msg.gameData,
+        })
+    }
+
+    rcvdLeftGameMsg(message) {
+        this.setState({
+            ...this.state,
+            showNewGameDialog: false,
+            showGameSetupDialog: false,
+            showAvailableGames: true,
+            hasJoinedGame: false,
+            hasJoinedTeam: false,
+            playerPosn: null,
+            currentGameData: null,
+            availableGames: message.msg.availGames,
+        });
+    }
+
+    rcvdJoinedTeamMsg(message) {
+        this.setState({
+            showNewGameDialog: false,
+            showGameSetupDialog: true,
+            showAvailableGames: false,
+            availableGames: [],
+            hasJoinedGame: true,
+            hasJoinedTeam: true,
+            playerPosn: message.msg.playerPosn,
+            currentGameData: message.msg.gameData,
+        });
+    }
+
+    rcvdGameDataChangedMsg(message) {
+        this.setState({
+            ...this.state,
+            showAvailableGames: false,
+            availableGames: [],
+            showGameSetupDialog: true,
+            currentGameData: message.msg.gameData,
+        })
+    }
+
+
+    //
+    // SEND MESSAGES
+    //
+
+    sendSocketMsg = async (socketMsg) => {
         try {
             console.log(`Sending message: ${JSON.stringify(socketMsg)}`);
-            this.socket.emit(`message`, socketMsg);
+            await this.socket.emit(`message`, socketMsg);
         } catch (error) {
             console.log(`Error sending socket msg: ${error.message}`);
         }
     }
 
-    getAvailGames = () => {
+    getAvailGames = async () => {
         let socketMsg = new SocketMsg(this.context.id);
         socketMsg.msgId = 'getAvailGames';
         this.sendSocketMsg(socketMsg);
@@ -202,79 +242,17 @@ class LobbyView extends Component {
         this.sendSocketMsg(socketMsg);
     }
 
-    /*
-    handleLeaveGame = async (gameName) => {
-        await this.getGameInfo(gameName);
-        if (this.state.hasJoinedGame) {
-            // Need to tell server we are leaving the game.
-            const requestOptions = {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    sessionId: this.context.id,
-                    gameName: gameName,
-                    playerPosn: this.state.playerPosn,
-                })
-            };
-            try {
-                const response = await fetch('/rook/playerLeaveGame', requestOptions);
-                if (!response.ok) {
-                    throw Error(response.statusText);
-                } else {
-                    const jsonResp = await response.json();
-                    let status = jsonResp.rookResponse.status;
-                    if (status === "SUCCESS") {
-                        this.setState({
-                            ...this.state,
-                            showNewGameDialog: false,
-                            showGameSetupDialog: false,
-                            showAvailableGames: true,
-                            hasJoinedGame: false,
-                            playerPosn: null,
-                            currentGameData: null,
-                        });
-                        //this.checkStatus();
-                    } else {
-                        alert("Failed to leave game: " + jsonResp.rookResponse.errorMsg);
-                    }
-                }
-            } catch (error) {
-                console.log(error);
-                this.setState({
-                    ...this.state,
-                    showNewGameDialog: false,
-                    showGameSetupDialog: false,
-                    showAvailableGames: true,
-                    hasJoinedGame: false,
-                    playerPosn: null,
-                    currentGameData: null,
-                });
-                //this.checkStatus();
-            }
-        } else {
-            // We have not joined the game yet so no need to tell server.
-            this.setState({
-                ...this.state,
-                showNewGameDialog: false,
-                showGameSetupDialog: false,
-                showAvailableGames: true,
-                hasJoinedGame: false,
-                playerPosn: null,
-                currentGameData: null,
-            });
-            //this.checkStatus();
-        }
-    }
-*/
-    onEnterGame = (gameName) => {
+    handleEnterGame = (gameName) => {
         this.setState({
             ...this.state,
             showNewGameDialog: false,
             showGameSetupDialog: false,
             showAvailableGames: false,
         });
-        this.props.onEnterGame(gameName, this.state.playerPosn);
+
+        this.props.onEnterGame(this.state.currentGameData, this.state.playerPosn);
     }
+
 
     render() {
         let session = this.context;
@@ -340,7 +318,7 @@ class LobbyView extends Component {
                     player3={(gameData.player3 != null) ? gameData.player3.name : ""}
                     player4={(gameData.player4 != null) ? gameData.player4.name : ""}
                     onJoinTeam={this.handleJoinTeam}
-                    onEnterGame={this.onEnterGame}
+                    onEnterGame={this.handleEnterGame}
                     onLeaveGame={this.handleLeaveGame} />
         }
 

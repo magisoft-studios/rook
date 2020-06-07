@@ -1,5 +1,8 @@
+import SocketMsg from './SocketMsg';
+
 class CamConn {
     constructor(params) {
+        this.sessionId = params.sessionId;
         this.name = params.name;
         this.playerPosn = params.playerPosn;
         this.peerPosn = params.peerPosn;
@@ -7,6 +10,7 @@ class CamConn {
         this.peerConn = null;
         this.sendSocketMessage = params.sendMessage;
         this.handleAddStream = params.handleAddStream;
+        this.handleConnected = params.handleConnected;
         this.mediaStream = null;
         this.connecting = false;
         this.connected = false;
@@ -80,11 +84,10 @@ class CamConn {
     }
 
     sendMessage = (msg) => {
-        let message = {
-            source: "camera",
-            toPlayerPosn: this.peerPosn,
-            msg: msg,
-        };
+        let message = new SocketMsg(this.sessionId);
+        message.source = 'camera';
+        message.toPlayerPosn = this.peerPosn;
+        message.msg = msg;
         this.sendSocketMessage(message);
     }
 
@@ -194,6 +197,7 @@ class CamConn {
         if (this.peerConn.connectionState.toLowerCase() === "connected") {
             this.connected = true;
             this.connecting = false;
+            this.handleConnected(this.name);
         }
     }
 

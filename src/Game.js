@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import adapter from 'webrtc-adapter';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import cards from './Cards'
@@ -16,8 +17,9 @@ import Cam from './Cam.js';
 import RemoteCam from './RemoteCam.js';
 import CamConn from './CamConn.js';
 import socketIOClient from 'socket.io-client';
+import SocketMsg from "./SocketMsg";
 
-const REFRESH_RATE = 5000;
+const REFRESH_RATE = 1000;
 
 class Game extends Component {
     constructor(props) {
@@ -45,26 +47,37 @@ class Game extends Component {
         this.updateTimerId = null;
         this.socket = null;
         this.camConnMap = new Map();
-        this.initCameraConnections();
+        this.initCameraConnections(props.sessionId);
     }
 
     componentDidMount = async () => {
-        await this.checkStatus();
-        this.initSocketIo();
+        await this.initSocketIo();
+        await this.enterGame();
         this.updateTimerId = setInterval(async () => this.checkStatus(), REFRESH_RATE);
     }
 
     componentWillUnmount() {
-        clearInterval(this.updateTimerId);
+        console.log("Component will unmount called!!!");
+        //if (this.socket) {
+        //    this.socket.disconnect();
+        //}
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        console.log("componentDidUpdate");
+        this.checkConnectionStates();
     }
 
     initSocketIo = async () => {
         try {
-            //this.socket = socketIOClient(window.location.href);
             this.socket = await socketIOClient('/game', {
+                transports: ['websocket'],
                 query: {
                     sessionId: this.context.id,
                 }
+            });
+            this.socket.on('disconnect', () => {
+                console.log(`Disconnected from Game socket`);
             });
             this.socket.on(`message`, this.rcvSocketMsg);
         } catch(error) {
@@ -74,22 +87,34 @@ class Game extends Component {
 
     rcvSocketMsg = (message) => {
         //console.log(`Received message: ${JSON.stringify(message)}`);
-        if (message.source = "camera") {
+        if (message.source === 'camera') {
             let camConn = this.camConnMap.get(message.fromPlayerPosn);
             camConn.handleMsg(message);
         } else {
-            console.log("Received a socket message not from a camera");
+            if (message.status === "SUCCESS") {
+                switch (message.msgId) {
+                    case "enteredGame": {
+                        this.rcvdEnteredGameMsg(message);
+                        break;
+                    }
+                    case "gameDataChanged": {
+                        this.rcvdGameDataChangedMsg(message);
+                        break;
+                    }
+                    default: {
+                        console.log(`Received invalid msgId on Game socket: ${message.msgId}`);
+                    }
+                }
+            } else {
+                console.log(`Game socket error: ${message.errorMsg}`);
+            }
         }
     }
 
     sendSocketMsg = async (message) => {
         try {
-            let socketMsg = {
-                sessionId: this.context.id,
-                fromPlayerPosn: this.state.playerPosn,
-                ...message,
-            }
-            this.socket.emit(`message`, socketMsg);
+            message.fromPlayerPosn = this.state.playerPosn;
+            await this.socket.emit(`message`, message);
         } catch (error) {
             console.log(`Error sending socket msg: ${error.message}`);
         }
@@ -97,29 +122,70 @@ class Game extends Component {
 
     checkStatus = async () => {
         await this.getGameData();
-        this.checkConnectionStates();
     }
 
-    initCameraConnections = () => {
-        this.initCamConn("topCamConn", this.posns.topPlayerPosn);
-        this.initCamConn("leftCamConn", this.posns.leftPlayerPosn);
-        this.initCamConn("rightCamConn", this.posns.rightPlayerPosn);
+    initCameraConnections = (sessionId) => {
+        this.initCamConn(sessionId,"topCamConn", this.posns.topPlayerPosn);
+        this.initCamConn(sessionId,"leftCamConn", this.posns.leftPlayerPosn);
+        this.initCamConn(sessionId,"rightCamConn", this.posns.rightPlayerPosn);
     }
 
-    initCamConn = (name, posn) => {
+    initCamConn = (sessionId, name, posn) => {
         let camConn = new CamConn({
+            sessionId: sessionId,
             name: name,
             playerPosn: this.state.playerPosn,
             peerPosn: posn,
             gameData: this.state.gameData,
             sendMessage: this.sendSocketMsg,
             handleAddStream: this.handleAddStream,
+            handleConnected: this.handleCamConnConnected,
         });
         this.camConnMap.set(posn, camConn);
     }
 
+    rcvdEnteredGameMsg = (message) => {
+        console.log("Received enteredGame message");
+        console.log(`New game state is ${message.msg.gameData.stateText}`);
+        let newState = {
+            ...this.state,
+            gameData: message.msg.gameData,
+        };
+        this.setState(newState);
+    }
+
+    rcvdGameDataChangedMsg = (message) => {
+        console.log("Received gameDataChanged message");
+        console.log(`New game state is ${message.msg.gameData.stateText}`);
+        let newState = {
+            ...this.state,
+            gameData: message.msg.gameData,
+        };
+        this.setState(newState);
+    }
+
+    handleCamConnConnected = async (name) => {
+        console.log(`Game: handleCamConnConnected from ${name}`);
+        let gameData = this.state.gameData;
+        if (gameData.state === GameStates.INIT_CONN) {
+            if (this.camConnMap && (this.camConnMap.size == 3)) {
+                let allConnected = true;
+                this.camConnMap.forEach( (camConn) => {
+                    allConnected = allConnected && camConn.connected;
+                });
+
+                if (allConnected) {
+                    let requestOptions = this.setupRequestOptions();
+                    console.log(`Game::handleCamConnConnected: sending connectionsInitialized to server`);
+                    await this.sendRequest("connectionsInitialized", requestOptions);
+                }
+            }
+        }
+    }
+
     checkConnectionStates = async () => {
         let gameData = this.state.gameData;
+        console.log(`checkConnectionStates: state = ${gameData.stateText}`);
         if (gameData.state === GameStates.INIT_STREAM) {
             if (this.camConnMap && (this.camConnMap.size == 3)) {
                 if (this.state.streams[this.posns.bottomPlayerPosn] != null) {
@@ -233,6 +299,12 @@ class Game extends Component {
         } catch (error) {
             console.log(error);
         }
+    }
+
+    enterGame = async () => {
+        let socketMsg = new SocketMsg(this.context.id);
+        socketMsg.msgId = 'enterGame';
+        this.sendSocketMsg(socketMsg);
     }
 
     getGameData = async () => {

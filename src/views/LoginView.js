@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import MyButton from "../MyButton";
+import Session from "../Session";
 
 class LoginView extends Component {
     constructor(props) {
@@ -31,7 +32,38 @@ class LoginView extends Component {
     }
 
     handleSubmit = (event) => {
-        this.props.onSubmit(this.state.userName, this.state.password);
+        this.doLogin();
+    }
+
+    doLogin = async () => {
+        console.log("doLogin START");
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userId: this.state.userName,
+                password: this.state.password,
+            })
+        };
+        try {
+            const response = await fetch('/rook/login', requestOptions);
+            if (!response.ok) {
+                console.log(`doLogin: response is NOT OK: ${response.statusText}`);
+            } else {
+                console.log("doLogin: response is OK");
+                const jsonResp = await response.json();
+                console.log(`doLogin: response: ${JSON.stringify(jsonResp)}`);
+                let reply = jsonResp.reply;
+                if (reply.status === "SUCCESS") {
+                    console.log("doLogin: SUCCESS");
+                    this.props.onLogin(reply);
+                } else {
+                    alert(`${reply.errorMsg}`);
+                }
+            }
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     render() {

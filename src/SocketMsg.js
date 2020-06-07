@@ -1,5 +1,3 @@
-import CamConn from "./CamConn";
-
 class SocketMsg {
     constructor(sessionId) {
         this.sessionId = sessionId;

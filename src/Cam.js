@@ -40,7 +40,7 @@ class Cam extends Component {
                     className="playerImage"
                     autoPlay={true}
                     playsInline={true}
-                    mute={true}
+                    muted
                     controls>
                 </video>
             </div>
