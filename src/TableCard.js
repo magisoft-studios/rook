@@ -2,10 +2,6 @@ import React, { Component } from 'react'
 import cards from "./Cards";
 
 class TableCard extends Component {
-    constructor(props) {
-        super(props);
-    }
-
     render() {
         let imgSrc = cards[this.props.id];
 

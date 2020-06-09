@@ -1,12 +1,9 @@
 import React, { Component } from 'react'
 import TableCard from './TableCard';
-import TABLE_BG from './images/card-table.png';
 import PlayerStates from './PlayerStates';
 import GameStates from './GameStates';
 import {AppContext} from "./ContextLib";
-import Game from "./Game";
 import Cards from "./Cards";
-import PlayerCard from "./PlayerCard";
 import KittyCard from "./KittyCard";
 import PlayerActions from "./PlayerActions";
 import MyButton from "./MyButton";
@@ -15,7 +12,7 @@ class CardTable extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            gameData: this.props.gameData,
+            //gameData: this.props.gameData,
             bidValue: "Pass",
             trumpValue: "Black",
         }
@@ -33,17 +30,6 @@ class CardTable extends Component {
         if (gd1.table.player4 !== gd2.table.player4) return true;
 
         return false;
-    }
-
-    static getDerivedStateFromProps(nextProps, prevState) {
-        if (CardTable.isStateChanged(nextProps.gameData, prevState.gameData)) {
-            return {
-                gameData: nextProps.gameData,
-                bidValue: CardTable.calcDefaultBidValue(nextProps.gameData),
-            };
-        } else {
-            return null;
-        }
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -99,22 +85,26 @@ class CardTable extends Component {
 
     static calcDefaultBidValue = (gameData) => {
         let defaultBid = "";
-
-        let highBid = gameData.highBid;
         let minBid = 70;
-        let nextBid = (highBid >= minBid) ? highBid + 5 : minBid;
         let maxBid = 180;
 
-        // Only include PASS as an option if all other players have not PASSED.
-        let passCntr = 0;
-        if (gameData.player1.bid < 0) passCntr++;
-        if (gameData.player2.bid < 0) passCntr++;
-        if (gameData.player3.bid < 0) passCntr++;
-        if (gameData.player4.bid < 0) passCntr++;
-        if (passCntr < 3) {
+        let currentHighBid = gameData.highBid;
+        if (currentHighBid === maxBid) {
             defaultBid = "Pass";
         } else {
-            defaultBid = nextBid.toString();
+            let nextBid = (currentHighBid >= minBid) ? currentHighBid + 5 : minBid;
+
+            // Only include PASS as an option if all other players have not PASSED.
+            let passCntr = 0;
+            if (gameData.player1.bid < 0) passCntr++;
+            if (gameData.player2.bid < 0) passCntr++;
+            if (gameData.player3.bid < 0) passCntr++;
+            if (gameData.player4.bid < 0) passCntr++;
+            if (passCntr < 3) {
+                defaultBid = "Pass";
+            } else {
+                defaultBid = nextBid.toString();
+            }
         }
 
         return defaultBid;
@@ -275,16 +265,8 @@ class CardTable extends Component {
         return cardArea;
     }
 
-    /*  Tried different ways to load the table background image from the public folder.
-          <div className="tableArea" style={{ backgroundImage: `url(${TABLE_BG})` }}>
-          <div className="tableArea" style={{ backgroundImage: `url(${bgSrc})` }}>
-          let bgSrc = process.env.PUBLIC_URL + '/card-table.png';
-          let bgSrc2 = 'localhost/rook/public/card-table.png'
-          let bgSrc = process.env.PUBLIC_URL + '/card-table.png';
-          let bgSrc2 = 'localhost/rook/public/card-table.png'
-    */
     render() {
-        let gameData = this.state.gameData;
+        let gameData = this.props.gameData;
         let gameState = gameData.state;
         let playerPosn = this.context.currentGame.playerPosn;
         let player = gameData[playerPosn];

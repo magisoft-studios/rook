@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import cards from './Cards'
 
 class MyButton extends Component {
     constructor(props) {
@@ -19,7 +18,7 @@ class MyButton extends Component {
             return;
         }
         this.setState({disabled: true});
-        this.disableTimerId = setTimeout( () => { this.setState({disabled: false}) }, 5000);
+        this.disableTimerId = setTimeout( () => { this.setState({disabled: false}) }, 2000);
         this.props.onClick(this.props.onClickValue);
     }
 

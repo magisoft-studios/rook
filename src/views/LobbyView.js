@@ -1,13 +1,10 @@
 import React, { Component } from "react";
-import adapter from 'webrtc-adapter';
 import NewGameDialog from '../NewGameDialog';
 import GameSetupDialog from '../GameSetupDialog';
-import { AppContext, useAppContext } from '../ContextLib';
+import { AppContext } from '../ContextLib';
 import MyButton from "../MyButton";
 import socketIOClient from "socket.io-client";
 import SocketMsg from '../SocketMsg';
-
-const REFRESH_RATE = 5000;
 
 class LobbyView extends Component {
     constructor(props) {
@@ -78,6 +75,7 @@ class LobbyView extends Component {
                 }
                 case "joinedTeam": {
                     this.rcvdJoinedTeamMsg(message);
+                    break;
                 }
                 case "gameDataChanged": {
                     this.rcvdGameDataChangedMsg(message);
@@ -85,6 +83,7 @@ class LobbyView extends Component {
                 }
                 default: {
                     console.log(`Received invalid msgId on Lobby socket: ${message.msgId}`);
+                    break;
                 }
             }
         } else {
@@ -255,8 +254,6 @@ class LobbyView extends Component {
 
 
     render() {
-        let session = this.context;
-
         let availableGameTable = null;
         if (this.state.showAvailableGames && this.state.availableGames) {
             let availGameCmpnts = [];

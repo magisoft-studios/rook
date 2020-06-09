@@ -2,10 +2,6 @@ import React, { Component } from 'react'
 import MyButton from "./MyButton";
 
 class GameSetupDialog extends Component {
-    constructor(props) {
-        super(props);
-    }
-
     handlePlayerJoinBtnClick = (playerPosn) => {
         this.props.onJoinTeam(this.props.gameName, playerPosn)
     }

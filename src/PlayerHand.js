@@ -3,29 +3,6 @@ import cards from "./Cards";
 import PlayerCard from "./PlayerCard";
 
 class PlayerHand extends Component {
-    constructor(props) {
-        super(props);
-        /*
-        this.state = {
-            cardList: props.cardList,
-        }
-        */
-    }
-/*
-    static getDerivedStateFromProps(nextProps, prevState) {
-        if (nextProps.cardList.length !== prevState.cardList.length) {
-            return { cardList: nextProps.cardList };
-        } else {
-            return null;
-        }
-    }
-
-    componentDidUpdate(prevProps, prevState) {
-        if (prevProps.cardList.length !== this.props.cardList.length) {
-            this.setState({cardList: this.props.cardList});
-        }
-    }
-*/
     render() {
         let playerCardCmpnts = [];
         let wrapperClass = "bottomPlayerCardWrapper";

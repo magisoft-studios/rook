@@ -11,7 +11,7 @@ class HomeView extends Component {
                     <div className="homeViewSection">
                         <div className="homeViewLine">
                             <Link className="homeViewLink" to='/store'>
-                                <img className="homeViewLinkImage" src={process.env.PUBLIC_URL + '/store.png'} />
+                                <img className="homeViewLinkImage" src={process.env.PUBLIC_URL + '/store.png'} alt="Store" />
                             </Link>
                             <span className="homeViewText">To check out our collection of gaming products, check out our</span>
                             <Link className="homeViewLink" to='/store'>Store</Link>
@@ -21,7 +21,7 @@ class HomeView extends Component {
                     <div className="homeViewSection">
                         <div className="homeViewLine">
                             <Link className="homeViewLink" to='/guides'>
-                                <img className="homeViewLinkImage" src={process.env.PUBLIC_URL + '/wizard.png'} />
+                                <img className="homeViewLinkImage" src={process.env.PUBLIC_URL + '/wizard.png'} alt="Guides" />
                             </Link>
                             <span className="homeViewText">To get some helpful info on our favorite games, step into our</span>
                             <Link className="homeViewLink" to='/guides'>Guides</Link>
@@ -31,7 +31,7 @@ class HomeView extends Component {
                     <div className="homeViewSection">
                         <div className="homeViewLine">
                             <Link className="homeViewLink" to='/reviews'>
-                                <img className="homeViewLinkImage" src={process.env.PUBLIC_URL + '/reviews.png'} />
+                                <img className="homeViewLinkImage" src={process.env.PUBLIC_URL + '/reviews.png'} alt="Reviews" />
                             </Link>
                             <span className="homeViewText">To find out our opinions of games, feel free to explore our</span>
                             <Link className="homeViewLink" to='/reviews'>Reviews</Link>
@@ -41,7 +41,7 @@ class HomeView extends Component {
                     <div className="homeViewSection">
                         <div className="homeViewLine">
                             <Link className="homeViewLink" to='/lobby'>
-                                <img className="homeViewLinkImage" src={process.env.PUBLIC_URL + '/card-game.png'} />
+                                <img className="homeViewLinkImage" src={process.env.PUBLIC_URL + '/card-game.png'} alt="Lobby" />
                             </Link>
                             <span className="homeViewText">To play one of our online games with your friends, pop on into our</span>
                             <Link className="homeViewLink" to='/lobby'>Game Lobby</Link>

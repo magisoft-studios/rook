@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import GameStates from './GameStates';
 
 class Cam extends Component {
     constructor(props) {
@@ -10,7 +11,14 @@ class Cam extends Component {
     }
 
     componentDidMount = async () => {
-        await this.streamCamVideo();
+        //if (await this.streamCamVideo();
+    }
+
+    componentDidUpdate(prevProps) {
+        if ((prevProps.gameDataState < GameStates.INIT_STREAM) &&
+            (this.props.gameDataState === GameStates.INIT_STREAM)) {
+            this.streamCamVideo();
+        }
     }
 
     streamCamVideo = async () => {

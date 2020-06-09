@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import MyButton from "../MyButton";
-import Session from "../Session";
 
 class LoginView extends Component {
     constructor(props) {
@@ -25,7 +24,6 @@ class LoginView extends Component {
     }
 
     handleKeyPress = (event) => {
-        console.log(`Key pressed: ${event.key}`);
         if (event.key === "Enter") {
             this.handleSubmit(event);
         }

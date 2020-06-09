@@ -1,4 +1,4 @@
-import React, { Component, useState } from 'react'
+import React, { Component } from 'react'
 import {
     Route,
     NavLink,
@@ -15,11 +15,9 @@ import GuidesView from './views/GuidesView';
 import ReviewsView from './views/ReviewsView';
 import TestView from './views/TestView';
 import images from "./Images";
-import NewWindow from 'react-new-window';
 import Session from './Session';
 import Game from './Game';
 
-const AUTO_LOGIN = false;
 const TEST = false;
 
 class Main extends Component {
@@ -115,20 +113,6 @@ class Main extends Component {
     render() {
         let session = this.state.session;
         let gameWindow = null;
-        /*
-                if (this.state.showGameWindow) {
-                    gameWindow = <NewWindow
-                        features="width=100%,height=100%"
-                        copyStyles={true}
-                        center="screen">
-                        <Game
-                            gameId={session.currentGame.id}
-                            playerPosn={session.currentGame.playerPosn}
-                            gameData={this.state.gameData} />
-                    </NewWindow>;
-                }
-        */
-
         let gameMenuItem = null;
         let gameRoute = null;
         let game = null;

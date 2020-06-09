@@ -1,32 +1,9 @@
 import React, { Component } from 'react'
-import MyButton from "./MyButton";
 
 class GameInfoArea extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            gameData: props.gameData,
-        }
-    }
-
-    static getDerivedStateFromProps(nextProps, prevState) {
-        if ((nextProps.gameData.state !== prevState.gameData.state)  ||
-            (nextProps.gameData.stateText !== prevState.gameData.stateText)) {
-            return { gameData: nextProps.gameData };
-        } else {
-            return null;
-        }
-    }
-
-    componentDidUpdate(prevProps, prevState) {
-        if ((prevProps.gameData.state !== this.props.gameData.state)  ||
-            (prevProps.gameData.stateText !== this.props.gameData.stateText)) {
-            this.setState({gameData: this.props.gameData});
-        }
-    }
 
     render() {
-        let gameData = this.state.gameData;
+        let gameData = this.props.gameData;
         let team1Players = gameData["player1"].name + ", " + gameData["player3"].name;
         let team2Players = gameData["player2"].name + ", " + gameData["player4"].name;
         let highBid = "";
@@ -36,7 +13,6 @@ class GameInfoArea extends Component {
             highBid = gameData.highBid;
         }
         let trumpSuit = gameData.trumpSuit ? gameData.trumpSuit : "";
-        let trickWinner = gameData.trick.winner ? gameData.trick.winner : "";
         let team1Score = gameData.team1.handScore;
         let team2Score = gameData.team2.handScore;
 
@@ -97,15 +73,6 @@ class GameInfoArea extends Component {
                         <span className="statusText">{gameData.stateText}</span>
                     </div>
                 </div>
-                {/*
-                <div className="gameInfoDiv">
-                    <MyButton
-                        btnClass="lobbyNewGameBtn"
-                        btnText="Send Socket Msg"
-                        onClick={() => this.props.socketHndl("Hello T")}>
-                    </MyButton>
-                </div>
-                */}
             </div>
         );
     }

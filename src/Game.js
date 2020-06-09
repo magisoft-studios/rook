@@ -1,9 +1,7 @@
 import React, { Component } from 'react'
-import adapter from 'webrtc-adapter';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import cards from './Cards'
-import players from './Players'
 import GameInfoArea from './GameInfoArea';
 import Card from './Card';
 import PlayerHand from './PlayerHand';
@@ -19,7 +17,6 @@ import CamConn from './CamConn.js';
 import socketIOClient from 'socket.io-client';
 import SocketMsg from "./SocketMsg";
 
-const REFRESH_RATE = 1000;
 
 class Game extends Component {
     constructor(props) {
@@ -44,28 +41,36 @@ class Game extends Component {
             },
         }
         this.calcPlayerPosns(props.playerPosn);
-        this.updateTimerId = null;
         this.socket = null;
         this.camConnMap = new Map();
         this.initCameraConnections(props.sessionId);
+        this.sentStreamInitialized = false;
     }
 
     componentDidMount = async () => {
         await this.initSocketIo();
-        await this.enterGame();
-        this.updateTimerId = setInterval(async () => this.checkStatus(), REFRESH_RATE);
+        await this.sendEnterGame();
+        //this.updateTimerId = setInterval(async () => this.checkStatus(), REFRESH_RATE);
     }
 
     componentWillUnmount() {
         console.log("Component will unmount called!!!");
-        //if (this.socket) {
-        //    this.socket.disconnect();
-        //}
+        if (this.socket) {
+            this.socket.disconnect();
+        }
     }
 
     componentDidUpdate(prevProps, prevState) {
-        console.log("componentDidUpdate");
-        this.checkConnectionStates();
+        console.log(`componentDidUpdate: prevState=${prevState.gameData.state} newState=${this.state.gameData.state}`);
+        if ((this.state.gameData.state === GameStates.INIT_STREAM) && !this.sentStreamInitialized) {
+            if (this.state.streams[this.posns.bottomPlayerPosn] != null) {
+                this.sentStreamInitialized = true;
+                this.sendStreamInitialized();
+            }
+        } else if ((this.state.gameData.state === GameStates.INIT_CONN) &&
+            (prevState.gameData.state === GameStates.INIT_STREAM)) {
+            this.sendCamOffers();
+        }
     }
 
     initSocketIo = async () => {
@@ -93,10 +98,6 @@ class Game extends Component {
         } else {
             if (message.status === "SUCCESS") {
                 switch (message.msgId) {
-                    case "enteredGame": {
-                        this.rcvdEnteredGameMsg(message);
-                        break;
-                    }
                     case "gameDataChanged": {
                         this.rcvdGameDataChangedMsg(message);
                         break;
@@ -120,10 +121,6 @@ class Game extends Component {
         }
     }
 
-    checkStatus = async () => {
-        await this.getGameData();
-    }
-
     initCameraConnections = (sessionId) => {
         this.initCamConn(sessionId,"topCamConn", this.posns.topPlayerPosn);
         this.initCamConn(sessionId,"leftCamConn", this.posns.leftPlayerPosn);
@@ -144,16 +141,6 @@ class Game extends Component {
         this.camConnMap.set(posn, camConn);
     }
 
-    rcvdEnteredGameMsg = (message) => {
-        console.log("Received enteredGame message");
-        console.log(`New game state is ${message.msg.gameData.stateText}`);
-        let newState = {
-            ...this.state,
-            gameData: message.msg.gameData,
-        };
-        this.setState(newState);
-    }
-
     rcvdGameDataChangedMsg = (message) => {
         console.log("Received gameDataChanged message");
         console.log(`New game state is ${message.msg.gameData.stateText}`);
@@ -168,45 +155,14 @@ class Game extends Component {
         console.log(`Game: handleCamConnConnected from ${name}`);
         let gameData = this.state.gameData;
         if (gameData.state === GameStates.INIT_CONN) {
-            if (this.camConnMap && (this.camConnMap.size == 3)) {
+            if (this.camConnMap && (this.camConnMap.size === 3)) {
                 let allConnected = true;
                 this.camConnMap.forEach( (camConn) => {
                     allConnected = allConnected && camConn.connected;
                 });
 
                 if (allConnected) {
-                    let requestOptions = this.setupRequestOptions();
-                    console.log(`Game::handleCamConnConnected: sending connectionsInitialized to server`);
-                    await this.sendRequest("connectionsInitialized", requestOptions);
-                }
-            }
-        }
-    }
-
-    checkConnectionStates = async () => {
-        let gameData = this.state.gameData;
-        console.log(`checkConnectionStates: state = ${gameData.stateText}`);
-        if (gameData.state === GameStates.INIT_STREAM) {
-            if (this.camConnMap && (this.camConnMap.size == 3)) {
-                if (this.state.streams[this.posns.bottomPlayerPosn] != null) {
-                    let requestOptions = this.setupRequestOptions();
-                    console.log(`Game::checkConnectionStates: sending streamInitiliazed to server`);
-                    await this.sendRequest("streamInitialized", requestOptions);
-                }
-            }
-        } else if (gameData.state === GameStates.INIT_CONN) {
-            if (this.camConnMap && (this.camConnMap.size == 3)) {
-                let allConnected = true;
-                this.camConnMap.forEach( (camConn) => {
-                    allConnected = allConnected && camConn.connected;
-                });
-
-                if (!allConnected) {
-                    this.sendCamOffers();
-                } else {
-                    let requestOptions = this.setupRequestOptions();
-                    console.log(`Game::checkConnectionStates: sending connectionsInitialized to server`);
-                    await this.sendRequest("connectionsInitialized", requestOptions);
+                    this.sendConnectionsInitialized();
                 }
             }
         }
@@ -267,78 +223,64 @@ class Game extends Component {
         this.setState(newState);
     }
 
-    setupRequestOptions = (bodyProps) => {
-        return {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                sessionId: this.context.id,
-                ...bodyProps,
-            }),
-        };
-    }
-
-    sendRequest = async (cmd, options) => {
-        try {
-            let url = "/rook/" + cmd;
-            const response = await fetch(url, options);
-            if (!response.ok) {
-                throw Error(response.statusText);
-            } else {
-                const jsonResp = await response.json();
-                let status = jsonResp.rookResponse.status;
-                if (status === "SUCCESS") {
-                    this.setState({
-                        ...this.state,
-                        gameData: jsonResp.rookResponse.gameData
-                    });
-                } else {
-                    alert(jsonResp.rookResponse.errorMsg);
-                }
-            }
-        } catch (error) {
-            console.log(error);
-        }
-    }
-
-    enterGame = async () => {
+    sendEnterGame = async () => {
         let socketMsg = new SocketMsg(this.context.id);
         socketMsg.msgId = 'enterGame';
         this.sendSocketMsg(socketMsg);
     }
 
-    getGameData = async () => {
-        let requestOptions = this.setupRequestOptions();
-        await this.sendRequest("getGameData", requestOptions);
+    sendStreamInitialized = async () => {
+        let socketMsg = new SocketMsg(this.context.id);
+        socketMsg.msgId = 'streamInitialized';
+        this.sendSocketMsg(socketMsg);
+    }
+
+    sendConnectionsInitialized = async () => {
+        let socketMsg = new SocketMsg(this.context.id);
+        socketMsg.msgId = 'connectionsInitialized';
+        this.sendSocketMsg(socketMsg);
     }
 
     handlePlayerAction = async (params) => {
-        let requestOptions = this.setupRequestOptions({
+        let socketMsg = new SocketMsg(this.context.id);
+        socketMsg.msgId = 'playerAction';
+        socketMsg.msg = {
             action: params.action,
-            value: params.value ? params.value : "NA",
-        });
-        await this.sendRequest("playerAction", requestOptions);
+            actionValue: params.value ? params.value : "NA",
+        };
+        this.sendSocketMsg(socketMsg);
     }
 
     handleKittyCardClick = async (cardId) => {
-        if (this.state.gameData.state === GameStates.POPULATE_KITTY) {
-            let requestOptions = this.setupRequestOptions({cardId: cardId});
-            await this.sendRequest("takeKittyCard", requestOptions);
-        }
+        let socketMsg = new SocketMsg(this.context.id);
+        socketMsg.msgId = 'playerAction';
+        socketMsg.msg = {
+            action: PlayerActions.TAKE_KITTY_CARD,
+            actionValue: cardId,
+        };
+        this.sendSocketMsg(socketMsg);
     }
 
     handleCardClick = async (cardId) => {
-        let requestOptions = this.setupRequestOptions({cardId: cardId});
-
+        let socketMsg = new SocketMsg(this.context.id);
+        socketMsg.msgId = 'playerAction';
         if (this.state.gameData.state === GameStates.POPULATE_KITTY) {
-            this.sendRequest("putKittyCard", requestOptions);
+            socketMsg.msg = {
+                action: PlayerActions.PUT_KITTY_CARD,
+                actionValue: cardId,
+            };
+            this.sendSocketMsg(socketMsg);
         } else if (this.state.gameData.state === GameStates.WAIT_FOR_CARD) {
             let gameData = this.state.gameData;
             let playerPosn = this.context.currentGame.playerPosn;
             let player = gameData[playerPosn];
-            if (gameData[playerPosn].state === PlayerStates.PLAY_CARD) {
+            if (player.state === PlayerStates.PLAY_CARD) {
                 if (this.isValidPlay(player, cardId, gameData.trick.suit)) {
-                    await this.sendRequest("playCard", requestOptions);
+                    socketMsg.msg = {
+                        action: PlayerActions.PLAY_CARD,
+                        actionValue: cardId,
+                    };
+                    this.sendSocketMsg(socketMsg);
                 }
             }
         }
@@ -362,11 +304,12 @@ class Game extends Component {
                 }
 
                 if (errMsg.length === 0) {
-                    let requestOptions = this.setupRequestOptions({
+                    let socketMsg = new SocketMsg(this.context.id);
+                    socketMsg.msgId = 'playerAction';
+                    socketMsg.msg = {
                         action: PlayerActions.KITTY_DONE,
-                        value: "NA",
-                    });
-                    await this.sendRequest("playerAction", requestOptions);
+                    };
+                    this.sendSocketMsg(socketMsg);
                 } else {
                     this.showErrorToast(errMsg);
                 }
@@ -382,7 +325,7 @@ class Game extends Component {
         })
 
         // Check if card suit equals trick suit.
-        if (trickSuit.length == 0) {
+        if (trickSuit.length === 0) {
             isValid = true;
         } else {
             if (card.suit === trickSuit) {
@@ -390,7 +333,7 @@ class Game extends Component {
             } else {
                 // Check if player has any cards of that suit.
                 let cardOfTrickSuit = player.cards.find((card) => {
-                    return (card.suit == trickSuit);
+                    return (card.suit === trickSuit);
                 });
 
                 if (cardOfTrickSuit === undefined) {
@@ -500,26 +443,14 @@ class Game extends Component {
     }
 
 
-    // NOTE: There is currently no way to prevent an "empty" render before the first data fetch
-    //
     render() {
-        console.log("Game: render START");
+        console.log("Game: render");
         let gameData = this.state.gameData;
 
         let topPlayer = gameData[this.posns.topPlayerPosn];
         let leftPlayer = gameData[this.posns.leftPlayerPosn];
         let rightPlayer = gameData[this.posns.rightPlayerPosn];
         let bottomPlayer = gameData[this.posns.bottomPlayerPosn];
-
-        let topPlayerImg = topPlayer.imgName;
-        let leftPlayerImg = leftPlayer.imgName;
-        let rightPlayerImg = rightPlayer.imgName;
-        let bottomPlayerImg = bottomPlayer.imgName;
-
-        let topPlayerImgClass = "playerImage";
-        let leftPlayerImgClass = "playerImage";
-        let rightPlayerImgClass = "playerImage";
-        let bottomPlayerImgClass = this.getImageClass(bottomPlayer);
 
         let topPlayerCardCmpnts = [];
         let leftPlayerCardCmpnts = [];
@@ -543,14 +474,18 @@ class Game extends Component {
             for (let i = 0; i < cards.length; i++) {
                 let card = cards[i];
                 bottomPlayerCards.push(new Card(card.id, card.name, card.value, card.pointValue, card.suit));
-                //bottomPlayerCards.push(new Card("card14Yellow", "card14Yellow", 14, 10, "yellow"));
             }
         }
 
         let topCam = <RemoteCam name="topCam" mediaStream={this.state.streams[this.posns.topPlayerPosn]} />;
         let leftCam = <RemoteCam name="leftCam" mediaStream={this.state.streams[this.posns.leftPlayerPosn]} />;
         let rightCam = <RemoteCam name="rightCam" mediaStream={this.state.streams[this.posns.rightPlayerPosn]} />;
-        let bottomCam = <Cam name="bottomCam" mediaStream={this.state.streams[this.posns.bottomPlayerPosn]} onStreamReady={this.handleStreamIsReady} />;
+
+        let bottomCam = <Cam
+            name="bottomCam"
+            mediaStream={this.state.streams[this.posns.bottomPlayerPosn]}
+            onStreamReady={this.handleStreamIsReady}
+            gameDataState={this.state.gameData.state}/>;
 
 
         return (
@@ -598,10 +533,6 @@ class Game extends Component {
         );
     }
 }
-
-/*
-  <img className={bottomPlayerImgClass} src={players[bottomPlayerImg]} alt="Player 4"></img>
- */
 
 Game.contextType = AppContext;
 
