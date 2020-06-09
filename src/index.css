@@ -304,8 +304,8 @@ body {
   display: flex;
   flex-direction: column;
   align-content: center;
-  height: 300px;
-  max-height: 300px;
+  height: 400px;
+  max-height: 400px;
   margin-bottom: 10px;
 }
 
@@ -313,8 +313,8 @@ body {
   display: flex;
   flex-direction: column-reverse;
   align-content: center;
-  height: 300px;
-  max-height: 300px;
+  height: 400px;
+  max-height: 400px;
   margin-top: 10px;
 }
 
@@ -339,7 +339,7 @@ body {
 .topPlayerCardArea {
   width: 85%;
   min-width: 300px;
-  max-width: 85%;
+  max-width: 700px;
   display: flex;
   flex-direction: row;
   align-content: center;
@@ -347,7 +347,7 @@ body {
 }
 
 .leftPlayerArea {
-  grid-row: 2 / span 6;
+  grid-row: 2 / span 7;
   grid-column-start: 2;
   grid-column-end: 3;
   display: flex;
@@ -360,7 +360,7 @@ body {
   border-color: #47686b;
   border-width: 2px;
   margin: 10px;
-  height: 500px;
+  height: 600px;
 }
 
 .rightPlayerArea {
@@ -377,7 +377,7 @@ body {
   border-width: 2px;
   border-radius: 5%;
   margin: 10px;
-  height: 500px;
+  height: 600px;
 }
 
 .tableArea {
@@ -478,11 +478,11 @@ body {
   align-items: center;
   margin-bottom: 10px;
   border-style: solid;
-  border-width: 8px;
+  border-width: 4px;
   border-color: #ffd9b3;
   animation: blinkingBorder 1s step-end infinite;
   /* background-color: #ffd9b3; */
-  background-color: lightGray;
+  background-color: #b3cacc;
 }
 
 .kittyActionArea {
@@ -497,7 +497,7 @@ body {
   border-width: 8px;
   border-color: #ffd9b3;
   animation: blinkingBorder 1s step-end infinite;
-  background-color: #ffd9b3;
+  background-color: #b3cacc;
 }
 
 .playerActionBtn {
@@ -607,9 +607,11 @@ body {
   justify-content: center;
   align-items: center;
   margin-bottom: 10px;
+  /*
   border-style: solid;
   border-width: 8px;
   border-color: #ffd9b3;
+   */
 }
 
 .currentPlayerBidArea {
@@ -646,9 +648,11 @@ body {
   justify-content: center;
   align-items: center;
   margin-bottom: 10px;
+  /*
   border-style: solid;
   border-width: 8px;
   border-color: #ffd9b3;
+  */
 }
 
 .biddingPlayerDiv {
@@ -658,23 +662,25 @@ body {
   align-items: center;
   margin-bottom: 10px;
   border-style: solid;
-  border-width: 8px;
+  /*
+  border-width: 4px;
   border-color: #ffd9b3;
   animation: blinkingBorder 1s step-end infinite;
+  */
 }
 
 .playerBidText {
   font-family: SansSerif;
   font-size: 30px;
   font-weight: bold;
-  color: #24756c;
+  color: #000000;
 }
 
 .playerBidTextTitle {
   font-family: SansSerif;
   font-size: 30px;
   font-weight: bold;
-  color: black;
+  color: #000000;
   margin-right: 10px;
 }
 
@@ -779,8 +785,9 @@ body {
 }
 
 .bottomPlayerCardArea {
-  width: 85%;
-  min-width: 300px;
+/*  width: 85%; */
+  min-width: 600px;
+  max-width: 900px;
   display: flex;
   flex-direction: row;
   align-items: center;

@@ -385,7 +385,7 @@ class CardTable extends Component {
                     tableMsgArea = this.setupTableMsgArea([player.stateText]);
                 } else {
                     kittyArea = this.createKittyCardArea(gameData.kitty, true);
-                    let msgText = "Click a card to move it between the kitty and your hand.";
+                    let msgText = "Click a card to move between the kitty and hand.";
                     playerActionArea = this.setupPlayerActionArea({
                         areaClass: "kittyActionArea",
                         msg1Text: msgText,
