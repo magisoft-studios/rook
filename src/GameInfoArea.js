@@ -13,8 +13,6 @@ class GameInfoArea extends Component {
             highBid = gameData.highBid;
         }
         let trumpSuit = gameData.trumpSuit ? gameData.trumpSuit : "";
-        let team1Score = gameData.team1.handScore;
-        let team2Score = gameData.team2.handScore;
 
         return (
             <div className="gameInfoArea">
@@ -60,11 +58,11 @@ class GameInfoArea extends Component {
                     </div>
                     <div className="gameStatusEntryDiv">
                         <span className="teamScoreTitle">Team 1 Score:</span>
-                        <span className="teamScore">{team1Score}</span>
+                        <span className="teamScore">{gameData.team1.handScore}</span>
                     </div>
                     <div className="gameStatusEntryDiv">
                         <span className="teamScoreTitle">Team 2 Score:</span>
-                        <span className="teamScore">{team2Score}</span>
+                        <span className="teamScore">{gameData.team2.handScore}</span>
                     </div>
                 </div>
                 <div className="gameInfoDiv">

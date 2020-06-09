@@ -445,7 +445,7 @@ class CardTable extends Component {
                 let team2Msg = "Team 2 scored " + gameData.team2.handScore + " points!";
                 if (gameData.highBidTeamId === "team2") {
                     if (gameData.team2.handScore < gameData.highBid) {
-                        team1Msg = "Team 2 lost " + gameData.highBid + " points";
+                        team2Msg = "Team 2 lost " + gameData.highBid + " points";
                     }
                 }
 
