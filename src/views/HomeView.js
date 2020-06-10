@@ -5,7 +5,7 @@ class HomeView extends Component {
     render() {
         return (
             <div className="homeDiv">
-                <h2>Welcome to Jennings Gaming</h2>
+                <h2>Welcome to Jennings Gaming!</h2>
                 <span className="missionText">Our mission is to spread happiness around the world through the enjoyment of gaming!</span>
                 <div className="homeViewLinksSection">
                     <div className="homeViewSection">
