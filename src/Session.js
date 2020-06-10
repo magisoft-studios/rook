@@ -6,6 +6,7 @@ class Session {
             this.playerId = props.playerId;
             this.playerName = props.playerName;
             this.currentGame = props.currentGame;
+            this.currentGame = props.permissions;
         } else {
             this.loggedIn = false;
             this.id = "";
@@ -14,6 +15,9 @@ class Session {
             this.currentGame = {
                 id: "",
                 playerPosn: ""
+            };
+            this.permissions = {
+                createGame: false,
             }
         }
     }

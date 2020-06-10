@@ -320,7 +320,7 @@ class LobbyView extends Component {
         }
 
         let newGameBtn = null;
-        if (!this.state.hasJoinedGame && this.state.showAvailableGames) {
+        if (!this.state.hasJoinedGame && this.state.showAvailableGames && this.context.permissions.createGame) {
             newGameBtn =
                 <MyButton
                     btnClass="lobbyNewGameBtn"

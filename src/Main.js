@@ -41,6 +41,7 @@ class Main extends Component {
         session.id = reply.sessionId;
         session.playerId = reply.playerId;
         session.playerName = reply.playerName;
+        session.permissions = reply.permissions;
         this.setState({ session: session });
     }
 
@@ -95,6 +96,9 @@ class Main extends Component {
             currentGame: {
                 id: "TestGame",
                 playerPosn: posn,
+            },
+            permissions: {
+                createGame: (posn === "player1") ? true : false,
             }
         });
 
