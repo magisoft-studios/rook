@@ -10,6 +10,7 @@ import GameStates from '../GameStates';
 class LobbyView extends Component {
     constructor(props) {
         super(props);
+        console.log("Constructing LobbyView");
         this.state = {
             showNewGameDialog: false,
             showGameSetupDialog: false,
@@ -24,10 +25,10 @@ class LobbyView extends Component {
 
     async componentDidMount() {
         await this.initSocketIo();
-        await this.getAvailGames();
     }
 
     componentWillUnmount() {
+        console.log("componentWillUnmount");
         if (this.socket) {
             this.socket.disconnect();
         }
