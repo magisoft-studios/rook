@@ -5,6 +5,7 @@ import { AppContext } from '../ContextLib';
 import MyButton from "../MyButton";
 import socketIOClient from "socket.io-client";
 import SocketMsg from '../SocketMsg';
+import GameStates from '../GameStates';
 
 class LobbyView extends Component {
     constructor(props) {
@@ -306,7 +307,7 @@ class LobbyView extends Component {
             gameSetupDlg =
                 <GameSetupDialog
                     hasJoinedTeam={this.state.hasJoinedTeam}
-                    enableEnterGameBtn={gameData.locked}
+                    enableEnterGameBtn={gameData.state === GameStates.READY_TO_START}
                     gameName={gameData.name}
                     gameType={gameData.type}
                     gameStateText={gameData.stateText}
