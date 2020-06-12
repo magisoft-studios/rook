@@ -1,4 +1,5 @@
-import React, { Component } from 'react'
+import React, { Component } from 'react';
+import MyButton from './MyButton';
 
 class GameInfoArea extends Component {
 
@@ -70,6 +71,13 @@ class GameInfoArea extends Component {
                     <div className="gameStatusEntryDiv">
                         <span className="statusText">{gameData.stateText}</span>
                     </div>
+                </div>
+                <div className="gameInfoCtrlPnlDiv">
+                    <MyButton
+                        btnClass="gameInfoRefreshBtn"
+                        btnText="Refresh"
+                        onClick={() => this.props.onRefresh()}>
+                    </MyButton>
                 </div>
             </div>
         );

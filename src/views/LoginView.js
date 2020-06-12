@@ -44,7 +44,7 @@ class LoginView extends Component {
             })
         };
         try {
-            const response = await fetch('/rook/login', requestOptions);
+            const response = await fetch('/user/login', requestOptions);
             if (!response.ok) {
                 const jsonResp = await response.json();
                 console.log(`doLogin: response: ${JSON.stringify(jsonResp)}`);

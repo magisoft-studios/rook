@@ -50,7 +50,6 @@ class Game extends Component {
     componentDidMount = async () => {
         await this.initSocketIo();
         await this.sendEnterGame();
-        //this.updateTimerId = setInterval(async () => this.checkStatus(), REFRESH_RATE);
     }
 
     componentWillUnmount() {
@@ -221,6 +220,16 @@ class Game extends Component {
         newState.streams[posn] = mediaStream;
         console.log(`Game::handleAddStream: adding media stream: ${mediaStream.id}`);
         this.setState(newState);
+    }
+
+    handleGetGameData = () => {
+        this.sendGetGameData();
+    }
+
+    sendGetGameData = async () => {
+        let socketMsg = new SocketMsg(this.context.id);
+        socketMsg.msgId = 'getGameData';
+        this.sendSocketMsg(socketMsg);
     }
 
     sendEnterGame = async () => {
@@ -491,7 +500,7 @@ class Game extends Component {
         return (
             <div className="gameView">
                 <div className="gameArea">
-                    <GameInfoArea gameData={this.state.gameData} socketHndl={this.sendSocketMsg} />
+                    <GameInfoArea gameData={this.state.gameData} onRefresh={this.handleGetGameData} />
                     <div className="topPlayerArea">
                         {topCam}
                         <div className="topPlayerCardArea">
