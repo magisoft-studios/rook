@@ -1,0 +1,131 @@
+@import 'common';
+
+.gameInfoArea {
+  background-color: lightGray;
+  grid-row: 1 / span 8;
+  grid-column-start: 1;
+  grid-column-end: 2;
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+  margin-left: 10px;
+  margin-bottom: 10px;
+  background-color: #262673;
+}
+
+.gameTitleArea {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.gameTitle {
+  font-weight: bold;
+  font-size: 40px;
+  color: white;
+}
+
+.gameInfoDiv {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 10px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.gameName {
+  font-weight: bold;
+  font-size: 26px;
+  color: white;
+  margin-left: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.teamTitle {
+  font-weight: bold;
+  font-size: 26px;
+  color: white;
+  margin-left: 10px;
+  margin-top: 10px;
+}
+
+.playerName {
+  font-weight: normal;
+  font-size: 20px;
+  color: white;
+  margin-left: 30px;
+}
+
+.teamScoreDiv {
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+}
+
+.teamScoreTitle {
+  font-weight: bold;
+  font-size: 20px;
+  color: white;
+  margin-left: 30px;
+}
+
+.teamScore {
+  font-weight: normal;
+  font-size: 20px;
+  color: white;
+  margin-left: 10px;
+}
+
+.gameStatusDiv {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 10px;
+  margin-left: 10px;
+}
+
+.statusTitle {
+  font-weight: bold;
+  font-size: 26px;
+  color: white;
+  margin-left: 10px;
+  margin-top: 10px;
+}
+
+.gameStatusEntryDiv {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  margin-top: 10px;
+  margin-left: 10px;
+}
+
+.statusText {
+  font-family: SansSerif;
+  font-size: 20px;
+  font-weight: normal;
+  color: white;
+  margin-left: 30px;
+}
+
+.gameInfoCtrlPnlDiv {
+  margin: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.gameInfoRefreshBtn {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 8px;
+  padding-right: 8px;
+  background-color: #067325;
+  color: white;
+  border-radius: 10%;
+  font-family: SansSerif;
+  font-size: 16px;
+}
+

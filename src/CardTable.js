@@ -7,6 +7,7 @@ import Cards from "./Cards";
 import KittyCard from "./KittyCard";
 import PlayerActions from "./PlayerActions";
 import MyButton from "./MyButton";
+import './css/CardTable.scss';
 
 class CardTable extends Component {
     constructor(props) {

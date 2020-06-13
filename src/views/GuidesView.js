@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import '../css/GuidesView.scss';
 
 class GuidesView extends Component {
     render() {

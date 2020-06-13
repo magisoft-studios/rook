@@ -1,0 +1,205 @@
+@import 'common';
+
+.gameView {
+  display: flex;
+  justify-content: center;
+  min-width: 1200px;
+  max-height: 860px;
+}
+
+.gameArea {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  background-color: #24756c;
+  min-width: 0;
+  min-height: 0;
+  height: 880px;
+}
+
+.topPlayerArea {
+  grid-row: 1 / span 2;
+  grid-column: 4 / span 1;
+  border-style: inset;
+  border-color: #47686b;
+  border-width: 2px;
+  border-radius: 10%;
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: space-evenly;
+  align-items: center;
+  border-radius: 5%;
+  background-color: #b3cacc;
+  margin: 10px;
+  height: 190px;
+}
+
+.topPlayerCardArea {
+  min-width: 300px;
+  max-width: 700px;
+  display: flex;
+  flex-direction: row;
+  align-content: center;
+  margin-left: 10px;
+}
+
+.leftPlayerArea {
+  grid-row: 4 / span 2;
+  grid-column: 2 / span 1;
+  display: flex;
+  flex-direction: column;
+  align-content: space-evenly;
+  align-items: center;
+  background-color: #b3cacc;
+  border-radius: 5%;
+  border-style: inset;
+  border-color: #47686b;
+  border-width: 2px;
+  margin: 10px;
+  /* height: 600px; */
+}
+
+.leftPlayerCardArea {
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  height: 400px;
+  max-height: 400px;
+  margin-bottom: 10px;
+}
+
+.rightPlayerArea {
+  grid-row: 4 / span 2;
+  grid-column: 6 / span 1;
+  display: flex;
+  flex-direction: column-reverse;
+  align-content: space-evenly;
+  align-items: center;
+  background-color: #b3cacc;
+  border-style: inset;
+  border-color: #47686b;
+  border-width: 2px;
+  border-radius: 5%;
+  margin: 10px;
+  /* height: 600px;*/
+}
+
+.rightPlayerCardArea {
+  display: flex;
+  flex-direction: column-reverse;
+  align-content: center;
+  height: 400px;
+  max-height: 400px;
+  margin-top: 10px;
+}
+
+.bottomPlayerArea {
+  grid-row: 7 / span 2;
+  grid-column: 3 / span 3;
+  margin: 10px;
+  background-color: #b3cacc;
+  border-style: inset;
+  border-color: #47686b;
+  border-width: 2px;
+  border-radius: 5%;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  height: 190px;
+  margin: 10px;
+}
+
+.playerImageDiv {
+  width: 150px;
+  height: 170px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 10px;
+  border-style: solid;
+  border-color: black;
+  border-width: 1px;
+}
+
+.otherPlayerImageDiv {
+  width: 150px;
+  height: 170px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 5px;
+  border-style: solid;
+  border-color: black;
+  border-width: 1px;
+  border-radius: 15%;
+}
+
+.playerImage {
+  width: 150px;
+  height: 170px;
+  border-radius: 15%;
+}
+
+.selectedCardArea {
+  animation: blinkingBorder 1s step-end infinite;
+}
+
+.bottomPlayerCardArea {
+  min-width: 600px;
+  max-width: 600px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-left: 10px;
+}
+
+.oppCardVertWrapper {
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+.oppCardVertWrapper:last-child, .oppCardVertWrapper:hover {
+  overflow: visible;
+  margin: 0;
+  padding: 0;
+}
+
+.oppCardVert {
+  min-width: 75px;
+  min-height: 100px;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  object-fit: contain;
+}
+
+.oppCard {
+  width: 90px;
+  height: 120px;
+}
+
+.oppCardHoriz {
+  width: 70px;
+  height: 50px;
+}
+
+.oppCardHorizWrapper {
+  overflow: hidden;
+}
+
+.oppCardHorizWrapper:last-child, .oppCardHorizWrapper:hover {
+  overflow: visible;
+}
+
+.oppCardHoriz {
+  width: 100px;
+  height: 75px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+

@@ -1,0 +1,53 @@
+@import 'common';
+
+.gameSetupDlgDiv {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  align-items: center;
+  background-color: #cce5d9;
+  border-style: inset;
+  border-width: 2px;
+  border-color: #B4DFC1;
+}
+
+.gameSetupGameTbl {
+  margin: 10px;
+}
+
+.gameSetupGameTbl td {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-right: 10px;
+  padding-left: 10px;
+}
+
+.gameSetupPlayerLabel {
+  padding-left: 20px;
+}
+
+.gameSetupBtnPnl {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.gameSetupEnterGameBtn {
+  padding: 4px;
+  background-color: #067325;
+  color: white;
+  border-radius: 10%;
+  width: 100px;
+}
+
+.gameSetupLeaveGameBtn {
+  padding: 4px;
+  background-color: #067325;
+  color: white;
+  border-radius: 10%;
+  width: 100px;
+}
+

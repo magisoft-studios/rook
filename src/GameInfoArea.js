@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import MyButton from './MyButton';
+import './css/GameInfoArea.scss';
 
 class GameInfoArea extends Component {
 

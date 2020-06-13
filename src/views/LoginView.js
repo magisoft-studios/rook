@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import MyButton from "../MyButton";
+import '../css/LoginView.scss';
 
 class LoginView extends Component {
     constructor(props) {
@@ -9,6 +10,7 @@ class LoginView extends Component {
             password: "",
         }
         this.userNameInput = React.createRef();
+        this.resizeTimer = null;
     }
 
     componentDidMount() {

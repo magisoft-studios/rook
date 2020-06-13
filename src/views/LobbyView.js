@@ -6,6 +6,7 @@ import MyButton from "../MyButton";
 import socketIOClient from "socket.io-client";
 import SocketMsg from '../SocketMsg';
 import GameStates from '../GameStates';
+import '../css/LobbyView.scss';
 
 class LobbyView extends Component {
     constructor(props) {

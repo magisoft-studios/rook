@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import './css/NewGameDialog.scss';
 
 class NewGameDialog extends Component {
     constructor(props) {

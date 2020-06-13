@@ -1,0 +1,73 @@
+@import 'common';
+
+.reviewsViewContentDiv {
+  display: flex;
+  flex-direction: column;
+  align-content: flex-start;
+  align-items: center;
+  width: 900px;
+  margin-top: 20px;
+}
+
+.reviewsViewReviewMainDiv {
+  display: flex;
+  flex-direction: column;
+  align-content: flex-start;
+  margin-top: 20px;
+  width: 900px;
+}
+
+.reviewsViewReviewDiv {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  border-style: solid;
+  border-color: lightGray;
+  border-width: 1px;
+  width: 800px;
+}
+
+.reviewsViewGameImage {
+  margin-left: 10px;
+  width: 150px;
+  height: 100px;
+  margin-right: 20px;
+}
+
+.reviewsViewReviewContentsDiv {
+  display: flex;
+  flex-direction: column;
+  align-content: flex-start;
+}
+
+.reviewsViewGameTitle {
+  font-style: normal;
+  font-weight: bold;
+  font-size: 20px;
+}
+
+.reviewsViewGameText {
+  font-style: normal;
+  font-weight: normal;
+  font-size: 18px;
+}
+
+.reviewsViewTextDiv{
+  display: flex;
+  flex-direction: column;
+  align-content: flex-start;
+  margin-top: 40px;
+  width: 900px;
+}
+
+.reviewsViewText {
+  font-style: normal;
+  font-weight: normal;
+  font-size: 22px;
+}
+
+.reviewsViewStatementDiv {
+  margin-top: 80px;
+  width: 900px;
+}
+

@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import MyButton from "./MyButton";
+import './css/GameSetupDialog.scss';
 
 class GameSetupDialog extends Component {
     handlePlayerJoinBtnClick = (playerPosn) => {
@@ -37,7 +38,7 @@ class GameSetupDialog extends Component {
 
         let leaveGameBtn =
             <MyButton
-                btnClass="leaveGameBtn"
+                btnClass="gameSetupLeaveGameBtn"
                 btnText="Leave Game"
                 onClick={this.props.onLeaveGame}
                 onClickValue={this.props.gameName}>
@@ -47,7 +48,7 @@ class GameSetupDialog extends Component {
         if (this.props.enableEnterGameBtn) {
             enterGameBtn =
                 <MyButton
-                    btnClass="enterGameBtn"
+                    btnClass="gameSetupEnterGameBtn"
                     btnText="Enter Game"
                     onClick={this.props.onEnterGame}
                     onClickValue={this.props.gameName}>
@@ -60,18 +61,18 @@ class GameSetupDialog extends Component {
                     <tbody>
                     <tr>
                         <td><span>Game Name:</span></td>
-                        <td><span className="gameSetupGameText">{this.props.gameName}</span></td>
+                        <td><span>{this.props.gameName}</span></td>
                     </tr>
                     <tr>
-                        <td><span className="gameSetupGameLabel">Game Type:</span></td>
-                        <td><span className="gameSetupGameText">{this.props.gameType}</span></td>
+                        <td><span>Game Type:</span></td>
+                        <td><span>{this.props.gameType}</span></td>
                     </tr>
                     <tr>
-                        <td><span className="gameSetupGameLabel">Game Status:</span></td>
-                        <td><span className="gameSetupGameText">{this.props.gameStateText}</span></td>
+                        <td><span>Game Status:</span></td>
+                        <td><span>{this.props.gameStateText}</span></td>
                     </tr>
                     <tr>
-                        <td><span className="gameSetupGameLabel">Team 1</span></td>
+                        <td><span>Team 1</span></td>
                         <td></td>
                     </tr>
                     <tr>
@@ -83,7 +84,7 @@ class GameSetupDialog extends Component {
                         <td>{player3Cmpnt}</td>
                     </tr>
                     <tr>
-                        <td><span className="gameSetupGameLabel">Team 2</span></td>
+                        <td><span>Team 2</span></td>
                         <td></td>
                     </tr>
                     <tr>

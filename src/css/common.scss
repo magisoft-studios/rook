@@ -1,0 +1,17 @@
+@keyframes blinkingBorder {
+  from, to {
+    border-color: transparent
+  }
+  50% {
+    border: solid 8px blue;
+  }
+}
+
+@keyframes blinkingText {
+  0%{     color: #000;        }
+  49%{    color: #000;        }
+  60%{    color: transparent; }
+  99%{    color: transparent; }
+  100%{   color: #000;        }
+}
+

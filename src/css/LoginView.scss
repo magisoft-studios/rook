@@ -1,0 +1,71 @@
+@import 'common';
+
+.loginViewDiv {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.loginFormDiv {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  margin-top: 30px;
+}
+
+.loginWelcomeMsg {
+  font-weight: bold;
+  font-size: 22px;
+  margin-top: 20px;
+}
+
+.loginInstructionMsg {
+  margin-top: 20px;
+}
+
+.loginInstructionText {
+  font-weight: normal;
+  font-size: 20px;
+  margin-top: 20px;
+}
+
+.loginUserLabel {
+  font-weight: normal;
+  font-size: 20px;
+  margin-top: 10px;
+}
+
+.loginUserText {
+  font-weight: normal;
+  font-size: 16px;
+  margin-top: 10px;
+  width: 300px;
+}
+
+.loginPasswordLabel {
+  font-weight: normal;
+  font-size: 20px;
+  margin-top: 20px;
+}
+
+.loginPasswordText {
+  font-weight: normal;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+.loginBtnDiv {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.loginSubmitBtn {
+  padding: 4px;
+  background-color: #067325;
+  color: white;
+  border-radius: 10%;
+  width: 100px;
+}

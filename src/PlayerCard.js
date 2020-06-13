@@ -1,5 +1,6 @@
-import React, { Component } from 'react'
-import MyButton from './MyButton'
+import React, { Component } from 'react';
+import MyButton from './MyButton';
+import './css/PlayerCard.scss';
 
 class PlayerCard extends Component {
     render() {

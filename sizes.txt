@@ -1,0 +1,58 @@
+Sizes
+
+MENU AREA
+
+topPageArea:  height: 64
+
+mainView   min-width:  1200
+           min-height:  800
+            
+mainMenu   width: 800
+           height: 40
+           
+logoIconContainer   width: 50
+                    height: 50
+                    
+logoImage   width: 50
+            height: 50
+            
+logoTextContainer  height: 60
+
+
+GAME
+
+gameView    min-width: 1200
+            max-height: 860
+            
+gameArea    height: 880
+
+topPlayerArea  height: 190
+
+topPlayerCardArea  min-width: 300
+                   max-width: 700
+                   
+leftPlayerArea  height: 600
+                   
+leftPlayerCardArea   height: 400
+                     max-height: 400
+
+rightPlayerArea  height: 600
+
+rightPlayerCardArea  height: 400
+                     max-height: 400
+
+bottomPlayerArea  height: 190
+
+bottomPlayerCardArea  min-width: 600
+                      max-width: 900
+
+playerImageDiv  width: 150
+                height: 170
+
+playerImage  width: 150
+             height: 170
+
+otherPlayerImageDiv  width: 150
+                     height: 170
+
+                     

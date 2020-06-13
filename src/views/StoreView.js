@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import '../css/StoreView.scss';
 
 class StoreView extends Component {
     render() {

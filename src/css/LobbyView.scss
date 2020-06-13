@@ -1,0 +1,105 @@
+@import 'common';
+
+.lobbyView {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.lobbyWelcomeDiv {
+  margin-top: 40px;
+}
+
+.lobbyInfoDiv {
+  margin-top: 20px;
+}
+
+.lobbyWelcomeMsg {
+  font-weight: bold;
+  font-size: 24px;
+}
+
+.lobbyInfoMsg {
+  font-weight: normal;
+  font-size: 22px;
+}
+
+.lobbyItemsArea {
+  display: flex;
+  flex-direction: row;
+  margin-top: 22px;
+}
+
+.lobbyUsersArea {
+  display: flex;
+  flex-direction: column;
+  margin-top: 6px;
+}
+
+.lobbyGamesArea {
+  display: flex;
+  flex-direction: column;
+}
+
+.lobbyUsersTitleArea {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.lobbyGamesTitleArea {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.loggyGamesTitle {
+  font-weight: normal;
+  font-size: 20px;
+}
+
+.lobbyNewGameBtn {
+  margin-left: 10px;
+  padding: 4px;
+  background-color: #067325;
+  color: white;
+  border-radius: 10%;
+}
+
+.availGamesTable {
+  margin-top: 10px;
+  border-spacing: 30px 10px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: black;
+  border-collapse: collapse;
+}
+
+.availGamesTable th {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-right: 10px;
+  padding-left: 10px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: black;
+  font-size: 14px;
+}
+
+.availGamesTable td {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-right: 10px;
+  padding-left: 10px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: black;
+  font-size: 14px;
+}
+
+.lobbyJoinGameBtn {
+  padding: 4px;
+  background-color: #067325;
+  color: white;
+  border-radius: 10%;
+}

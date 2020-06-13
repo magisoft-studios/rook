@@ -1,0 +1,38 @@
+@import 'common';
+
+.bottomPlayerCardWrapper {
+  overflow: hidden;
+  margin: 0;
+  margin-top: 2px;
+  padding: 0;
+  background: none;
+}
+
+.bottomPlayerCardWrapper:last-child, .bottomPlayerCardWrapper:hover {
+  overflow: visible;
+  margin: 0;
+  padding: 0;
+  background: none;
+}
+
+.bottomPlayerCardButton {
+  background: none;
+  overflow: hidden;
+  border: none;
+  width: 130px;
+  height: 170px;
+  margin: 0;
+  padding: 0;
+}
+
+.bottomPlayerCard {
+  max-width: 100%;
+  height: auto;
+  border-width: 2px;
+  border-style: outset;
+  border-color: rgb(240,240,240);
+  border-radius: 15%;
+  margin: 0;
+  padding: 0;
+}
+

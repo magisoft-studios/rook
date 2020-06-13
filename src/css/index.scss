@@ -1,0 +1,143 @@
+@import 'common';
+
+body {
+ background-color:white;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+.mainPage {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 0px;
+  margin: 0px;
+}
+
+.topPageArea {
+  background-color: #B4DFC1;
+  width: 100%;
+  height: 64px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.mainView {
+  min-width: 1200px;
+  min-height: 800px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  background-color: white;
+}
+
+.mainMenu {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background-color: #B4DFC1;
+  height: 40px;
+  width: 800px;
+}
+
+.mainMenuHeader {
+  background-color: #B4DFC1;
+  padding: 0;
+  margin-left: 50px;
+}
+
+.mainMenuItem {
+  display: inline;
+  list-style-type: none;
+  margin: 0;
+  color: black;
+  color: black;
+  font-weight: bold;
+  font-size: 28px;
+}
+
+.mainMenuItem a {
+  color: black;
+  font-weight: bold;
+  font-size: 28px;
+  text-decoration: none;
+  padding-left: 20px;
+  padding-right: 20px;
+  display: inline-block;
+}
+
+.mainMenuItem a.active {
+  color: white;
+}
+
+/* This is the React Router .active class for when I menu item is selected. */
+.active {
+  background-color: #067325;
+}
+
+.logoContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.logoIconContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  width: 50px;
+  height: 50px;
+}
+
+.logoImage {
+  width: 50px;
+  height: 50px;
+}
+
+.logoTextContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  height: 60px;
+}
+
+.logoJenningsText {
+  font-family: SansSerif;
+  font-size: 24px;
+  font-weight: bold;
+  font-style: italic;
+  color: darkblue;
+  margin-left: 10px;
+}
+
+.logoGamingText {
+  font-family: SansSerif;
+  font-size: 24px;
+  font-weight: bold;
+  font-style: italic;
+  color: #ff0000;
+  margin-left: 5px;
+}
+
+.contentArea {
+  background-color: white;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.missionText {
+  font-family: SansSerif;
+  font-size: 24px;
+  font-weight: normal;
+  font-style: normal;
+}
+
+
+

@@ -16,7 +16,9 @@ import RemoteCam from './RemoteCam.js';
 import CamConn from './CamConn.js';
 import socketIOClient from 'socket.io-client';
 import SocketMsg from "./SocketMsg";
+import './css/Game.scss';
 
+const RESIZE_TIMEOUT = 100;
 
 class Game extends Component {
     constructor(props) {
@@ -48,6 +50,11 @@ class Game extends Component {
     }
 
     componentDidMount = async () => {
+        console.log(`componentDidMount: window size = ${window.innerWidth} x ${window.innerHeight}`);
+        window.addEventListener('resize', () => {
+            clearInterval(this.resizeTimer);
+            this.resizeTimer = setTimeout(this.handleWindowResize, RESIZE_TIMEOUT);
+        });
         await this.initSocketIo();
         await this.sendEnterGame();
     }
@@ -70,6 +77,10 @@ class Game extends Component {
             (prevState.gameData.state === GameStates.INIT_STREAM)) {
             this.sendCamOffers();
         }
+    }
+
+    handleWindowResize = () => {
+        console.log(`handleWindowResize: window size = ${window.innerWidth} x ${window.innerHeight}`);
     }
 
     initSocketIo = async () => {
@@ -503,15 +514,19 @@ class Game extends Component {
                     <GameInfoArea gameData={this.state.gameData} onRefresh={this.handleGetGameData} />
                     <div className="topPlayerArea">
                         {topCam}
+                        {/*
                         <div className="topPlayerCardArea">
                             {topPlayerCardCmpnts}
                         </div>
+                        */}
                     </div>
                     <div className="leftPlayerArea">
                         {leftCam}
+                        {/*
                         <div className="leftPlayerCardArea">
                             {leftPlayerCardCmpnts}
                         </div>
+                        */}
                     </div>
                     <CardTable
                         ref={this.cardTableRef}
@@ -523,18 +538,18 @@ class Game extends Component {
                     </CardTable>
                     <div className="rightPlayerArea">
                         {rightCam}
+                        {/*
                         <div className="rightPlayerCardArea">
                             {rightPlayerCardCmpnts}
                         </div>
+                        */}
                     </div>
                     <div className="bottomPlayerArea">
                         {bottomCam}
-                        <div className="bottomPlayerCardArea">
-                            <PlayerHand
-                                ref={this.playerHandRef}
-                                cardList={bottomPlayerCards}
-                                onClick={this.handleCardClick} />
-                        </div>
+                        <PlayerHand
+                            ref={this.playerHandRef}
+                            cardList={bottomPlayerCards}
+                            onClick={this.handleCardClick} />
                     </div>
                 </div>
                 <ToastContainer />
