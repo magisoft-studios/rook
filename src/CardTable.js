@@ -361,7 +361,7 @@ class CardTable extends Component {
                 if (player.state === PlayerStates.WAIT_FOR_TRUMP) {
                     tableMsgArea = this.setupTableMsgArea([player.stateText]);
                 } else {
-                    let msgText = "Select your trump suit and press the button";
+                    let msgText = "Select your trump suit";
                     let selOptions = [
                         <option key="suitBlack" value="Black">Black</option>,
                         <option key = "suitGreen" value="Green">Green</option>,
@@ -386,7 +386,7 @@ class CardTable extends Component {
                     tableMsgArea = this.setupTableMsgArea([player.stateText]);
                 } else {
                     kittyArea = this.createKittyCardArea(gameData.kitty, true);
-                    let msgText = "Click a card to move between the kitty and hand.";
+                    let msgText = "Click card to move between kitty and hand.";
                     playerActionArea = this.setupPlayerActionArea({
                         areaClass: "kittyActionArea",
                         msg1Text: msgText,

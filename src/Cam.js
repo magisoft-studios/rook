@@ -23,7 +23,14 @@ class Cam extends Component {
 
     streamCamVideo = async () => {
         console.log(`Cam[${this.props.name}] streamCamVideo`);
-        var mediaStreamConstraints = { audio: true, video: { width: 150, height: 170 } };
+        var mediaStreamConstraints = {
+            audio: true,
+            video: {
+                width: 150,
+                height: 170,
+                facingMode: { ideal: "user" },
+            }
+        };
         try {
             console.log(`Cam[${this.props.name}] getUserMedia`);
             let mediaStream = await navigator.mediaDevices.getUserMedia(mediaStreamConstraints);
