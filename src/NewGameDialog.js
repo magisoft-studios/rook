@@ -53,6 +53,7 @@ class NewGameDialog extends Component {
                             value={this.state.gameType}
                             onChange={this.handleTypeChange}>
                             <option value="Rook">Rook</option>
+                            <option value="ConnectionTest">ConnectionTest</option>
                         </select>
                         <div className="newGameBtnDiv">
                             <input className="newGameSubmitBtn" type="submit" value="OK"/>

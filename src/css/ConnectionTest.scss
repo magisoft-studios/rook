@@ -1,0 +1,48 @@
+@import 'common';
+
+.connTestView {
+  margin-top: 40px;
+  width: 400px;
+  height: 500px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background-color: #24756c;
+}
+
+.connTestTopArea {
+  margin: 10px;
+  height: 190px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  background-color: #b3cacc;
+  border-style: inset;
+  border-color: #47686b;
+  border-width: 2px;
+  border-radius: 5%;
+}
+
+.connTestBottomArea {
+  margin: 10px;
+  height: 190px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  background-color: #b3cacc;
+  border-style: inset;
+  border-color: #47686b;
+  border-width: 2px;
+  border-radius: 5%;
+}
+
+.connTestCtrlPnlDiv {
+  margin: 10px;
+  height: 40px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}

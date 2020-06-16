@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import NewGameDialog from '../NewGameDialog';
 import GameSetupDialog from '../GameSetupDialog';
+import ConnectionTestSetupDialog from '../ConnectionTestSetupDialog';
 import { AppContext } from '../ContextLib';
 import MyButton from "../MyButton";
 import socketIOClient from "socket.io-client";
@@ -306,20 +307,34 @@ class LobbyView extends Component {
         let gameSetupDlg = null;
         if (this.state.showGameSetupDialog) {
             let gameData = this.state.currentGameData;
-            gameSetupDlg =
-                <GameSetupDialog
-                    hasJoinedTeam={this.state.hasJoinedTeam}
-                    enableEnterGameBtn={gameData.state === GameStates.READY_TO_START}
-                    gameName={gameData.name}
-                    gameType={gameData.type}
-                    gameStateText={gameData.stateText}
-                    player1={(gameData.player1 != null) ? gameData.player1.name : ""}
-                    player2={(gameData.player2 != null) ? gameData.player2.name : ""}
-                    player3={(gameData.player3 != null) ? gameData.player3.name : ""}
-                    player4={(gameData.player4 != null) ? gameData.player4.name : ""}
-                    onJoinTeam={this.handleJoinTeam}
-                    onEnterGame={this.handleEnterGame}
-                    onLeaveGame={this.handleLeaveGame} />
+            if (gameData.type === "Rook") {
+                gameSetupDlg =
+                    <GameSetupDialog
+                        hasJoinedTeam={this.state.hasJoinedTeam}
+                        enableEnterGameBtn={gameData.state === GameStates.READY_TO_START}
+                        gameName={gameData.name}
+                        gameType={gameData.type}
+                        gameStateText={gameData.stateText}
+                        player1={(gameData.player1 != null) ? gameData.player1.name : ""}
+                        player2={(gameData.player2 != null) ? gameData.player2.name : ""}
+                        player3={(gameData.player3 != null) ? gameData.player3.name : ""}
+                        player4={(gameData.player4 != null) ? gameData.player4.name : ""}
+                        onJoinTeam={this.handleJoinTeam}
+                        onEnterGame={this.handleEnterGame}
+                        onLeaveGame={this.handleLeaveGame}/>
+            } else if (gameData.type === "ConnectionTest") {
+                gameSetupDlg =
+                    <ConnectionTestSetupDialog
+                        hasJoinedTeam={this.state.hasJoinedTeam}
+                        enableEnterGameBtn={gameData.state === GameStates.READY_TO_START}
+                        gameName={gameData.name}
+                        gameType={gameData.type}
+                        gameStateText={gameData.stateText}
+                        player1Name={(gameData.player1 != null) ? gameData.player1.name : ""}
+                        player2Name={(gameData.player2 != null) ? gameData.player2.name : ""}
+                        onEnterGame={this.handleEnterGame}
+                        onLeaveGame={this.handleLeaveGame}/>
+            }
         }
 
         let newGameBtn = null;

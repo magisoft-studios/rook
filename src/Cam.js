@@ -17,11 +17,13 @@ class Cam extends Component {
     componentDidUpdate(prevProps) {
         if ((prevProps.gameDataState < GameStates.INIT_STREAM) &&
             (this.props.gameDataState === GameStates.INIT_STREAM)) {
-            this.streamCamVideo();
+            this.initStream();
+        } else if ((prevProps.initStream === false) && (this.props.initStream === true)) {
+            this.initStream();
         }
     }
 
-    streamCamVideo = async () => {
+    initStream = async () => {
         console.log(`Cam[${this.props.name}] streamCamVideo`);
         var mediaStreamConstraints = {
             audio: true,

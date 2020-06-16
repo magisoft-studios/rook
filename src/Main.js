@@ -17,6 +17,7 @@ import TestView from './views/TestView';
 import images from "./Images";
 import Session from './Session';
 import Game from './Game';
+import ConnectionTest from './ConnectionTest';
 
 const TEST = false;
 
@@ -122,11 +123,19 @@ class Main extends Component {
         let game = null;
         let gameRedirect = null;
         if (this.state.showGameWindow) {
-            game = <Game
-                sessionId={session.id}
-                gameId={session.currentGame.id}
-                playerPosn={session.currentGame.playerPosn}
-                gameData={this.state.gameData}/>;
+            if (this.state.gameData.type === "Rook") {
+                game = <Game
+                    sessionId={session.id}
+                    gameId={session.currentGame.id}
+                    playerPosn={session.currentGame.playerPosn}
+                    gameData={this.state.gameData}/>;
+            } else if (this.state.gameData.type === "ConnectionTest") {
+                game = <ConnectionTest
+                    sessionId={session.id}
+                    gameId={session.currentGame.id}
+                    playerPosn={session.currentGame.playerPosn}
+                    gameData={this.state.gameData}/>;
+            }
             gameMenuItem = <li className="mainMenuItem"><NavLink to="/game">Game</NavLink></li>;
             gameRoute = <Route path="/game">{game}</Route>;
 
