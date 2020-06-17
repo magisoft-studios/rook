@@ -11,7 +11,9 @@ class Cam extends Component {
     }
 
     componentDidMount = async () => {
-        //if (await this.streamCamVideo();
+        if (this.props.initStream) {
+            this.initStream();
+        }
     }
 
     componentDidUpdate(prevProps) {
@@ -25,14 +27,23 @@ class Cam extends Component {
 
     initStream = async () => {
         console.log(`Cam[${this.props.name}] streamCamVideo`);
-        var mediaStreamConstraints = {
-            audio: true,
-            video: {
-                width: 150,
-                height: 170,
-                facingMode: { ideal: "user" },
-            }
+        const videoSource = this.props.videoSrc;
+        const audioSource = this.props.audioSrc;
+        let videoConstraints = {
+            width: 150,
+            height: 170,
+            deviceId: (videoSource.length > 0) ? {exact: videoSource} : undefined,
+            facingMode: {ideal: 'user'},
         };
+        let audioConstraints = {
+            deviceId: (audioSource.length > 0) ? {exact: audioSource} : undefined,
+        };
+        let mediaStreamConstraints = {
+            audio: audioConstraints,
+            video: videoConstraints,
+        };
+
+        console.log(`Cam:initStream: constraints = ${JSON.stringify(mediaStreamConstraints)}`)
         try {
             console.log(`Cam[${this.props.name}] getUserMedia`);
             let mediaStream = await navigator.mediaDevices.getUserMedia(mediaStreamConstraints);
@@ -40,6 +51,9 @@ class Cam extends Component {
             videoEle.onloadedmetadata = (e) => {
                 console.log(`Cam[${this.props.name}] onloadedmetadata, called`);
                 videoEle.play();
+                if (this.props.audioDst.length > 0) {
+                    videoEle.setSinkId(this.props.audioDst);
+                }
                 this.props.onStreamReady(mediaStream);
             };
             console.log(`Cam[${this.props.name}] setting media stream on video ele`);
@@ -48,6 +62,7 @@ class Cam extends Component {
             console.log(`Cam[${this.props.name}] cant get user media: ${error.message}`);
         }
     }
+
 
     render() {
         return (

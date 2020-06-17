@@ -7,6 +7,7 @@ import MyButton from "../MyButton";
 import socketIOClient from "socket.io-client";
 import SocketMsg from '../SocketMsg';
 import GameStates from '../GameStates';
+import CamCfg from '../CamCfg';
 import '../css/LobbyView.scss';
 
 class LobbyView extends Component {
@@ -352,16 +353,16 @@ class LobbyView extends Component {
                 <div className="lobbyWelcomeDiv">
                     <span className="lobbyWelcomeMsg">Welcome to the Game Lobby</span>
                 </div>
-                <div className="lobbyInfoDiv">
-                    <span className="lobbyInfoMsg">Please select a game to join</span>
-                </div>
                 <div className="lobbyItemsArea">
+                    <CamCfg />
                     <div className="lobbyGamesArea">
                         <div className="lobbyGamesTitleArea">
-                            <div className="loggyGamesTitle"><span>Available Games</span></div>
-                            {newGameBtn}
+                            <div className="lobbyGamesTitle"><span>Available Games</span></div>
                         </div>
                         {availableGameTable}
+                        <div className="lobbyViewCtrlPnlDiv">
+                            {newGameBtn}
+                        </div>
                         {newGameDlg}
                         {gameSetupDlg}
                     </div>

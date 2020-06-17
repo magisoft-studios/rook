@@ -1,0 +1,111 @@
+@import 'common';
+
+.camCfgDiv {
+  margin-right: 20px;
+  width: 560px;
+  //height: 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: $cfgDlgBgColor;
+  border-style: solid;
+  border-width: 1px;
+  border-color: black;
+}
+
+.camCfgTitleDiv {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  align-items: center;
+}
+
+.camCfgTitle {
+  font-family: SansSerif;
+  font-weight: bold;
+  font-size: 20px;
+}
+
+.camCfgOptionDiv {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  align-items: flex-start;
+}
+
+.camCfgOptionLabel {
+  margin-top: 10px;
+  font-family: SansSerif;
+  font-size: 16px;
+}
+
+.camCfgOptionSelect {
+  margin-top: 10px;
+  width: 500px;
+  font-family: SansSerif;
+  font-size: 16px;
+}
+
+.camCfgCtrlPnlDiv {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: row;
+  align-content: center;
+}
+
+.camCfgApplyCfgBtn {
+  margin-left: 10px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 8px;
+  padding-right: 8px;
+  background-color: #067325;
+  color: white;
+  border-radius: 10%;
+  font-family: SansSerif;
+  font-size: 16px;
+}
+
+.camCfgCamDiv {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.camCfgAudioOutAdviceDiv {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: row;
+  align-content: flex-start;
+}
+
+.camCfgAudioOutAdviceText {
+  font-style: italic;
+  text-decoration: underline;
+}
+
+.camCfgAdviceDiv {
+  margin-bottom: 10px;
+}
+
+.camCfgAdviceText {
+  font-style: italic
+}
+
+.camCfgFirefoxAdviceDiv {
+  display: flex;
+  flex-direction: column;
+  align-content: flex-start;
+  align-items: flex-start;
+  border-style: solid;
+  border-width: 1px;
+  border-color: black;
+}
+
+.camCfgFirefoxCfgText {
+  font-style: normal;
+}
