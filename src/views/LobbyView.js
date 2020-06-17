@@ -354,7 +354,7 @@ class LobbyView extends Component {
                     <span className="lobbyWelcomeMsg">Welcome to the Game Lobby</span>
                 </div>
                 <div className="lobbyItemsArea">
-                    <CamCfg />
+                    <CamCfg cookies={this.props.cookies} />
                     <div className="lobbyGamesArea">
                         <div className="lobbyGamesTitleArea">
                             <div className="lobbyGamesTitle"><span>Available Games</span></div>

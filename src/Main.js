@@ -1,10 +1,11 @@
-import React, { Component } from 'react'
+import React, { Component } from 'react';
 import {
     Route,
     NavLink,
     HashRouter,
     Redirect
 } from "react-router-dom";
+import { withCookies } from 'react-cookie';
 import adapter from 'webrtc-adapter';
 import { AppContext } from './ContextLib';
 import LoginView from './views/LoginView';
@@ -172,7 +173,7 @@ class Main extends Component {
                         <ReviewsView/>
                     </Route>
                     <Route path="/lobby">
-                        <LobbyView onEnterGame={this.handleEnterGame}/>
+                        <LobbyView cookies={this.props.cookies} onEnterGame={this.handleEnterGame}/>
                     </Route>
                     {testRoute}
                     {gameRoute}
@@ -222,4 +223,4 @@ class Main extends Component {
     }
 }
 
-export default Main;
+export default withCookies(Main);

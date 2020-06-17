@@ -63,6 +63,10 @@ class CamCfg extends Component {
             });
         }
 
+        this.props.cookies.set("VideoSource", this.videoSrcInput.current.value, {path: '/'} );
+        this.props.cookies.set("AudioSource", this.audioSrcInput.current.value, {path: '/'} );
+        this.props.cookies.set("AudioDest", this.audioDstInput.current.value, {path: '/'} );
+
         this.setState( {
             initStream: true,
             mediaStream: null,
@@ -134,6 +138,21 @@ class CamCfg extends Component {
     }
 
     render() {
+        let curVideoSrc = this.state.videoSrc;
+        if (curVideoSrc.length === 0) {
+            curVideoSrc = this.props.cookies.get("VideoSource") || "";
+        }
+
+        let curAudioSrc = this.state.audioSrc;
+        if (curAudioSrc.length === 0) {
+            curAudioSrc = this.props.cookies.get("AudioSource") || "";
+        }
+
+        let curAudioDst = this.state.audioDst;
+        if (curAudioDst.length === 0) {
+            curAudioDst = this.props.cookies.get("AudioDest") || "";
+        }
+
         return (
             <div className="camCfgDiv">
                 <div className="camCfgTitleDiv">
@@ -146,7 +165,7 @@ class CamCfg extends Component {
                         className="camCfgOptionSelect"
                         id="videoSrcInput"
                         name="videoSrcInput"
-                        value={this.state.videoSrc}
+                        value={curVideoSrc}
                         onChange={this.handleVideoSrcChange}>
                         {this.state.videoSrcOptions}
                     </select>
@@ -158,7 +177,7 @@ class CamCfg extends Component {
                         className="camCfgOptionSelect"
                         id="audioSrcInput"
                         name="audioSrcInput"
-                        value={this.state.audioSrc}
+                        value={curAudioSrc}
                         onChange={this.handleAudioSrcChange}>
                         {this.state.audioSrcOptions}
                     </select>
@@ -170,7 +189,7 @@ class CamCfg extends Component {
                         className="camCfgOptionSelect"
                         id="audioDstInput"
                         name="audioDstInput"
-                        value={this.state.audioDst}
+                        value={curAudioDst}
                         onChange={this.handleAudioDstChange}>
                         {this.state.audioDstOptions}
                     </select>
