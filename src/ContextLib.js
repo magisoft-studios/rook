@@ -1,7 +1,15 @@
 import { createContext } from "react";
 import Session from "./Session";
 
-export const AppContext = createContext( {
-    session: new Session()
+let AppContext = createContext( {
+    session: new Session(),
+    mediaSettings: {
+        videoSrc: "",
+        audioSrc: "",
+        audioDst: "",
+    },
+    updateMediaSettings: (mediaSettings) => {},
 });
+
+export default AppContext;
 

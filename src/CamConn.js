@@ -14,6 +14,7 @@ class CamConn {
         this.mediaStream = null;
         this.connecting = false;
         this.connected = false;
+        this.needsOffer = false;
     }
 
     /*
@@ -73,21 +74,12 @@ class CamConn {
         this.peerConn.oniceconnectionstatechange = this.handleIceStateChange;
         this.peerConn.ontrack = this.onAddTrack;
 
-        if (mediaStream != null) {
-            console.log(`CamConn[${this.name}]: mediaStream is not null, adding stream`);
-            for (const track of mediaStream.getTracks()) {
-                this.peerConn.addTrack(track, mediaStream);
-            }
-        } else {
-            console.log(`CamConn[${this.name}]: mediaStream is null, not adding stream`);
-        }
+        this.addTracks();
     }
 
-    sendMessage = (msg) => {
-        let message = new SocketMsg(this.sessionId);
+    sendMessage = (message) => {
         message.source = 'camera';
         message.toPlayerPosn = this.peerPosn;
-        message.msg = msg;
         this.sendSocketMessage(message);
     }
 
@@ -96,14 +88,29 @@ class CamConn {
         this.handleAddStream(this.peerPosn, event.streams[0]);
     }
 
+    close = () => {
+        if (this.peerConn != null) {
+            this.peerConn.close();
+        }
+        this.peerConn = null;
+        this.connected = false;
+        this.connecting = false;
+    }
+
+    sendClose = () => {
+        console.log(`CamConn[${this.name}] sendClose`);
+        try {
+            let message = new SocketMsg(this.sessionId);
+            message.msgId = 'camConnClosed';
+            this.sendMessage(message);
+        } catch (error) {
+            console.log(`Cam[${this.name}] cant send close: ${error.message}`);
+        }
+    }
+
     createOffer = async () => {
         console.log(`CamConn[${this.name}]: createOffer`);
-        //const offerOptions = {
-        //    offerToReceiveVideo: 1,
-        //};
-
         try {
-            //let offerDescription = await this.peerConn.createOffer(offerOptions);
             let offerDescription = await this.peerConn.createOffer();
             this.createdOffer(offerDescription);
         } catch (error) {
@@ -125,7 +132,12 @@ class CamConn {
     sendOffer = async (offerDesc) => {
         console.log(`CamConn[${this.name}] sendOffer`);
         try {
-            this.sendMessage({msgType: "offer", offer: offerDesc});
+            let message = new SocketMsg(this.sessionId);
+            message.msg = {
+                msgType: 'offer',
+                offer: offerDesc,
+            };
+            this.sendMessage(message);
         } catch (error) {
             console.log(`Cam[${this.name}] cant send offer: ${error.message}`);
         }
@@ -149,8 +161,24 @@ class CamConn {
 
     sendAnswer = (answer) => {
         console.log(`CamConn[${this.name}] sending answer`);
-        this.sendMessage({msgType: "answer", answer: answer});
+        let message = new SocketMsg(this.sessionId);
+        message.msg = {
+            msgType: 'answer',
+            answer: answer,
+        };
+        this.sendMessage(message);
         this.peerConn.setLocalDescription(answer);
+    }
+
+    addTracks = () => {
+        if (this.mediaStream != null) {
+            console.log(`CamConn[${this.name}]: adding tracks`);
+            for (const track of this.mediaStream.getTracks()) {
+                this.peerConn.addTrack(track, this.mediaStream);
+            }
+        } else {
+            console.log(`CamConn[${this.name}]: mediaStream is null, not adding stream`);
+        }
     }
 
     answerRcvd = async (message) => {
@@ -171,14 +199,18 @@ class CamConn {
         //const peerConnection = event.target;
         const iceCandidate = event.candidate;
         if (iceCandidate) {
-//            const newIceCandidate = new RTCIceCandidate(iceCandidate);
             this.sendIceCandidate(iceCandidate);
         }
     }
 
     sendIceCandidate = async (iceCandidate) => {
         console.log(`CamConn[${this.name}] sending ice candidate`);
-        this.sendMessage({msgType: "icecandidate", candidate: iceCandidate});
+        let message = new SocketMsg(this.sessionId);
+        message.msg = {
+            msgType: 'icecandidate',
+            candidate: iceCandidate,
+        };
+        this.sendMessage(message);
     }
 
     iceCandidateRcvd = async (message) => {

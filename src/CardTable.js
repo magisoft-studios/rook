@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import TableCard from './TableCard';
 import PlayerStates from './PlayerStates';
 import GameStates from './GameStates';
-import {AppContext} from "./ContextLib";
+import AppContext from "./ContextLib";
 import Cards from "./Cards";
 import KittyCard from "./KittyCard";
 import PlayerActions from "./PlayerActions";
@@ -269,7 +269,7 @@ class CardTable extends Component {
     render() {
         let gameData = this.props.gameData;
         let gameState = gameData.state;
-        let playerPosn = this.context.currentGame.playerPosn;
+        let playerPosn = this.context.session.currentGame.playerPosn;
         let player = gameData[playerPosn];
         let playerState = player.state;
         let playerPosns = this.props.playerPosns;

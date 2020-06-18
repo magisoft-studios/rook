@@ -7,7 +7,7 @@ import Card from './Card';
 import PlayerHand from './PlayerHand';
 import OpponentCard from './OpponentCard';
 import CardTable from './CardTable';
-import {AppContext} from './ContextLib';
+import AppContext from './ContextLib';
 import PlayerStates from './PlayerStates';
 import GameStates from './GameStates';
 import PlayerActions from './PlayerActions';
@@ -35,6 +35,7 @@ class Game extends Component {
             gameId: props.gameId,
             playerPosn: props.playerPosn,
             gameData: props.gameData,
+            initStream: false,
             streams: {
                 player1: null,
                 player2: null,
@@ -88,7 +89,7 @@ class Game extends Component {
             this.socket = await socketIOClient('/game', {
                 transports: ['websocket'],
                 query: {
-                    sessionId: this.context.id,
+                    sessionId: this.context.session.id,
                 }
             });
             this.socket.on('disconnect', () => {
@@ -238,31 +239,31 @@ class Game extends Component {
     }
 
     sendGetGameData = async () => {
-        let socketMsg = new SocketMsg(this.context.id);
+        let socketMsg = new SocketMsg(this.context.session.id);
         socketMsg.msgId = 'getGameData';
         this.sendSocketMsg(socketMsg);
     }
 
     sendEnterGame = async () => {
-        let socketMsg = new SocketMsg(this.context.id);
+        let socketMsg = new SocketMsg(this.context.session.id);
         socketMsg.msgId = 'enterGame';
         this.sendSocketMsg(socketMsg);
     }
 
     sendStreamInitialized = async () => {
-        let socketMsg = new SocketMsg(this.context.id);
+        let socketMsg = new SocketMsg(this.context.session.id);
         socketMsg.msgId = 'streamInitialized';
         this.sendSocketMsg(socketMsg);
     }
 
     sendConnectionsInitialized = async () => {
-        let socketMsg = new SocketMsg(this.context.id);
+        let socketMsg = new SocketMsg(this.context.session.id);
         socketMsg.msgId = 'connectionsInitialized';
         this.sendSocketMsg(socketMsg);
     }
 
     handlePlayerAction = async (params) => {
-        let socketMsg = new SocketMsg(this.context.id);
+        let socketMsg = new SocketMsg(this.context.session.id);
         socketMsg.msgId = 'playerAction';
         socketMsg.msg = {
             action: params.action,
@@ -272,7 +273,7 @@ class Game extends Component {
     }
 
     handleKittyCardClick = async (cardId) => {
-        let socketMsg = new SocketMsg(this.context.id);
+        let socketMsg = new SocketMsg(this.context.session.id);
         socketMsg.msgId = 'playerAction';
         socketMsg.msg = {
             action: PlayerActions.TAKE_KITTY_CARD,
@@ -282,7 +283,7 @@ class Game extends Component {
     }
 
     handleCardClick = async (cardId) => {
-        let socketMsg = new SocketMsg(this.context.id);
+        let socketMsg = new SocketMsg(this.context.session.id);
         socketMsg.msgId = 'playerAction';
         if (this.state.gameData.state === GameStates.POPULATE_KITTY) {
             socketMsg.msg = {
@@ -324,7 +325,7 @@ class Game extends Component {
                 }
 
                 if (errMsg.length === 0) {
-                    let socketMsg = new SocketMsg(this.context.id);
+                    let socketMsg = new SocketMsg(this.context.session.id);
                     socketMsg.msgId = 'playerAction';
                     socketMsg.msg = {
                         action: PlayerActions.KITTY_DONE,
@@ -501,11 +502,17 @@ class Game extends Component {
         let leftCam = <RemoteCam name="leftCam" mediaStream={this.state.streams[this.posns.leftPlayerPosn]} />;
         let rightCam = <RemoteCam name="rightCam" mediaStream={this.state.streams[this.posns.rightPlayerPosn]} />;
 
-        let bottomCam = <Cam
-            name="bottomCam"
-            mediaStream={this.state.streams[this.posns.bottomPlayerPosn]}
-            onStreamReady={this.handleStreamIsReady}
-            gameDataState={this.state.gameData.state}/>;
+        let bottomCam =
+            <Cam
+                name="bottomCam"
+                initStream={this.state.initStream}
+                mediaStream={this.state.streams[this.posns.bottomPlayerPosn]}
+                onStreamReady={this.handleStreamIsReady}
+                gameDataState={this.state.gameData.state}
+                videoSrc={this.context.mediaSettings.videoSrc}
+                audioSrc={this.context.mediaSettings.audioSrc}
+                audioDst={this.context.mediaSettings.audioDst}
+            />;
 
 
         return (

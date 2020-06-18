@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import NewGameDialog from '../NewGameDialog';
 import GameSetupDialog from '../GameSetupDialog';
 import ConnectionTestSetupDialog from '../ConnectionTestSetupDialog';
-import { AppContext } from '../ContextLib';
+import AppContext from '../ContextLib';
 import MyButton from "../MyButton";
 import socketIOClient from "socket.io-client";
 import SocketMsg from '../SocketMsg';
@@ -42,7 +42,7 @@ class LobbyView extends Component {
             this.socket = await socketIOClient('/lobby', {
                 transports: ['websocket'],
                 query: {
-                    sessionId: this.context.id,
+                    sessionId: this.context.session.id,
                 }
             });
             this.socket.on('disconnect', () => {
@@ -182,7 +182,7 @@ class LobbyView extends Component {
     }
 
     getAvailGames = async () => {
-        let socketMsg = new SocketMsg(this.context.id);
+        let socketMsg = new SocketMsg(this.context.session.id);
         socketMsg.msgId = 'getAvailGames';
         this.sendSocketMsg(socketMsg);
     }
@@ -198,7 +198,7 @@ class LobbyView extends Component {
     }
 
     handleNewGameOk = async (gameName, gameType) => {
-        let socketMsg = new SocketMsg(this.context.id);
+        let socketMsg = new SocketMsg(this.context.session.id);
         socketMsg.msgId = 'newGame';
         socketMsg.msg = {
             gameName: gameName,
@@ -217,7 +217,7 @@ class LobbyView extends Component {
     }
 
     handleJoinGame = async (gameName) => {
-        let socketMsg = new SocketMsg(this.context.id);
+        let socketMsg = new SocketMsg(this.context.session.id);
         socketMsg.msgId = 'joinGame';
         socketMsg.msg = {
             gameName: gameName,
@@ -226,7 +226,7 @@ class LobbyView extends Component {
     }
 
     handleLeaveGame = async (gameName) => {
-        let socketMsg = new SocketMsg(this.context.id);
+        let socketMsg = new SocketMsg(this.context.session.id);
         socketMsg.msgId = 'leaveGame';
         socketMsg.msg = {
             gameName: gameName,
@@ -236,11 +236,11 @@ class LobbyView extends Component {
     }
 
     handleJoinTeam = async (gameName, playerPosn) => {
-        let socketMsg = new SocketMsg(this.context.id);
+        let socketMsg = new SocketMsg(this.context.session.id);
         socketMsg.msgId = 'joinTeam';
         socketMsg.msg = {
             gameName: gameName,
-            playerId: this.context.playerId,
+            playerId: this.context.session.playerId,
             playerPosn: playerPosn,
         };
         this.sendSocketMsg(socketMsg);
@@ -339,7 +339,7 @@ class LobbyView extends Component {
         }
 
         let newGameBtn = null;
-        if (!this.state.hasJoinedGame && this.state.showAvailableGames && this.context.permissions.createGame) {
+        if (!this.state.hasJoinedGame && this.state.showAvailableGames && this.context.session.permissions.createGame) {
             newGameBtn =
                 <MyButton
                     btnClass="lobbyNewGameBtn"

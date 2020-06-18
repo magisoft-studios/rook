@@ -17,10 +17,7 @@ class Cam extends Component {
     }
 
     componentDidUpdate(prevProps) {
-        if ((prevProps.gameDataState < GameStates.INIT_STREAM) &&
-            (this.props.gameDataState === GameStates.INIT_STREAM)) {
-            this.initStream();
-        } else if ((prevProps.initStream === false) && (this.props.initStream === true)) {
+        if ((prevProps.initStream === false) && (this.props.initStream === true)) {
             this.initStream();
         }
     }
@@ -33,7 +30,7 @@ class Cam extends Component {
             width: 150,
             height: 170,
             deviceId: (videoSource.length > 0) ? {exact: videoSource} : undefined,
-            facingMode: {ideal: 'user'},
+            facingMode: (videoSource.length > 0) ? undefined : {ideal: 'user'},
         };
         let audioConstraints = {
             deviceId: (audioSource.length > 0) ? {exact: audioSource} : undefined,

@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import {AppContext} from './ContextLib';
+import AppContext from './ContextLib';
 import Cam from './Cam.js';
 import './css/CamCfg.scss';
 import MyButton from './MyButton';
@@ -26,6 +26,12 @@ class CamCfg extends Component {
     componentDidMount = async () => {
     }
 
+    componentDidUpdate(prevProps, prevState) {
+        if ((this.state.mediaStream != null) && (prevState.mediaStream == null)) {
+            this.enumerateDevices();
+        }
+    }
+
     handleVideoSrcChange = (event) => {
         this.setState({videoSrc: event.target.value});
     }
@@ -48,7 +54,6 @@ class CamCfg extends Component {
 
     handleStreamIsReady = (mediaStream) => {
         console.log(`CamCfg::handleStreamIsReady`);
-        this.enumerateDevices();
         this.setState({
             mediaStream: mediaStream,
             initStream: false,
@@ -63,16 +68,26 @@ class CamCfg extends Component {
             });
         }
 
-        this.props.cookies.set("VideoSource", this.videoSrcInput.current.value, {path: '/'} );
-        this.props.cookies.set("AudioSource", this.audioSrcInput.current.value, {path: '/'} );
-        this.props.cookies.set("AudioDest", this.audioDstInput.current.value, {path: '/'} );
+        let videoSrc = this.videoSrcInput.current.value;
+        let audioSrc = this.audioSrcInput.current.value;
+        let audioDst = this.audioDstInput.current.value;
+
+        this.props.cookies.set("VideoSource", videoSrc, {path: '/'} );
+        this.props.cookies.set("AudioSource", audioSrc, {path: '/'} );
+        this.props.cookies.set("AudioDest", audioDst, {path: '/'} );
+
+        this.context.updateMediaSettings( {
+            videoSrc: videoSrc,
+            audioSrc: audioSrc,
+            audioDst: audioDst,
+        });
 
         this.setState( {
             initStream: true,
             mediaStream: null,
-            videoSrc: this.videoSrcInput.current.value,
-            audioSrc: this.audioSrcInput.current.value,
-            audioDst: this.audioDstInput.current.value,
+            videoSrc: videoSrc,
+            audioSrc: audioSrc,
+            audioDst: audioDst,
         });
     }
 
@@ -82,6 +97,7 @@ class CamCfg extends Component {
     }
 
     enumerateDevices = async () => {
+        console.log('enumerateDevices');
         try {
             let videoSrcOptions = [];
             let audioSrcOptions = [];
@@ -128,7 +144,7 @@ class CamCfg extends Component {
     showFirefoxAdvice = () => {
          this.setState( {
              showFirefoxAdvice: true,
-         })   ;
+         });
     }
 
     hideFirefoxAdvice = () => {
@@ -140,17 +156,17 @@ class CamCfg extends Component {
     render() {
         let curVideoSrc = this.state.videoSrc;
         if (curVideoSrc.length === 0) {
-            curVideoSrc = this.props.cookies.get("VideoSource") || "";
+            curVideoSrc = this.context.mediaSettings.videoSrc;
         }
 
         let curAudioSrc = this.state.audioSrc;
         if (curAudioSrc.length === 0) {
-            curAudioSrc = this.props.cookies.get("AudioSource") || "";
+            curAudioSrc = this.context.mediaSettings.audioSrc;
         }
 
         let curAudioDst = this.state.audioDst;
         if (curAudioDst.length === 0) {
-            curAudioDst = this.props.cookies.get("AudioDest") || "";
+            curAudioDst = this.context.mediaSettings.audioDst;
         }
 
         return (
@@ -227,9 +243,9 @@ class CamCfg extends Component {
                         name="playerCam"
                         initStream={this.state.initStream}
                         mediaStream={this.state.mediaStream}
-                        videoSrc={this.state.videoSrc}
-                        audioSrc={this.state.audioSrc}
-                        audioDst={this.state.audioDst}
+                        videoSrc={curVideoSrc}
+                        audioSrc={curAudioSrc}
+                        audioDst={curAudioDst}
                         onStreamReady={this.handleStreamIsReady} />
                 </div>
                 <div className="camCfgAdviceDiv">

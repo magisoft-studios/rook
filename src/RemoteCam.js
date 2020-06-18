@@ -19,9 +19,7 @@ class RemoteCam extends Component {
     }
 */
     componentDidUpdate(prevProps) {
-        //console.log(`RemoteCam[${this.props.name}] componentDidUpdate: prevProps = ${JSON.stringify(prevProps)}`);
-        //console.log(`RemoteCam[${this.props.name}] componentDidUpdate: newProps = ${JSON.stringify(this.props)}`);
-        if ((prevProps.mediaStream == null) && (this.props.mediaStream != null)) {
+        if (this.props.mediaStream != prevProps.mediaStream) {
             this.updateMediaStream(this.props.mediaStream);
         }
     }
@@ -29,13 +27,22 @@ class RemoteCam extends Component {
     updateMediaStream = (mediaStream) => {
         console.log(`RemoteCam[${this.props.name} updateMediaStream called`);
         try {
+            var videoEle = this.videoEleRef.current;
             if (mediaStream != null) {
                 console.log(`RemoteCam[${this.props.name}] setting video source object to ${mediaStream.id}`);
-                var videoEle = this.videoEleRef.current;
                 videoEle.srcObject = mediaStream;
-                //videoEle.onloadedmetadata = function (e) {
-                //    videoEle.play();
-                //};
+            } else {
+                console.log(`mediaStream object is null, trying to get existing stream and remove tracks`);
+                let stream = videoEle.srcObject;
+                if (stream != null) {
+                    console.log('stream is not null, removing tracks')
+                    let tracks = stream.getTracks();
+                    tracks.forEach( (track) => {
+                        track.stop();
+                    });
+                }
+                videoEle.srcObject = null;
+                //videoEle.display = 'none';
             }
         } catch (err) {
             console.log(err.name + ": " + err.message);

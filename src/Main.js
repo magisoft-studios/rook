@@ -7,7 +7,7 @@ import {
 } from "react-router-dom";
 import { withCookies } from 'react-cookie';
 import adapter from 'webrtc-adapter';
-import { AppContext } from './ContextLib';
+import AppContext from './ContextLib';
 import LoginView from './views/LoginView';
 import HomeView from './views/HomeView';
 import LobbyView from './views/LobbyView';
@@ -26,15 +26,26 @@ class Main extends Component {
     constructor(props) {
         super(props);
         let session = new Session();
+
         if (TEST) {
             session.loggedIn = true;
         }
+
         this.state = {
             session: session,
             showGameWindow: false,
             redirectToGame: false,
-            gameData: null
+            gameData: null,
+            mediaSettings: {},
         }
+
+        this.context = {};
+    }
+
+    updateMediaSettings = (mediaSettings) => {
+        this.setState({
+            mediaSettings: mediaSettings,
+        });
     }
 
     handleLogin = (reply) => {
@@ -44,7 +55,16 @@ class Main extends Component {
         session.playerId = reply.playerId;
         session.playerName = reply.playerName;
         session.permissions = reply.permissions;
-        this.setState({ session: session });
+
+        let mediaSettings = {};
+        mediaSettings.videoSrc = this.props.cookies.get("VideoSource") || "";
+        mediaSettings.audioSrc = this.props.cookies.get("AudioSource") || "";
+        mediaSettings.audioDst = this.props.cookies.get("AudioDest") || "";
+
+        this.setState({
+            session: session,
+            mediaSettings: mediaSettings,
+        });
     }
 
     getGameData = async () => {
@@ -187,7 +207,13 @@ class Main extends Component {
         }
 
         return (
-            <AppContext.Provider value={session}>
+            <AppContext.Provider value={
+                {
+                    session: this.state.session,
+                    mediaSettings: this.state.mediaSettings,
+                    updateMediaSettings: this.updateMediaSettings,
+                }
+            }>
                 <HashRouter>
                     <div className="mainPage">
                         <div className="topPageArea">

@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import {AppContext} from './ContextLib';
+import AppContext from './ContextLib';
 import GameStates from './GameStates';
 import Cam from './Cam.js';
 import RemoteCam from './RemoteCam.js';
@@ -22,7 +22,7 @@ class ConnectionTest extends Component {
             gameId: props.gameId,
             playerPosn: props.playerPosn,
             gameData: props.gameData,
-            initStream: false,
+            connectionState: '',
             streams: {
                 player1: null,
                 player2: null,
@@ -32,7 +32,6 @@ class ConnectionTest extends Component {
         this.socket = null;
         this.camConnMap = new Map();
         this.initCameraConnections(props.sessionId);
-        this.sentStreamInitialized = false;
     }
 
     componentDidMount = async () => {
@@ -49,14 +48,37 @@ class ConnectionTest extends Component {
 
     componentDidUpdate(prevProps, prevState) {
         console.log(`componentDidUpdate: prevState=${prevState.gameData.state} newState=${this.state.gameData.state}`);
-        if ((this.state.gameData.state === GameStates.INIT_STREAM) && !this.sentStreamInitialized) {
-            if (this.state.streams[this.posns.bottomPlayerPosn] != null) {
-                this.sentStreamInitialized = true;
-                this.sendStreamInitialized();
-            }
-        } else if ((this.state.gameData.state === GameStates.INIT_CONN) &&
-            (prevState.gameData.state === GameStates.INIT_STREAM)) {
+        console.log(`componentDidUpdate: prevConnState=${prevState.connectionState} newState=${this.state.connectionState}`);
+        if (this.state.connectionState === 'initStream') {
+            // The Cam object will see the initStream state and initialize the stream.
+            console.log(`componentDidUpdate: setting connectionState to waitForStream`);
+            this.setState({ connectionState: 'waitForStream' } );
+        } else if (this.state.connectionState === 'streamIsReady') {
+            console.log(`componentDidUpdate: sending streamInitialized`);
+            this.sendStreamInitialized();
+            console.log(`componentDidUpdate: calling streamIsReady for each camConn`);
+            this.camConnMap.forEach( (camConn) => {
+                camConn.streamIsReady(this.state.streams[this.posns.bottomPlayerPosn]);
+            });
+            console.log(`componentDidUpdate: setting connectionState to initConn`);
+            this.setState( { connectionState: 'initConn' } );
+        } else if (this.state.connectionState === 'initConn') {
+            console.log(`componentDidUpdate: sending cam offers`);
             this.sendCamOffers();
+            console.log(`componentDidUpdate: setting connectionState to negotiating`);
+            this.setState( {connectionState: 'negotiating'} );
+        } else if (this.state.connectionState === 'sendConnectionsInitialized') {
+            console.log(`componentDidUpdate: sending connectionsInitialized`);
+            this.sendConnectionsInitialized();
+            console.log(`componentDidUpdate: setting connectionState to connectionsInitialized`);
+            this.setState({ connectionState: 'connectionsInitialized'});
+        }
+
+        if (this.state.gameData.state === GameStates.INIT_STREAM) {
+            if (prevState.gameData.state === GameStates.WAIT_FOR_ENTER) {
+                console.log(`componentDidUpdate: setting connectionState to initStream`);
+                this.setState({ connectionState: 'initStream' });
+            }
         }
     }
 
@@ -65,7 +87,7 @@ class ConnectionTest extends Component {
             this.socket = await socketIOClient('/game', {
                 transports: ['websocket'],
                 query: {
-                    sessionId: this.context.id,
+                    sessionId: this.context.session.id,
                 }
             });
             this.socket.on('disconnect', () => {
@@ -80,8 +102,12 @@ class ConnectionTest extends Component {
     rcvSocketMsg = (message) => {
         console.log(`Received message: ${JSON.stringify(message)}`);
         if (message.source === 'camera') {
-            let camConn = this.camConnMap.get(message.fromPlayerPosn);
-            camConn.handleMsg(message);
+            if (message.msgId === 'camConnClosed') {
+                this.handleRcvdCamConnClosed(message);
+            } else {
+                let camConn = this.camConnMap.get(message.fromPlayerPosn);
+                camConn.handleMsg(message);
+            }
         } else {
             if (message.status === "SUCCESS") {
                 switch (message.msgId) {
@@ -110,6 +136,7 @@ class ConnectionTest extends Component {
 
     initCameraConnections = (sessionId) => {
         this.initCamConn(sessionId,"topCamConn", this.posns.topPlayerPosn);
+        this.determineCamOffers();
     }
 
     initCamConn = (sessionId, name, posn) => {
@@ -137,23 +164,26 @@ class ConnectionTest extends Component {
     }
 
     handleCamConnConnected = async (name) => {
-        console.log(`Game: handleCamConnConnected from ${name}`);
+        console.log(`ConnectionTest: handleCamConnConnected from ${name}`);
         let gameData = this.state.gameData;
-        if (gameData.state === GameStates.INIT_CONN) {
-            if (this.camConnMap && (this.camConnMap.size === 2)) {
+        console.log(`ConnectionTest: handleCamConnConnected: connectionState=${this.state.connectionState}`);
+        if (this.state.connectionState === 'negotiating') {
+            if (this.camConnMap && (this.camConnMap.size === 1)) {
                 let allConnected = true;
                 this.camConnMap.forEach( (camConn) => {
                     allConnected = allConnected && camConn.connected;
                 });
 
+                console.log(`ConnectionTest: handleCamConnConnected: allConnected=${allConnected}`);
                 if (allConnected) {
-                    this.sendConnectionsInitialized();
+                    console.log(`ConnectionTest: handleCamConnConnected: setting state to sendConnectionsInitialized`);
+                    this.setState( { connectionState: 'sendConnectionsInitialized' });
                 }
             }
         }
     }
 
-    sendCamOffers = () => {
+    determineCamOffers = () => {
         switch (this.state.playerPosn) {
             case "player1": {
                 // Nothing to do, just wait for offers.
@@ -162,7 +192,7 @@ class ConnectionTest extends Component {
             case "player2": {
                 // Send offer to player 1.
                 let camConn = this.camConnMap.get("player1");
-                camConn.createAndSendOffer();
+                camConn.needsOffer = true;
                 break;
             }
             default: {
@@ -172,52 +202,81 @@ class ConnectionTest extends Component {
         }
     }
 
-    handleStreamIsReady = (mediaStream) => {
-        console.log(`Game::handleStreamIsReady for stream ${mediaStream.id}`);
+    sendCamOffers = () => {
         this.camConnMap.forEach( (camConn) => {
-           camConn.streamIsReady(mediaStream);
+            if (camConn.needsOffer) {
+                camConn.createAndSendOffer();
+            }
         });
+    }
+
+    handleStreamIsReady = (mediaStream) => {
+        console.log(`ConnectionTest::handleStreamIsReady for stream ${mediaStream.id}`);
         let newState = { ...this.state };
+        newState.connectionState = 'streamIsReady';
         newState.streams[this.posns.bottomPlayerPosn] = mediaStream;
         this.setState(newState);
     }
 
     handleAddStream = (posn, mediaStream) => {
-        console.log(`Game::handleAddStream called for ${posn}`);
+        console.log(`ConnectionTest::handleAddStream called for ${posn}`);
         let newState = { ...this.state };
         newState.streams[posn] = mediaStream;
         console.log(`Game::handleAddStream: adding media stream: ${mediaStream.id}`);
         this.setState(newState);
     }
 
-    handleReinit = () => {
-        console.log(`Game::handleReinit`);
+    handleReinit = async (posn) => {
+        console.log(`ConnectionTest::handleReinit`);
+
+        let camConn = this.camConnMap.get(posn);
+        let camConnName = camConn.name;
+        camConn.close();
+        await camConn.sendClose();
+
         this.sentStreamInitialized = true;
-        this.camConnMap.clear();
-        this.initCamConn(this.props.sessionId,"topCamConn", this.posns.topPlayerPosn);
-        this.setState( {
-            initStream: true,
-            streams: {
-                player1: null,
-                player2: null,
-            }
-         });
+        this.initCamConn(this.props.sessionId, camConnName, this.posns.topPlayerPosn);
+        camConn = this.camConnMap.get(posn);
+        camConn.needsOffer = true;
+
+        camConn.streamIsReady(this.state.streams[this.posns.bottomPlayerPosn]);
+
+        let newState = { ...this.state };
+        newState.connectionState = 'initConn';
+        newState.streams[this.posns.bottomPlayerPosn] = this.state.streams[this.posns.bottomPlayerPosn];
+        newState.streams[posn] = null;
+
+        this.setState(newState);
+    }
+
+    handleRcvdCamConnClosed = (message) => {
+        console.log(`handleRcvdCamConnClosed from ${message.fromPlayerPosn}`);
+        let camConn = this.camConnMap.get(message.fromPlayerPosn);
+        let camConnName = camConn.name;
+        camConn.close();
+
+        this.initCamConn(this.props.sessionId, camConnName, message.fromPlayerPosn);
+
+        let newState = { ...this.state };
+        newState.connectionState = 'negotiating';
+        newState.streams[message.fromPlayerPosn] = null;
+        this.setState(newState);
     }
 
     sendEnterGame = async () => {
-        let socketMsg = new SocketMsg(this.context.id);
+        let socketMsg = new SocketMsg(this.context.session.id);
         socketMsg.msgId = 'enterGame';
         this.sendSocketMsg(socketMsg);
     }
 
     sendStreamInitialized = async () => {
-        let socketMsg = new SocketMsg(this.context.id);
+        let socketMsg = new SocketMsg(this.context.session.id);
         socketMsg.msgId = 'streamInitialized';
         this.sendSocketMsg(socketMsg);
     }
 
     sendConnectionsInitialized = async () => {
-        let socketMsg = new SocketMsg(this.context.id);
+        let socketMsg = new SocketMsg(this.context.session.id);
         socketMsg.msgId = 'connectionsInitialized';
         this.sendSocketMsg(socketMsg);
     }
@@ -242,17 +301,23 @@ class ConnectionTest extends Component {
 
     render() {
         console.log(`ConnectionTest: render: `);
+
         let topCam =
             <RemoteCam
                 name="topCam"
                 mediaStream={this.state.streams[this.posns.topPlayerPosn]} />;
 
-        let bottomCam = <Cam
-            name="bottomCam"
-            initStream={this.state.initStream}
-            mediaStream={this.state.streams[this.posns.bottomPlayerPosn]}
-            onStreamReady={this.handleStreamIsReady}
-            gameDataState={this.state.gameData.state}/>;
+        let bottomCam =
+            <Cam
+                name="bottomCam"
+                initStream={this.state.connectionState === 'initStream'}
+                mediaStream={this.state.streams[this.posns.bottomPlayerPosn]}
+                onStreamReady={this.handleStreamIsReady}
+                gameDataState={this.state.gameData.state}
+                videoSrc={this.context.mediaSettings.videoSrc}
+                audioSrc={this.context.mediaSettings.audioSrc}
+                audioDst={this.context.mediaSettings.audioDst}
+            />;
 
 
         return (
@@ -264,7 +329,7 @@ class ConnectionTest extends Component {
                     <MyButton
                         btnClass="connTestReinitBtn"
                         btnText="Re-Initialize"
-                        onClick={() => this.handleReinit()}>
+                        onClick={() => this.handleReinit(this.posns.topPlayerPosn)}>
                     </MyButton>
                 </div>
                 <div className="connTestBottomArea">
