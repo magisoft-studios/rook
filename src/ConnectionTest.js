@@ -238,7 +238,6 @@ class ConnectionTest extends Component {
         this.initCamConn(this.props.sessionId, camConnName, this.posns.topPlayerPosn);
         camConn = this.camConnMap.get(posn);
         camConn.needsOffer = true;
-
         camConn.streamIsReady(this.state.streams[this.posns.bottomPlayerPosn]);
 
         let newState = { ...this.state };
@@ -250,12 +249,16 @@ class ConnectionTest extends Component {
     }
 
     handleRcvdCamConnClosed = (message) => {
-        console.log(`handleRcvdCamConnClosed from ${message.fromPlayerPosn}`);
-        let camConn = this.camConnMap.get(message.fromPlayerPosn);
+        let posn = message.fromPlayerPosn;
+        console.log(`handleRcvdCamConnClosed from ${posn}`);
+        let camConn = this.camConnMap.get(posn);
         let camConnName = camConn.name;
         camConn.close();
 
-        this.initCamConn(this.props.sessionId, camConnName, message.fromPlayerPosn);
+        this.sentStreamInitialized = true;
+        this.initCamConn(this.props.sessionId, camConnName, posn);
+        camConn = this.camConnMap.get(posn);
+        camConn.streamIsReady(this.state.streams[this.posns.bottomPlayerPosn]);
 
         let newState = { ...this.state };
         newState.connectionState = 'negotiating';
