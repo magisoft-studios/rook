@@ -74,13 +74,12 @@ class ConnectionTest extends Component {
             this.setState({ connectionState: 'connectionsInitialized'});
         }
 
-        if (this.state.gameData.state === GameStates.INIT_STREAM) {
-            if (prevState.gameData.state === GameStates.WAIT_FOR_ENTER) {
-                console.log(`componentDidUpdate: setting connectionState to initStream`);
-                this.setState({ connectionState: 'initStream' });
-            }
+        if ((this.state.gameData.state === GameStates.INIT_STREAM) &&
+            (prevState.gameData.state != GameStates.INIT_STREAM)) {
+            console.log(`componentDidUpdate: setting connectionState to initStream`);
+            this.setState({ connectionState: 'initStream' });
         }
-    }
+   }
 
     initSocketIo = async () => {
         try {
@@ -284,7 +283,7 @@ class ConnectionTest extends Component {
         this.sendSocketMsg(socketMsg);
     }
 
-    calcPlayerPosns(playerPosn) {
+    calcPlayerPosns = (playerPosn) => {
         switch (playerPosn) {
             case "player1":
                 this.posns.bottomPlayerPosn = "player1";
@@ -308,7 +307,9 @@ class ConnectionTest extends Component {
         let topCam =
             <RemoteCam
                 name="topCam"
-                mediaStream={this.state.streams[this.posns.topPlayerPosn]} />;
+                mediaStream={this.state.streams[this.posns.topPlayerPosn]}
+                audioDst={this.context.mediaSettings.audioDst}
+            />;
 
         let bottomCam =
             <Cam
@@ -319,7 +320,7 @@ class ConnectionTest extends Component {
                 gameDataState={this.state.gameData.state}
                 videoSrc={this.context.mediaSettings.videoSrc}
                 audioSrc={this.context.mediaSettings.audioSrc}
-                audioDst={this.context.mediaSettings.audioDst}
+                audioDst=""
             />;
 
 

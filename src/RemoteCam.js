@@ -31,6 +31,9 @@ class RemoteCam extends Component {
             if (mediaStream != null) {
                 console.log(`RemoteCam[${this.props.name}] setting video source object to ${mediaStream.id}`);
                 videoEle.srcObject = mediaStream;
+                if (this.props.audioDst.length > 0) {
+                    videoEle.setSinkId(this.props.audioDst);
+                }
             } else {
                 console.log(`mediaStream object is null, trying to get existing stream and remove tracks`);
                 let stream = videoEle.srcObject;
@@ -42,7 +45,6 @@ class RemoteCam extends Component {
                     });
                 }
                 videoEle.srcObject = null;
-                //videoEle.display = 'none';
             }
         } catch (err) {
             console.log(err.name + ": " + err.message);
