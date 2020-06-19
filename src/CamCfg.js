@@ -24,12 +24,17 @@ class CamCfg extends Component {
     }
 
     componentDidMount = async () => {
+        console.log("CamCfg: mounted");
     }
 
     componentDidUpdate(prevProps, prevState) {
         if ((this.state.mediaStream != null) && (prevState.mediaStream == null)) {
             this.enumerateDevices();
         }
+    }
+
+    componentWillUnmount = () => {
+        console.log("CamCfg: unmounting");
     }
 
     handleVideoSrcChange = (event) => {

@@ -34,7 +34,7 @@ class Main extends Component {
         this.state = {
             session: session,
             showGameWindow: false,
-            redirectToGame: false,
+            redirectRoute: "",
             gameData: null,
             mediaSettings: {},
         }
@@ -104,8 +104,23 @@ class Main extends Component {
             ...this.state,
             session: session,
             showGameWindow: true,
-            redirectToGame: true,
+            redirectRoute: '/game',
             gameData: gameData,
+        });
+    }
+
+    handleExitGame = async (gameData, playerPosn) => {
+        let session = this.state.session;
+        session.currentGame = {
+            id: "",
+            playerPosn: "",
+        }
+        this.setState({
+            ...this.state,
+            session: session,
+            showGameWindow: false,
+            redirectRoute: '/lobby',
+            gameData: null,
         });
     }
 
@@ -142,27 +157,29 @@ class Main extends Component {
         let gameMenuItem = null;
         let gameRoute = null;
         let game = null;
-        let gameRedirect = null;
+        let redirect = null;
         if (this.state.showGameWindow) {
             if (this.state.gameData.type === "Rook") {
                 game = <Game
                     sessionId={session.id}
                     gameId={session.currentGame.id}
                     playerPosn={session.currentGame.playerPosn}
-                    gameData={this.state.gameData}/>;
+                    gameData={this.state.gameData}
+                    onExit={this.handleExitGame}/>;
             } else if (this.state.gameData.type === "ConnectionTest") {
                 game = <ConnectionTest
                     sessionId={session.id}
                     gameId={session.currentGame.id}
                     playerPosn={session.currentGame.playerPosn}
-                    gameData={this.state.gameData}/>;
+                    gameData={this.state.gameData}
+                    onExit={this.handleExitGame}/>;
             }
             gameMenuItem = <li className="mainMenuItem"><NavLink to="/game">Game</NavLink></li>;
             gameRoute = <Route path="/game">{game}</Route>;
+        }
 
-            if (this.state.redirectToGame) {
-                gameRedirect = <Redirect to={'/game'} />
-            }
+        if (this.state.redirectRoute.length > 0) {
+            redirect = <Redirect to={this.state.redirectRoute} />
         }
 
         let testRoute = null;
@@ -197,7 +214,7 @@ class Main extends Component {
                     </Route>
                     {testRoute}
                     {gameRoute}
-                    {gameRedirect}
+                    {redirect}
                 </div>
             );
         } else {

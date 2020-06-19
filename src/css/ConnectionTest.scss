@@ -10,6 +10,18 @@
   background-color: #24756c;
 }
 
+.connTestGameDataDiv {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.connTestGameStatus {
+  font-family: SansSerif;
+  font-size: 20px;
+}
+
 .connTestTopArea {
   margin: 10px;
   height: 190px;

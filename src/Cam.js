@@ -22,6 +22,23 @@ class Cam extends Component {
         }
     }
 
+    componentWillUnmount() {
+        this.clear();
+    }
+
+    clear = () => {
+        var videoEle = this.videoEleRef.current;
+        let stream = videoEle.srcObject;
+        if (stream != null) {
+            console.log('Cam: stream is not null, removing tracks')
+            let tracks = stream.getTracks();
+            tracks.forEach( (track) => {
+                track.stop();
+            });
+        }
+        videoEle.srcObject = null;
+    }
+
     initStream = async () => {
         console.log(`Cam[${this.props.name}] streamCamVideo`);
         const videoSource = this.props.videoSrc;

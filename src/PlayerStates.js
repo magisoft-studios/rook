@@ -22,6 +22,7 @@ class PlayerStates {
     static WAIT_FOR_TAKE_TRICK  = 19;   // Waiting for the trick winner to take the trick
     static END_HAND             = 20;   // End of Hand - Announce score, then go back to DEAL
     static WAIT_FOR_END_HAND    = 21;   // Wait for other player to end the hand
+    static EXITED               = 22;   // Player exited game
 
     static getStateText(thisPlayer, otherPlayer) {
         let text = "";
@@ -91,6 +92,9 @@ class PlayerStates {
                 break;
             case PlayerStates.WAIT_FOR_END_HAND:
                 text = "End of hand";
+                break;
+            case PlayerStates.EXITED:
+                text = "Exited";
                 break;
             default:
                 text = "Invalid State";

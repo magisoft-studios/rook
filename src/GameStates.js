@@ -14,6 +14,7 @@ class GameStates {
     static WAIT_FOR_CARD    = 10;   // Waiting for someone to play a card
     static TAKE_TRICK       = 11;   // Waiting for the winner of the trick to take it
     static END_OF_HAND      = 12;   // Announce end of hand
+    static END_OF_GAME      = 13;   // Announce end of game
 
     static getStateText(gameData, player) {
         let text = "";
@@ -56,6 +57,9 @@ class GameStates {
                 break;
             case GameStates.END_OF_HAND:
                 text = "End of hand";
+                break;
+            case GameStates.END_OF_GAME:
+                text = "Game is over";
                 break;
             default:
                 text = "Invalid State";

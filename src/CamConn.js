@@ -195,46 +195,55 @@ class CamConn {
     }
 
     onIceCandidate = async (event) => {
-        console.log(`CamConn[${this.name}] onIceCandidate`);
-        //const peerConnection = event.target;
-        const iceCandidate = event.candidate;
-        if (iceCandidate) {
-            this.sendIceCandidate(iceCandidate);
+        if (this.peerConn) {
+            console.log(`CamConn[${this.name}] onIceCandidate`);
+            const iceCandidate = event.candidate;
+            if (iceCandidate) {
+                this.sendIceCandidate(iceCandidate);
+            }
         }
     }
 
     sendIceCandidate = async (iceCandidate) => {
-        console.log(`CamConn[${this.name}] sending ice candidate`);
-        let message = new SocketMsg(this.sessionId);
-        message.msg = {
-            msgType: 'icecandidate',
-            candidate: iceCandidate,
-        };
-        this.sendMessage(message);
+        if (this.peerConn) {
+            console.log(`CamConn[${this.name}] sending ice candidate`);
+            let message = new SocketMsg(this.sessionId);
+            message.msg = {
+                msgType: 'icecandidate',
+                candidate: iceCandidate,
+            };
+            this.sendMessage(message);
+        }
     }
 
     iceCandidateRcvd = async (message) => {
-        let candidate = message.msg.candidate;
-        console.log(`CamConn[${this.name}]: candidate received from ${message.fromPlayerPosn}`);
-        try {
-            await this.peerConn.addIceCandidate(candidate);
-            console.log(`CamConn: added ice candidate success`);
-        } catch (error) {
-            console.log(`CamConn[${this.name}] cant set remote description: ${error.message}`);
+        if (this.peerConn) {
+            let candidate = message.msg.candidate;
+            console.log(`CamConn[${this.name}]: candidate received from ${message.fromPlayerPosn}`);
+            try {
+                await this.peerConn.addIceCandidate(candidate);
+                console.log(`CamConn: added ice candidate success`);
+            } catch (error) {
+                console.log(`CamConn[${this.name}] cant set remote description: ${error.message}`);
+            }
         }
     }
 
     handleConnectionChange = (event) => {
-        console.log(`CamConn[${this.name}] handleConnectionChange: connection state =  ${this.peerConn.connectionState}`);
-        if (this.peerConn.connectionState.toLowerCase() === "connected") {
-            this.connected = true;
-            this.connecting = false;
-            this.handleConnected(this.name);
+        if (this.peerConn) {
+            console.log(`CamConn[${this.name}] handleConnectionChange: connection state =  ${this.peerConn.connectionState}`);
+            if (this.peerConn.connectionState.toLowerCase() === "connected") {
+                this.connected = true;
+                this.connecting = false;
+                this.handleConnected(this.name);
+            }
         }
     }
 
     handleIceStateChange = (event) => {
-        console.log(`CamConn[${this.name}] handleIceStateChange: state =  ${this.peerConn.iceConnectionState}`);
+        if (this.peerConn) {
+            console.log(`CamConn[${this.name}] handleIceStateChange: state =  ${this.peerConn.iceConnectionState}`);
+        }
     }
 
 }

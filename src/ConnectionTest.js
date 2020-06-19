@@ -35,15 +35,29 @@ class ConnectionTest extends Component {
     }
 
     componentDidMount = async () => {
+        console.log("ConnectionTest: Component will componentDidMount called!!!");
+        window.addEventListener('beforeunload', this.handleBeforeUnload);
+        window.addEventListener('unload', this.handleUnload);
         await this.initSocketIo();
         await this.sendEnterGame();
     }
 
     componentWillUnmount() {
-        console.log("Component will unmount called!!!");
+        console.log("ConnectionTest: Component will unmount called!!!");
+        window.removeEventListener('beforeunload', this.handleBeforeUnload);
+        window.removeEventListener('unload', this.handleUnload);
         if (this.socket) {
             this.socket.disconnect();
         }
+    }
+
+    handleBeforeUnload = (event) => {
+        event.preventDefault();
+        event.returnValue = "Are you sure you want to exit the game?";
+    }
+
+    handleUnload = (event) => {
+        this.handleExit();
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -247,6 +261,11 @@ class ConnectionTest extends Component {
         this.setState(newState);
     }
 
+    handleExit = () => {
+        this.sendExitGame();
+        this.props.onExit(this.state.gameData, this.state.playerPosn);
+    }
+
     handleRcvdCamConnClosed = (message) => {
         let posn = message.fromPlayerPosn;
         console.log(`handleRcvdCamConnClosed from ${posn}`);
@@ -263,6 +282,12 @@ class ConnectionTest extends Component {
         newState.connectionState = 'negotiating';
         newState.streams[message.fromPlayerPosn] = null;
         this.setState(newState);
+    }
+
+    sendExitGame = async () => {
+        let socketMsg = new SocketMsg(this.context.session.id);
+        socketMsg.msgId = 'exitGame';
+        this.sendSocketMsg(socketMsg);
     }
 
     sendEnterGame = async () => {
@@ -326,6 +351,9 @@ class ConnectionTest extends Component {
 
         return (
             <div className="connTestView">
+                <div className="connTestGameDataDiv">
+                    <span className="connTestGameStatus">Status: {this.state.gameData.stateText}</span>
+                </div>
                 <div className="connTestTopArea">
                     {topCam}
                 </div>
@@ -334,6 +362,11 @@ class ConnectionTest extends Component {
                         btnClass="connTestReinitBtn"
                         btnText="Re-Initialize"
                         onClick={() => this.handleReinit(this.posns.topPlayerPosn)}>
+                    </MyButton>
+                    <MyButton
+                        btnClass="connTestExitBtn"
+                        btnText="Exit Game"
+                        onClick={() => this.handleExit()}>
                     </MyButton>
                 </div>
                 <div className="connTestBottomArea">

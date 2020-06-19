@@ -9,19 +9,27 @@ class RemoteCam extends Component {
         }
     }
 
-    /*
-    static getDerivedStateFromProps(nextProps, prevState) {
-        if ((prevState.mediaStream == null) && (nextProps.mediaStream != null)) {
-            return { mediaStream: nextProps.mediaStream };
-        } else {
-            return null;
-        }
-    }
-*/
     componentDidUpdate(prevProps) {
         if (this.props.mediaStream != prevProps.mediaStream) {
             this.updateMediaStream(this.props.mediaStream);
         }
+    }
+
+    componentWillUnmount() {
+        this.clear();
+    }
+
+    clear = () => {
+        var videoEle = this.videoEleRef.current;
+        let stream = videoEle.srcObject;
+        if (stream != null) {
+            console.log('RemoteCam: stream is not null, removing tracks')
+            let tracks = stream.getTracks();
+            tracks.forEach( (track) => {
+                track.stop();
+            });
+        }
+        videoEle.srcObject = null;
     }
 
     updateMediaStream = (mediaStream) => {
@@ -36,15 +44,7 @@ class RemoteCam extends Component {
                 }
             } else {
                 console.log(`mediaStream object is null, trying to get existing stream and remove tracks`);
-                let stream = videoEle.srcObject;
-                if (stream != null) {
-                    console.log('stream is not null, removing tracks')
-                    let tracks = stream.getTracks();
-                    tracks.forEach( (track) => {
-                        track.stop();
-                    });
-                }
-                videoEle.srcObject = null;
+                this.clear();
             }
         } catch (err) {
             console.log(err.name + ": " + err.message);
