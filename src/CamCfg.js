@@ -245,7 +245,7 @@ class CamCfg extends Component {
                 </div>
                 <div className="camCfgCamDiv">
                     <Cam
-                        name="playerCam"
+                        name="lobbyCam"
                         initStream={this.state.initStream}
                         mediaStream={this.state.mediaStream}
                         videoSrc={curVideoSrc}

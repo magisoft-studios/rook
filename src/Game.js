@@ -17,6 +17,7 @@ import CamConn from './CamConn.js';
 import socketIOClient from 'socket.io-client';
 import SocketMsg from "./SocketMsg";
 import './css/Game.scss';
+import MyButton from "./MyButton";
 
 const RESIZE_TIMEOUT = 100;
 
@@ -35,7 +36,7 @@ class Game extends Component {
             gameId: props.gameId,
             playerPosn: props.playerPosn,
             gameData: props.gameData,
-            initStream: false,
+            connectionState: 'initialize',
             streams: {
                 player1: null,
                 player2: null,
@@ -47,42 +48,93 @@ class Game extends Component {
         this.socket = null;
         this.camConnMap = new Map();
         this.initCameraConnections(props.sessionId);
-        this.sentStreamInitialized = false;
     }
 
+    /* Changing to the Lobby tab causes the Game to unmount.
+       Coming back to the Game tab causes the constructor to get re-run and
+       the componentDidMount method to get called.
+     */
     componentDidMount = async () => {
-        console.log(`componentDidMount: window size = ${window.innerWidth} x ${window.innerHeight}`);
-        window.addEventListener('resize', () => {
-            clearInterval(this.resizeTimer);
-            this.resizeTimer = setTimeout(this.handleWindowResize, RESIZE_TIMEOUT);
-        });
-        await this.initSocketIo();
-        await this.sendEnterGame();
+        console.log(`Game: componentDidMount: window size = ${window.innerWidth} x ${window.innerHeight}`);
+        window.addEventListener('beforeunload', this.handleBeforeUnload);
+        window.addEventListener('unload', this.handleUnload);
+        //window.addEventListener('resize', () => {
+        //    clearInterval(this.resizeTimer);
+        //    this.resizeTimer = setTimeout(this.handleWindowResize, RESIZE_TIMEOUT);
+        //});
+        if (this.socket === null) {
+            console.log(`Game: componentDidMount: initializing socket IO`);
+            await this.initSocketIo();
+        }
+        this.sendGetGameData();
     }
 
+    /* This gets called when we switch to the Lobby tab while the game is in progress. */
     componentWillUnmount() {
-        console.log("Component will unmount called!!!");
+        console.log("Game: componentWillUnmount");
         if (this.socket) {
             this.socket.disconnect();
+            this.socket = null;
         }
+        window.removeEventListener('beforeunload', this.handleBeforeUnload);
+        window.removeEventListener('unload', this.handleUnload);
+    }
+
+    handleBeforeUnload = (event) => {
+        event.preventDefault();
+        event.returnValue = "Are you sure you want to exit the game?";
+    }
+
+    handleUnload = (event) => {
+        console.log("Game: handleUnload, sending exit msg, disconnecting socket");
+        this.handleExit();
     }
 
     componentDidUpdate(prevProps, prevState) {
-        console.log(`componentDidUpdate: prevState=${prevState.gameData.state} newState=${this.state.gameData.state}`);
-        if ((this.state.gameData.state === GameStates.INIT_STREAM) && !this.sentStreamInitialized) {
-            if (this.state.streams[this.posns.bottomPlayerPosn] != null) {
-                this.sentStreamInitialized = true;
-                this.sendStreamInitialized();
-            }
-        } else if ((this.state.gameData.state === GameStates.INIT_CONN) &&
-            (prevState.gameData.state === GameStates.INIT_STREAM)) {
+        console.log(`Game: componentDidUpdate: prevState=${prevState.gameData.state} newState=${this.state.gameData.state}`);
+        console.log(`Game: componentDidUpdate: prevConnState=${prevState.connectionState} newConnState=${this.state.connectionState}`);
+
+        if (! this.state.gameData[this.state.playerPosn].enteredGame) {
+            console.log(`componentDidUpdate: sending enterGame`);
+            this.sendEnterGame();
+        } else if ((this.state.gameData.state === GameStates.INIT_STREAM) &&
+            (prevState.gameData.state != GameStates.INIT_STREAM)) {
+            console.log(`componentDidUpdate: setting connectionState to initStream`);
+            this.setState({ connectionState: 'initStream' });
+        } else if (this.state.connectionState === 'initialize') {
+            // The Cam object will see the initStream state and initialize the stream.
+            console.log(`componentDidUpdate: setting connectionState to initStream`);
+            this.setState({ connectionState: 'initStream' } );
+        } else if (this.state.connectionState === 'initStream') {
+            // The Cam object will see the initStream state and initialize the stream.
+            console.log(`componentDidUpdate: setting connectionState to waitForStream`);
+            this.setState({ connectionState: 'waitForStream' } );
+        } else if (this.state.connectionState === 'streamIsReady') {
+            console.log(`componentDidUpdate: sending streamInitialized`);
+            this.sendStreamInitialized();
+            console.log(`componentDidUpdate: calling streamIsReady for each camConn`);
+            this.camConnMap.forEach( (camConn) => {
+                camConn.streamIsReady(this.state.streams[this.posns.bottomPlayerPosn]);
+            });
+            console.log(`componentDidUpdate: setting connectionState to initConn`);
+            this.setState( { connectionState: 'initConn' } );
+        } else if ((this.state.connectionState === 'initConn') && (this.state.gameData.state >= GameStates.INIT_CONN)) {
+            console.log(`componentDidUpdate: sending cam offers`);
             this.sendCamOffers();
+            console.log(`componentDidUpdate: setting connectionState to negotiating`);
+            this.setState( {connectionState: 'negotiating'} );
+        } else if (this.state.connectionState === 'sendConnectionsInitialized') {
+            console.log(`componentDidUpdate: sending connectionsInitialized`);
+            this.sendConnectionsInitialized();
+            console.log(`componentDidUpdate: setting connectionState to connectionsInitialized`);
+            this.setState({ connectionState: 'connectionsInitialized'});
         }
     }
 
-    handleWindowResize = () => {
-        console.log(`handleWindowResize: window size = ${window.innerWidth} x ${window.innerHeight}`);
-    }
+
+    //handleWindowResize = () => {
+    //    console.log(`handleWindowResize: window size = ${window.innerWidth} x ${window.innerHeight}`);
+    //}
 
     initSocketIo = async () => {
         try {
@@ -92,20 +144,26 @@ class Game extends Component {
                     sessionId: this.context.session.id,
                 }
             });
-            this.socket.on('disconnect', () => {
-                console.log(`Disconnected from Game socket`);
-            });
+            this.socket.on('disconnect', this.handleSocketDisconnect);
             this.socket.on(`message`, this.rcvSocketMsg);
         } catch(error) {
-            console.log(`Error initializing socket IO: ${error.message}`);
+            console.log(`Game: Error initializing socket IO: ${error.message}`);
         }
+    }
+
+    handleSocketDisconnect = () => {
+        console.log(`ConnectionTest: handleSocketDisconnect: Game socket disconnected`);
     }
 
     rcvSocketMsg = (message) => {
         //console.log(`Received message: ${JSON.stringify(message)}`);
         if (message.source === 'camera') {
-            let camConn = this.camConnMap.get(message.fromPlayerPosn);
-            camConn.handleMsg(message);
+            if (message.msgId === 'camConnClosed') {
+                this.handleRcvdCamConnClosed(message);
+            } else {
+                let camConn = this.camConnMap.get(message.fromPlayerPosn);
+                camConn.handleMsg(message);
+            }
         } else {
             if (message.status === "SUCCESS") {
                 switch (message.msgId) {
@@ -114,11 +172,11 @@ class Game extends Component {
                         break;
                     }
                     default: {
-                        console.log(`Received invalid msgId on Game socket: ${message.msgId}`);
+                        console.log(`Game: Received invalid msgId on Game socket: ${message.msgId}`);
                     }
                 }
             } else {
-                console.log(`Game socket error: ${message.errorMsg}`);
+                console.log(`Game: Game socket error: ${message.errorMsg}`);
             }
         }
     }
@@ -136,6 +194,7 @@ class Game extends Component {
         this.initCamConn(sessionId,"topCamConn", this.posns.topPlayerPosn);
         this.initCamConn(sessionId,"leftCamConn", this.posns.leftPlayerPosn);
         this.initCamConn(sessionId,"rightCamConn", this.posns.rightPlayerPosn);
+        this.determineCamOffers();
     }
 
     initCamConn = (sessionId, name, posn) => {
@@ -153,8 +212,8 @@ class Game extends Component {
     }
 
     rcvdGameDataChangedMsg = (message) => {
-        console.log("Received gameDataChanged message");
-        console.log(`New game state is ${message.msg.gameData.stateText}`);
+        console.log("Game: Received gameDataChanged message");
+        console.log(`Game: New game state is ${message.msg.gameData.stateText}`);
         let newState = {
             ...this.state,
             gameData: message.msg.gameData,
@@ -165,7 +224,7 @@ class Game extends Component {
     handleCamConnConnected = async (name) => {
         console.log(`Game: handleCamConnConnected from ${name}`);
         let gameData = this.state.gameData;
-        if (gameData.state === GameStates.INIT_CONN) {
+        if (this.state.connectionState === 'negotiating') {
             if (this.camConnMap && (this.camConnMap.size === 3)) {
                 let allConnected = true;
                 this.camConnMap.forEach( (camConn) => {
@@ -173,13 +232,13 @@ class Game extends Component {
                 });
 
                 if (allConnected) {
-                    this.sendConnectionsInitialized();
+                    this.setState( { connectionState: 'sendConnectionsInitialized' });
                 }
             }
         }
     }
 
-    sendCamOffers = () => {
+    determineCamOffers = () => {
         switch (this.state.playerPosn) {
             case "player1": {
                 // Nothing to do, just wait for offers.
@@ -188,25 +247,25 @@ class Game extends Component {
             case "player2": {
                 // Send offer to player 1.
                 let camConn = this.camConnMap.get("player1");
-                camConn.createAndSendOffer();
+                camConn.needsOffer = true;
                 break;
             }
             case "player3": {
                 // Send offers to player 1 and player 2.
                 let camConn = this.camConnMap.get("player1");
-                camConn.createAndSendOffer();
+                camConn.needsOffer = true;
                 camConn = this.camConnMap.get("player2");
-                camConn.createAndSendOffer();
+                camConn.needsOffer = true;
                 break;
             }
             case "player4": {
                 // Send offers to player 1, player 2 and player 3.
                 let camConn = this.camConnMap.get("player1");
-                camConn.createAndSendOffer();
+                camConn.needsOffer = true;
                 camConn = this.camConnMap.get("player2");
-                camConn.createAndSendOffer();
+                camConn.needsOffer = true;
                 camConn = this.camConnMap.get("player3");
-                camConn.createAndSendOffer();
+                camConn.needsOffer = true;
                 break;
             }
             default: {
@@ -216,12 +275,18 @@ class Game extends Component {
         }
     }
 
+    sendCamOffers = () => {
+        this.camConnMap.forEach( (camConn) => {
+            if (camConn.needsOffer) {
+                camConn.createAndSendOffer();
+            }
+        });
+    }
+
     handleStreamIsReady = (mediaStream) => {
         console.log(`Game::handleStreamIsReady for stream ${mediaStream.id}`);
-        this.camConnMap.forEach( (camConn) => {
-           camConn.streamIsReady(mediaStream);
-        });
         let newState = { ...this.state };
+        newState.connectionState = 'streamIsReady';
         newState.streams[this.posns.bottomPlayerPosn] = mediaStream;
         this.setState(newState);
     }
@@ -232,6 +297,77 @@ class Game extends Component {
         newState.streams[posn] = mediaStream;
         console.log(`Game::handleAddStream: adding media stream: ${mediaStream.id}`);
         this.setState(newState);
+    }
+
+    handleReinit = async (posn) => {
+        console.log(`Game::handleReinit`);
+
+        let camConn = this.camConnMap.get(posn);
+        let camConnName = camConn.name;
+        camConn.close();
+        await camConn.sendClose();
+
+        this.initCamConn(this.props.sessionId, camConnName, posn);
+        camConn = this.camConnMap.get(posn);
+        camConn.needsOffer = true;
+        camConn.streamIsReady(this.state.streams[this.posns.bottomPlayerPosn]);
+
+        let newState = { ...this.state };
+        newState.connectionState = 'initConn';
+        newState.streams[posn] = null;
+
+        this.setState(newState);
+    }
+
+    handleCamReload = async () => {
+        console.log(`ConnectionTest::handleCamReload`);
+
+        this.camConnMap.forEach( async (camConn) => {
+            camConn.close();
+            await camConn.sendClose();
+        });
+
+        this.initCameraConnections(this.context.session.id);
+
+        this.camConnMap.forEach( async (camConn) => {
+            camConn.needsOffer = true;
+        });
+
+        this.setState( {
+            connectionState: 'initStream',
+            streams: {
+                player1: null,
+                player2: null,
+            }
+        });
+    }
+
+    handleExit = () => {
+        this.sendExitGame();
+        this.props.onExit(this.state.gameData, this.state.playerPosn);
+    }
+
+    handleRcvdCamConnClosed = (message) => {
+        let posn = message.fromPlayerPosn;
+        console.log(`handleRcvdCamConnClosed from ${posn}`);
+        let camConn = this.camConnMap.get(posn);
+        let camConnName = camConn.name;
+        camConn.close();
+
+        this.initCamConn(this.props.sessionId, camConnName, posn);
+        camConn = this.camConnMap.get(posn);
+        camConn.streamIsReady(this.state.streams[this.posns.bottomPlayerPosn]);
+
+        let newState = { ...this.state };
+        newState.connectionState = 'negotiating';
+        newState.streams[posn] = null;
+        this.setState(newState);
+    }
+
+    sendExitGame = async () => {
+        let socketMsg = new SocketMsg(this.context.session.id);
+        socketMsg.msgId = 'exitGame';
+        this.sendSocketMsg(socketMsg);
     }
 
     handleGetGameData = () => {
@@ -293,7 +429,7 @@ class Game extends Component {
             this.sendSocketMsg(socketMsg);
         } else if (this.state.gameData.state === GameStates.WAIT_FOR_CARD) {
             let gameData = this.state.gameData;
-            let playerPosn = this.context.currentGame.playerPosn;
+            let playerPosn = this.context.session.currentGame.playerPosn;
             let player = gameData[playerPosn];
             if (player.state === PlayerStates.PLAY_CARD) {
                 if (this.isValidPlay(player, cardId, gameData.trick.suit)) {
@@ -309,7 +445,7 @@ class Game extends Component {
 
     handleKittyDone = async () => {
         let gameData = this.state.gameData;
-        let playerPosn = this.context.currentGame.playerPosn;
+        let playerPosn = this.context.session.currentGame.playerPosn;
         let player = gameData[playerPosn];
         if (gameData.state === GameStates.POPULATE_KITTY) {
             if (player.state === PlayerStates.SETUP_KITTY) {
@@ -473,11 +609,12 @@ class Game extends Component {
         let rightPlayer = gameData[this.posns.rightPlayerPosn];
         let bottomPlayer = gameData[this.posns.bottomPlayerPosn];
 
-        let topPlayerCardCmpnts = [];
-        let leftPlayerCardCmpnts = [];
-        let rightPlayerCardCmpnts = [];
+        //let topPlayerCardCmpnts = [];
+        //let leftPlayerCardCmpnts = [];
+        //let rightPlayerCardCmpnts = [];
         let bottomPlayerCards = [];
 
+        /*
         for (let i = 0; i < topPlayer.numCards; i++) {
             leftPlayerCardCmpnts.push(this.createHorizOpponentCard(topPlayer.name, i));
         }
@@ -489,6 +626,7 @@ class Game extends Component {
         for (let i = 0; i < rightPlayer.numCards; i++) {
             rightPlayerCardCmpnts.push(this.createHorizOpponentCard(rightPlayer.name, i));
         }
+        */
 
         let cards = bottomPlayer.cards;
         if (cards) {
@@ -498,29 +636,57 @@ class Game extends Component {
             }
         }
 
-        let topCam = <RemoteCam name="topCam" mediaStream={this.state.streams[this.posns.topPlayerPosn]} />;
-        let leftCam = <RemoteCam name="leftCam" mediaStream={this.state.streams[this.posns.leftPlayerPosn]} />;
-        let rightCam = <RemoteCam name="rightCam" mediaStream={this.state.streams[this.posns.rightPlayerPosn]} />;
+        let topCam =
+            <RemoteCam
+                name="topCam"
+                mediaStream={this.state.streams[this.posns.topPlayerPosn]}
+                audioDst={this.context.mediaSettings.audioDst}
+            />;
+
+        let leftCam =
+            <RemoteCam
+                name="leftCam"
+                mediaStream={this.state.streams[this.posns.leftPlayerPosn]}
+                audioDst={this.context.mediaSettings.audioDst}
+        />;
+
+        let rightCam =
+            <RemoteCam
+                name="rightCam"
+                mediaStream={this.state.streams[this.posns.rightPlayerPosn]}
+                audioDst={this.context.mediaSettings.audioDst}
+        />;
 
         let bottomCam =
             <Cam
                 name="bottomCam"
-                initStream={this.state.initStream}
+                initStream={this.state.connectionState === 'initStream'}
                 mediaStream={this.state.streams[this.posns.bottomPlayerPosn]}
                 onStreamReady={this.handleStreamIsReady}
                 gameDataState={this.state.gameData.state}
                 videoSrc={this.context.mediaSettings.videoSrc}
                 audioSrc={this.context.mediaSettings.audioSrc}
-                audioDst={this.context.mediaSettings.audioDst}
+                audioDst=""
             />;
 
 
         return (
             <div className="gameView">
                 <div className="gameArea">
-                    <GameInfoArea gameData={this.state.gameData} onRefresh={this.handleGetGameData} />
+                    <GameInfoArea
+                        gameData={this.state.gameData}
+                        onRefresh={this.handleGetGameData}
+                        onReloadCam={this.handleCamReload}
+                        onExit={this.handleExit}
+                    />
                     <div className="topPlayerArea">
                         {topCam}
+                        <MyButton
+                            btnClass="gameReconnectBtn"
+                            btnText="Reconnect"
+                            onClick={this.handleReinit}
+                            onClickValue={this.posns.topPlayerPosn}>
+                        </MyButton>
                         {/*
                         <div className="topPlayerCardArea">
                             {topPlayerCardCmpnts}
@@ -529,6 +695,12 @@ class Game extends Component {
                     </div>
                     <div className="leftPlayerArea">
                         {leftCam}
+                        <MyButton
+                            btnClass="gameReconnectBtn"
+                            btnText="Reconnect"
+                            onClick={this.handleReinit}
+                            onClickValue={this.posns.leftPlayerPosn}>
+                        </MyButton>
                         {/*
                         <div className="leftPlayerCardArea">
                             {leftPlayerCardCmpnts}
@@ -544,6 +716,12 @@ class Game extends Component {
                         onKittyDone={this.handleKittyDone}>
                     </CardTable>
                     <div className="rightPlayerArea">
+                        <MyButton
+                            btnClass="gameReconnectBtn"
+                            btnText="Reconnect"
+                            onClick={this.handleReinit}
+                            onClickValue={this.posns.rightPlayerPosn}>
+                        </MyButton>
                         {rightCam}
                         {/*
                         <div className="rightPlayerCardArea">

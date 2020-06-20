@@ -35,10 +35,11 @@ class CardTable extends Component {
 
     componentDidUpdate(prevProps, prevState) {
         if (CardTable.isStateChanged(prevProps.gameData, this.props.gameData)) {
-            this.setState({
-                gameData: this.props.gameData,
-                bidValue: CardTable.calcDefaultBidValue(this.props.gameData),
-            });
+            if (this.props.gameData.state === GameStates.BIDDING) {
+                this.setState({
+                    bidValue: CardTable.calcDefaultBidValue(this.props.gameData),
+                });
+            }
         }
     }
 
@@ -462,6 +463,11 @@ class CardTable extends Component {
                     let msgs = [team1Msg,team2Msg];
                     tableMsgArea = this.setupTableMsgArea(msgs);
                 }
+                break;
+            }
+
+            case GameStates.END_OF_GAME: {
+                tableMsgArea = this.setupTableMsgArea([gameData.stateText]);
                 break;
             }
 

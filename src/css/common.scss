@@ -1,4 +1,18 @@
 $cfgDlgBgColor: #cce5d9;
+$btnBgColor: #067325;
+$btnTextColor: white;
+
+@mixin jg-button {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 8px;
+  padding-right: 8px;
+  background-color: $btnBgColor;
+  color: $btnTextColor;
+  border-radius: 10%;
+  font-family: SansSerif;
+  font-size: 16px;
+}
 
 @keyframes blinkingBorder {
   from, to {

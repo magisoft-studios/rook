@@ -113,19 +113,21 @@
 .gameInfoCtrlPnlDiv {
   margin: 40px;
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  flex-direction: row;
+  justify-content: center;
 }
 
 .gameInfoRefreshBtn {
-  padding-top: 4px;
-  padding-bottom: 4px;
-  padding-left: 8px;
-  padding-right: 8px;
-  background-color: #067325;
-  color: white;
-  border-radius: 10%;
-  font-family: SansSerif;
-  font-size: 16px;
+  @include jg-button;
+}
+
+.gameInfoCamReloadBtn {
+  @include jg-button;
+  margin-left: 10px;
+}
+
+.gameInfoExitBtn {
+  @include jg-button;
+  margin-left: 10px;
 }
 

@@ -58,3 +58,15 @@
   justify-content: center;
   align-items: center;
 }
+
+.connTestCamReloadBtn {
+  @include jg-button;
+}
+
+.connTestReconnectBtn {
+  @include jg-button;
+}
+
+.connTestExitBtn {
+  @include jg-button;
+}

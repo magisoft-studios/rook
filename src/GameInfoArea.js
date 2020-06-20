@@ -6,12 +6,21 @@ class GameInfoArea extends Component {
 
     render() {
         let gameData = this.props.gameData;
-        let team1Players = gameData["player1"].name + ", " + gameData["player3"].name;
-        let team2Players = gameData["player2"].name + ", " + gameData["player4"].name;
+        let player1 = gameData["player1"];
+        let player2 = gameData["player2"];
+        let player3 = gameData["player3"];
+        let player4 = gameData["player4"];
+        let player1Name = player1 ? player1.name : "";
+        let player2Name = player2 ? player2.name : "";
+        let player3Name = player3 ? player3.name : "";
+        let player4Name = player4 ? player4.name : "";
+        let team1Players = player1Name + ", " + player3Name;
+        let team2Players = player2Name + ", " + player4Name;
         let highBid = "";
         let highBidPlayerName = "";
         if (gameData.highBidPlayerPosn != null) {
-            highBidPlayerName = gameData[gameData.highBidPlayerPosn].name;
+            let highBidPlayer = gameData[gameData.highBidPlayerPosn];
+            highBidPlayerName = highBidPlayer ? highBidPlayer.name : "";
             highBid = gameData.highBid;
         }
         let trumpSuit = gameData.trumpSuit ? gameData.trumpSuit : "";
@@ -76,8 +85,18 @@ class GameInfoArea extends Component {
                 <div className="gameInfoCtrlPnlDiv">
                     <MyButton
                         btnClass="gameInfoRefreshBtn"
-                        btnText="Refresh"
-                        onClick={() => this.props.onRefresh()}>
+                        btnText="Refresh Game Data"
+                        onClick={this.props.onRefresh}>
+                    </MyButton>
+                    <MyButton
+                        btnClass="gameInfoCamReloadBtn"
+                        btnText="Reload Camera"
+                        onClick={this.props.onReloadCam}>
+                    </MyButton>
+                    <MyButton
+                        btnClass="gameInfoExitBtn"
+                        btnText="Exit Game"
+                        onClick={this.props.onExit}>
                     </MyButton>
                 </div>
             </div>
