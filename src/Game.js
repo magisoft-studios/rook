@@ -1,10 +1,10 @@
 import React, { Component } from 'react'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import cards from './Cards'
+import CommonCards from './CommonCards';
+import RookCards from './RookCards';
+import ElementsCards from './ElementsCards';
 import GameInfoArea from './GameInfoArea';
-import Card from './Card';
-import PlayerHand from './PlayerHand';
 import OpponentCard from './OpponentCard';
 import CardTable from './CardTable';
 import AppContext from './ContextLib';
@@ -18,14 +18,13 @@ import socketIOClient from 'socket.io-client';
 import SocketMsg from "./SocketMsg";
 import './css/Game.scss';
 import MyButton from "./MyButton";
+import PlayerCard from "./PlayerCard";
 
 const RESIZE_TIMEOUT = 100;
 
 class Game extends Component {
     constructor(props) {
         super(props);
-        this.playerHandRef = React.createRef();
-        this.cardTableRef = React.createRef();
         this.posns = {
             bottomPlayerPosn: "",
             leftPlayerPosn: "",
@@ -48,6 +47,15 @@ class Game extends Component {
         this.socket = null;
         this.camConnMap = new Map();
         this.initCameraConnections(props.sessionId);
+        if (props.gameData.type === "Elements") {
+            this.cardDeck = ElementsCards;
+        } else {
+            this.cardDeck = RookCards;
+        }
+        this.sentEnterGame = false;
+        this.sentStreamInitialized = false;
+        this.sentConnectionsInitialized = false;
+        this.sentCamOffers = false;
     }
 
     /* Changing to the Lobby tab causes the Game to unmount.
@@ -94,8 +102,9 @@ class Game extends Component {
         console.log(`Game: componentDidUpdate: prevState=${prevState.gameData.state} newState=${this.state.gameData.state}`);
         console.log(`Game: componentDidUpdate: prevConnState=${prevState.connectionState} newConnState=${this.state.connectionState}`);
 
-        if (! this.state.gameData[this.state.playerPosn].enteredGame) {
+        if ((! this.state.gameData[this.state.playerPosn].enteredGame) && (!this.sentEnterGame)) {
             console.log(`componentDidUpdate: sending enterGame`);
+            this.sentEnterGame = true;
             this.sendEnterGame();
         } else if ((this.state.gameData.state === GameStates.INIT_STREAM) &&
             (prevState.gameData.state != GameStates.INIT_STREAM)) {
@@ -109,8 +118,11 @@ class Game extends Component {
             // The Cam object will see the initStream state and initialize the stream.
             console.log(`componentDidUpdate: setting connectionState to waitForStream`);
             this.setState({ connectionState: 'waitForStream' } );
-        } else if (this.state.connectionState === 'streamIsReady') {
+        } else if ((this.state.connectionState === 'streamIsReady') &&
+            (this.state.gameData.state >= GameStates.INIT_STREAM) &&
+            !this.sentStreamInitialized) {
             console.log(`componentDidUpdate: sending streamInitialized`);
+            this.sentStreamInitialized = true;
             this.sendStreamInitialized();
             console.log(`componentDidUpdate: calling streamIsReady for each camConn`);
             this.camConnMap.forEach( (camConn) => {
@@ -118,13 +130,17 @@ class Game extends Component {
             });
             console.log(`componentDidUpdate: setting connectionState to initConn`);
             this.setState( { connectionState: 'initConn' } );
-        } else if ((this.state.connectionState === 'initConn') && (this.state.gameData.state >= GameStates.INIT_CONN)) {
+        } else if ((this.state.connectionState === 'initConn') &&
+            (this.state.gameData.state >= GameStates.INIT_CONN) &&
+             !this.sentCamOffers) {
             console.log(`componentDidUpdate: sending cam offers`);
+            this.sentCamOffers = true;
             this.sendCamOffers();
             console.log(`componentDidUpdate: setting connectionState to negotiating`);
             this.setState( {connectionState: 'negotiating'} );
-        } else if (this.state.connectionState === 'sendConnectionsInitialized') {
+        } else if ((this.state.connectionState === 'sendConnectionsInitialized') && !this.sentConnectionsInitialized) {
             console.log(`componentDidUpdate: sending connectionsInitialized`);
+            this.sentConnectionsInitialized = true;
             this.sendConnectionsInitialized();
             console.log(`componentDidUpdate: setting connectionState to connectionsInitialized`);
             this.setState({ connectionState: 'connectionsInitialized'});
@@ -184,7 +200,7 @@ class Game extends Component {
     sendSocketMsg = async (message) => {
         try {
             message.fromPlayerPosn = this.state.playerPosn;
-            await this.socket.emit(`message`, message);
+            this.socket.emit(`message`, message);
         } catch (error) {
             console.log(`Error sending socket msg: ${error.message}`);
         }
@@ -299,8 +315,11 @@ class Game extends Component {
         this.setState(newState);
     }
 
-    handleReinit = async (posn) => {
-        console.log(`Game::handleReinit`);
+    handleReconnect = async (posn) => {
+        console.log(`Game::handleReconnect`);
+
+        this.sentConnectionsInitialized = false;
+        this.sentCamOffers = false;
 
         let camConn = this.camConnMap.get(posn);
         let camConnName = camConn.name;
@@ -328,6 +347,10 @@ class Game extends Component {
         });
 
         this.initCameraConnections(this.context.session.id);
+
+        this.sentStreamInitialized = false;
+        this.sentConnectionsInitialized = false;
+        this.sentCamOffers = false;
 
         this.camConnMap.forEach( async (camConn) => {
             camConn.needsOffer = true;
@@ -554,7 +577,7 @@ class Game extends Component {
         let cardKey = player + index;
         let wrapperClass = "oppCardVertWrapper";
         let imgClass = "oppCardVert";
-        let imgSrc = cards.cardBack;
+        let imgSrc = CommonCards.cardBack;
         return (
             <OpponentCard
                 key={cardKey}
@@ -569,7 +592,7 @@ class Game extends Component {
         let cardKey = player + index;
         let wrapperClass = "oppCardHorizWrapper";
         let imgClass = "oppCardHoriz";
-        let imgSrc = cards.cardBackHoriz;
+        let imgSrc = CommonCards.cardBackHoriz;
         return (
             <OpponentCard
                 key={cardKey}
@@ -599,6 +622,39 @@ class Game extends Component {
         return imageClass;
     }
 
+    getPlayerCardCmpnts = (cards, gameData) => {
+        let playerCardCmpnts = [];
+        let wrapperClass = "bottomPlayerCardWrapper";
+        let buttonClass = "bottomPlayerCardButton";
+        let imgClass = "bottomPlayerCard";
+
+        cards.forEach( (card, index) => {
+            let cardId = card.id;
+            if (cardId === 'cardElemental') {
+                if (gameData.trumpSuit && (gameData.trumpSuit.length > 0)) {
+                    cardId = 'card' + gameData.trumpSuit + 'Elemental';
+                }
+            }
+            let imgSrc = this.cardDeck[cardId];
+            let key = card.id + index;
+            let wrapperKey = "wrapper" + key;
+            let cardKey = "card" + key;
+            playerCardCmpnts.push(
+                <div key={wrapperKey} className={wrapperClass}>
+                    <PlayerCard
+                        cardKey={cardKey}
+                        cardId={card.id}
+                        buttonClass={buttonClass}
+                        onClick={this.handleCardClick}
+                        imgClass={imgClass}
+                        imgSrc={imgSrc} />
+                </div>
+            );
+        });
+
+        return playerCardCmpnts;
+    }
+
 
     render() {
         console.log("Game: render");
@@ -609,32 +665,7 @@ class Game extends Component {
         let rightPlayer = gameData[this.posns.rightPlayerPosn];
         let bottomPlayer = gameData[this.posns.bottomPlayerPosn];
 
-        //let topPlayerCardCmpnts = [];
-        //let leftPlayerCardCmpnts = [];
-        //let rightPlayerCardCmpnts = [];
-        let bottomPlayerCards = [];
-
-        /*
-        for (let i = 0; i < topPlayer.numCards; i++) {
-            leftPlayerCardCmpnts.push(this.createHorizOpponentCard(topPlayer.name, i));
-        }
-
-        for (let i = 0; i < leftPlayer.numCards; i++) {
-            topPlayerCardCmpnts.push(this.createVertOpponentCard(leftPlayer.name, i));
-        }
-
-        for (let i = 0; i < rightPlayer.numCards; i++) {
-            rightPlayerCardCmpnts.push(this.createHorizOpponentCard(rightPlayer.name, i));
-        }
-        */
-
-        let cards = bottomPlayer.cards;
-        if (cards) {
-            for (let i = 0; i < cards.length; i++) {
-                let card = cards[i];
-                bottomPlayerCards.push(new Card(card.id, card.name, card.value, card.pointValue, card.suit));
-            }
-        }
+        let playerCardCmpnts = this.getPlayerCardCmpnts(bottomPlayer.cards, gameData);
 
         let topCam =
             <RemoteCam
@@ -684,31 +715,20 @@ class Game extends Component {
                         <MyButton
                             btnClass="gameReconnectBtn"
                             btnText="Reconnect"
-                            onClick={this.handleReinit}
+                            onClick={this.handleReconnect}
                             onClickValue={this.posns.topPlayerPosn}>
                         </MyButton>
-                        {/*
-                        <div className="topPlayerCardArea">
-                            {topPlayerCardCmpnts}
-                        </div>
-                        */}
                     </div>
                     <div className="leftPlayerArea">
                         {leftCam}
                         <MyButton
                             btnClass="gameReconnectBtn"
                             btnText="Reconnect"
-                            onClick={this.handleReinit}
+                            onClick={this.handleReconnect}
                             onClickValue={this.posns.leftPlayerPosn}>
                         </MyButton>
-                        {/*
-                        <div className="leftPlayerCardArea">
-                            {leftPlayerCardCmpnts}
-                        </div>
-                        */}
                     </div>
                     <CardTable
-                        ref={this.cardTableRef}
                         gameData={this.state.gameData}
                         playerPosns={this.posns}
                         onPlayerAction={this.handlePlayerAction}
@@ -719,22 +739,16 @@ class Game extends Component {
                         <MyButton
                             btnClass="gameReconnectBtn"
                             btnText="Reconnect"
-                            onClick={this.handleReinit}
+                            onClick={this.handleReconnect}
                             onClickValue={this.posns.rightPlayerPosn}>
                         </MyButton>
                         {rightCam}
-                        {/*
-                        <div className="rightPlayerCardArea">
-                            {rightPlayerCardCmpnts}
-                        </div>
-                        */}
                     </div>
                     <div className="bottomPlayerArea">
                         {bottomCam}
-                        <PlayerHand
-                            ref={this.playerHandRef}
-                            cardList={bottomPlayerCards}
-                            onClick={this.handleCardClick} />
+                        <div className="bottomPlayerCardArea">
+                            {playerCardCmpnts}
+                        </div>
                     </div>
                 </div>
                 <ToastContainer />

@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import cards from "./Cards";
+import cards from "./CommonCards";
 import PlayerCard from "./PlayerCard";
 
 class PlayerHand extends Component {
@@ -14,6 +14,7 @@ class PlayerHand extends Component {
             let key = card.id + index;
             let wrapperKey = "wrapper" + key;
             let cardKey = "card" + key;
+
             playerCardCmpnts.push(
                 <div key={wrapperKey} className={wrapperClass}>
                     <PlayerCard

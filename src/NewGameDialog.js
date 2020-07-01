@@ -52,6 +52,7 @@ class NewGameDialog extends Component {
                             name="gameType"
                             value={this.state.gameType}
                             onChange={this.handleTypeChange}>
+                            <option value="Elements">Elements</option>
                             <option value="Rook">Rook</option>
                             <option value="ConnectionTest">ConnectionTest</option>
                         </select>

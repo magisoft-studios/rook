@@ -1,12 +1,10 @@
 import React, { Component } from 'react'
-import cards from "./Cards";
+import cards from "./CommonCards";
 
 class TableCard extends Component {
     render() {
-        let imgSrc = cards[this.props.id];
-
         return (
-            <img className="tableCard" src={imgSrc} alt="?"></img>
+            <img className="tableCard" src={this.props.imgSrc} alt="?"></img>
         );
     }
 }

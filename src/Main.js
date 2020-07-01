@@ -159,7 +159,7 @@ class Main extends Component {
         let game = null;
         let redirect = null;
         if (this.state.showGameWindow) {
-            if (this.state.gameData.type === "Rook") {
+            if ((this.state.gameData.type === "Rook") || (this.state.gameData.type === "Elements")) {
                 game = <Game
                     sessionId={session.id}
                     gameId={session.currentGame.id}

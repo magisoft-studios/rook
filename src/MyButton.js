@@ -18,7 +18,7 @@ class MyButton extends Component {
             return;
         }
         this.setState({disabled: true});
-        this.disableTimerId = setTimeout( () => { this.setState({disabled: false}) }, 2000);
+        this.disableTimerId = setTimeout( () => { this.setState({disabled: false}) }, 500);
         this.props.onClick(this.props.onClickValue);
     }
 

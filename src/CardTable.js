@@ -3,7 +3,9 @@ import TableCard from './TableCard';
 import PlayerStates from './PlayerStates';
 import GameStates from './GameStates';
 import AppContext from "./ContextLib";
-import Cards from "./Cards";
+import CommonCards from './CommonCards';
+import RookCards from './RookCards';
+import ElementsCards from './ElementsCards';
 import KittyCard from "./KittyCard";
 import PlayerActions from "./PlayerActions";
 import MyButton from "./MyButton";
@@ -13,9 +15,13 @@ class CardTable extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            //gameData: this.props.gameData,
             bidValue: "Pass",
             trumpValue: "Black",
+        }
+        if (props.gameData.type === "Elements") {
+            this.cardDeck = ElementsCards;
+        } else {
+            this.cardDeck = RookCards;
         }
     }
 
@@ -43,7 +49,8 @@ class CardTable extends Component {
         }
     }
 
-    createKittyCardArea = (cards, showFace) => {
+    createKittyCardArea = (gameData, showFace) => {
+        let cards = gameData.kitty;
         let kittyCards = [];
         cards.forEach( (card, index) => {
             let cardKey = "kittyCard" + index;
@@ -51,14 +58,20 @@ class CardTable extends Component {
             let wrapperClass = "kittyCardWrapper";
             let buttonClass = "kittyCardButton";
             let imgClass = "kittyCardImg";
-            let imgSrc = showFace ? Cards[card.id] : Cards.cardBack;
+            let cardId = card.id;
+            if (cardId === 'cardElemental') {
+                if (gameData.trumpSuit && (gameData.trumpSuit.length > 0)) {
+                    cardId = 'card' + gameData.trumpSuit + 'Elemental';
+                }
+            }
+            let imgSrc = showFace ? this.cardDeck[cardId] : CommonCards.cardBack;
             kittyCards.push(
                 <div key={wrapperKey} className={wrapperClass}>
                     <KittyCard
                         cardKey={cardKey}
-                        cardId={cardKey}
+                        cardId={card.id}
                         buttonClass={buttonClass}
-                        onClick={() => this.props.onKittyCardClick(card.id)}
+                        onClick={this.props.onKittyCardClick}
                         imgClass={imgClass}
                         imgSrc={imgSrc} />
                 </div>
@@ -245,7 +258,7 @@ class CardTable extends Component {
         );
     }
 
-    setupCardArea = (player, cardId, cardAreaClass) => {
+    setupCardArea = (gameData, player, cardId, cardAreaClass) => {
         let cardArea = null;
         if (player.state === PlayerStates.PLAY_CARD) {
             cardArea = (
@@ -254,8 +267,14 @@ class CardTable extends Component {
                 </div>
             );
         } else if (cardId != null) {
+            if (cardId === 'cardElemental') {
+                if (gameData.trumpSuit && (gameData.trumpSuit.length > 0)) {
+                    cardId = 'card' + gameData.trumpSuit + 'Elemental';
+                }
+            }
+            let imgSrc = this.cardDeck[cardId];
             cardArea = (
-                <div className={cardAreaClass}><TableCard id={cardId} /></div>
+                <div className={cardAreaClass}><TableCard imgSrc={imgSrc}/></div>
             )
         } else {
             cardArea = (
@@ -335,7 +354,7 @@ class CardTable extends Component {
                         btnValue: {action: PlayerActions.BID, value: this.state.bidValue},
                     });
                 } else {
-                    kittyArea = this.createKittyCardArea(gameData.kitty, false);
+                    kittyArea = this.createKittyCardArea(gameData, false);
                     bottomBidArea = this.setupBidArea(gameData, playerPosns.bottomPlayerPosn, "bottomPlayerBidArea");
                 }
                 break;
@@ -364,11 +383,19 @@ class CardTable extends Component {
                 } else {
                     let msgText = "Select your trump suit";
                     let selOptions = [
-                        <option key="suitBlack" value="Black">Black</option>,
-                        <option key = "suitGreen" value="Green">Green</option>,
-                        <option key = "suitRed" value="Red">Red</option>,
-                        <option key = "suitYellow" value="Yellow">Yellow</option>
+                        <option value="Black">Black</option>,
+                        <option value="Green">Green</option>,
+                        <option value="Red">Red</option>,
+                        <option value="Yellow">Yellow</option>
                     ];
+                    if (this.props.gameData.type === "Elements") {
+                        selOptions = [
+                            <option value="Air">Air</option>,
+                            <option value="Earth">Earth</option>,
+                            <option value="Fire">Fire</option>,
+                            <option value="Water">Water</option>
+                        ];
+                    }
 
                     playerActionArea = this.setupPlayerActionArea({
                         msg1Text: msgText,
@@ -386,7 +413,7 @@ class CardTable extends Component {
                 if (player.state === PlayerStates.WAIT_FOR_KITTY) {
                     tableMsgArea = this.setupTableMsgArea([player.stateText]);
                 } else {
-                    kittyArea = this.createKittyCardArea(gameData.kitty, true);
+                    kittyArea = this.createKittyCardArea(gameData, true);
                     let msgText = "Click card to move between kitty and hand.";
                     playerActionArea = this.setupPlayerActionArea({
                         areaClass: "kittyActionArea",
@@ -404,10 +431,10 @@ class CardTable extends Component {
                 let rightCardId = gameData.table[playerPosns.rightPlayerPosn];
                 let bottomCardId = gameData.table[playerPosns.bottomPlayerPosn];
 
-                topCardArea = this.setupCardArea(topPlayer, topCardId, 'tableTopCardArea');
-                leftCardArea = this.setupCardArea(leftPlayer, leftCardId, 'tableLeftCardArea');
-                rightCardArea = this.setupCardArea(rightPlayer, rightCardId, 'tableRightCardArea');
-                bottomCardArea = this.setupCardArea(bottomPlayer, bottomCardId, 'tableBottomCardArea');
+                topCardArea = this.setupCardArea(gameData, topPlayer, topCardId, 'tableTopCardArea');
+                leftCardArea = this.setupCardArea(gameData, leftPlayer, leftCardId, 'tableLeftCardArea');
+                rightCardArea = this.setupCardArea(gameData, rightPlayer, rightCardId, 'tableRightCardArea');
+                bottomCardArea = this.setupCardArea(gameData, bottomPlayer, bottomCardId, 'tableBottomCardArea');
                 break;
             }
 
@@ -417,10 +444,10 @@ class CardTable extends Component {
                 let rightCardId = gameData.table[playerPosns.rightPlayerPosn];
                 let bottomCardId = gameData.table[playerPosns.bottomPlayerPosn];
 
-                topCardArea = this.setupCardArea(topPlayer, topCardId, 'tableTopCardArea');
-                leftCardArea = this.setupCardArea(leftPlayer, leftCardId, 'tableLeftCardArea');
-                rightCardArea = this.setupCardArea(rightPlayer, rightCardId, 'tableRightCardArea');
-                bottomCardArea = this.setupCardArea(bottomPlayer, bottomCardId, 'tableBottomCardArea');
+                topCardArea = this.setupCardArea(gameData, topPlayer, topCardId, 'tableTopCardArea');
+                leftCardArea = this.setupCardArea(gameData, leftPlayer, leftCardId, 'tableLeftCardArea');
+                rightCardArea = this.setupCardArea(gameData, rightPlayer, rightCardId, 'tableRightCardArea');
+                bottomCardArea = this.setupCardArea(gameData, bottomPlayer, bottomCardId, 'tableBottomCardArea');
 
                 if (player.state === PlayerStates.TRICK_WON) {
                     playerActionArea = this.setupPlayerActionArea({

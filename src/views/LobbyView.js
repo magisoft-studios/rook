@@ -308,7 +308,7 @@ class LobbyView extends Component {
         let gameSetupDlg = null;
         if (this.state.showGameSetupDialog) {
             let gameData = this.state.currentGameData;
-            if (gameData.type === "Rook") {
+            if ((gameData.type === "Rook") || (gameData.type === "Elements")) {
                 gameSetupDlg =
                     <GameSetupDialog
                         hasJoinedTeam={this.state.hasJoinedTeam}
