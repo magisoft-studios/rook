@@ -15,7 +15,7 @@ class GameSetupDialog extends Component {
             if (! this.props.hasJoinedTeam) {
                 playerCmpnt =
                     <MyButton
-                        btnClass="joinGameBtn"
+                        btnClass="jgNormalBtn"
                         btnText="Join"
                         onClick={this.handlePlayerJoinBtnClick}
                         onClickValue={playerPosn}>
@@ -38,7 +38,7 @@ class GameSetupDialog extends Component {
 
         let leaveGameBtn =
             <MyButton
-                btnClass="gameSetupLeaveGameBtn"
+                btnClass="jgNormalBtn"
                 btnText="Leave Game"
                 onClick={this.props.onLeaveGame}
                 onClickValue={this.props.gameName}>
@@ -48,7 +48,7 @@ class GameSetupDialog extends Component {
         if (this.props.enableEnterGameBtn) {
             enterGameBtn =
                 <MyButton
-                    btnClass="gameSetupEnterGameBtn"
+                    btnClass="jgNormalBtn"
                     btnText="Enter Game"
                     onClick={this.props.onEnterGame}
                     onClickValue={this.props.gameName}>
