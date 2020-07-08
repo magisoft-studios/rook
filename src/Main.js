@@ -49,12 +49,14 @@ class Main extends Component {
     }
 
     handleLogin = (reply) => {
+        console.log(`Main:handleLogin: reply=${JSON.stringify(reply)}`);
         let session = new Session();
         session.loggedIn = true;
         session.id = reply.sessionId;
         session.playerId = reply.playerId;
         session.playerName = reply.playerName;
         session.permissions = reply.permissions;
+        session.friends = reply.friends;
 
         let mediaSettings = {};
         mediaSettings.videoSrc = this.props.cookies.get("VideoSource") || "";

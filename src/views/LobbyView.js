@@ -9,6 +9,9 @@ import SocketMsg from '../SocketMsg';
 import GameStates from '../GameStates';
 import CamCfg from '../CamCfg';
 import '../css/LobbyView.scss';
+import LobbyGameData from '../data/LobbyGameData';
+import Team from '../data/Team';
+import Player from '../data/Player';
 
 class LobbyView extends Component {
     constructor(props) {
@@ -86,13 +89,17 @@ class LobbyView extends Component {
                     this.rcvdGameDataChangedMsg(message);
                     break;
                 }
+                case "enterGame": {
+                    this.rcvdEnterGameMsg(message);
+                    break;
+                }
                 default: {
                     console.log(`Received invalid msgId on Lobby socket: ${message.msgId}`);
                     break;
                 }
             }
         } else {
-            console.log(`Lobby socket error: ${message.errorMsg}`);
+            alert(`Error: ${message.errorMsg}`);
         }
     }
 
@@ -106,6 +113,10 @@ class LobbyView extends Component {
     }
 
     rcvdNewGameMsg(message) {
+        console.log(`LobbyView:rcvdNewGameMsg: calling fromJson`);
+        let lobbyGameData = LobbyGameData.fromJson(message.msg.gameData);
+        console.log(`LobbyView:rcvdNewGameMsg: back from fromJson`);
+
         this.setState({
             showNewGameDialog: false,
             showGameSetupDialog: true,
@@ -114,11 +125,12 @@ class LobbyView extends Component {
             hasJoinedGame: true,
             hasJoinedTeam: true,
             playerPosn: "player1",
-            currentGameData: message.msg.gameData,
+            currentGameData: lobbyGameData,
         });
     }
 
     rcvdJoinedGameMsg(message) {
+        let lobbyGameData = LobbyGameData.fromJson(message.msg.gameData);
         this.setState({
             ...this.state,
             showAvailableGames: false,
@@ -126,7 +138,7 @@ class LobbyView extends Component {
             showGameSetupDialog: true,
             hasJoinedGame: true,
             hasJoinedTeam: false,
-            currentGameData: message.msg.gameData,
+            currentGameData: lobbyGameData,
         })
     }
 
@@ -145,6 +157,7 @@ class LobbyView extends Component {
     }
 
     rcvdJoinedTeamMsg(message) {
+        let lobbyGameData = LobbyGameData.fromJson(message.msg.gameData);
         this.setState({
             showNewGameDialog: false,
             showGameSetupDialog: true,
@@ -153,18 +166,32 @@ class LobbyView extends Component {
             hasJoinedGame: true,
             hasJoinedTeam: true,
             playerPosn: message.msg.playerPosn,
-            currentGameData: message.msg.gameData,
+            currentGameData: lobbyGameData,
         });
     }
 
     rcvdGameDataChangedMsg(message) {
+        let lobbyGameData = LobbyGameData.fromJson(message.msg.gameData);
         this.setState({
             ...this.state,
             showAvailableGames: false,
             availableGames: [],
             showGameSetupDialog: true,
-            currentGameData: message.msg.gameData,
+            currentGameData: lobbyGameData,
         })
+    }
+
+    rcvdEnterGameMsg(message) {
+        let runningGameData = message.msg.gameData;
+
+        this.setState({
+            ...this.state,
+            showNewGameDialog: false,
+            showGameSetupDialog: false,
+            showAvailableGames: false,
+        });
+
+        this.props.onEnterGame(runningGameData, this.state.playerPosn);
     }
 
 
@@ -197,12 +224,13 @@ class LobbyView extends Component {
         this.requestInProgress = false;
     }
 
-    handleNewGameOk = async (gameName, gameType) => {
+    handleNewGameOk = async (gameName, gameType, invitees) => {
         let socketMsg = new SocketMsg(this.context.session.id);
         socketMsg.msgId = 'newGame';
         socketMsg.msg = {
             gameName: gameName,
             gameType: gameType,
+            invitees: invitees,
         };
         this.sendSocketMsg(socketMsg);
     }
@@ -246,19 +274,20 @@ class LobbyView extends Component {
         this.sendSocketMsg(socketMsg);
     }
 
-    handleEnterGame = (gameName) => {
-        this.setState({
-            ...this.state,
-            showNewGameDialog: false,
-            showGameSetupDialog: false,
-            showAvailableGames: false,
-        });
-
-        this.props.onEnterGame(this.state.currentGameData, this.state.playerPosn);
+    handleEnterGame = async (gameName) => {
+        let socketMsg = new SocketMsg(this.context.session.id);
+        socketMsg.msgId = 'enterGame';
+        socketMsg.msg = {
+            gameName: gameName
+        };
+        this.sendSocketMsg(socketMsg);
     }
 
 
+
     render() {
+        console.log(`LobbyView:render`);
+
         let availableGameTable = null;
         if (this.state.showAvailableGames && this.state.availableGames) {
             let availGameCmpnts = [];
@@ -301,38 +330,45 @@ class LobbyView extends Component {
         if (this.state.showNewGameDialog) {
             newGameDlg =
                 <NewGameDialog
+                    friends={this.context.session.friends}
                     onOk={this.handleNewGameOk}
                     onCancel={this.handleNewGameCancel} />
         }
 
         let gameSetupDlg = null;
         if (this.state.showGameSetupDialog) {
-            let gameData = this.state.currentGameData;
-            if ((gameData.type === "Rook") || (gameData.type === "Elements")) {
+            let lobbyGameData = this.state.currentGameData;
+            if ((lobbyGameData.type === "Rook") || (lobbyGameData.type === "Elements")) {
+                let player1 = lobbyGameData.players.get('player1');
+                let player2 = lobbyGameData.players.get('player2');
+                let player3 = lobbyGameData.players.get('player3');
+                let player4 = lobbyGameData.players.get('player4');
                 gameSetupDlg =
                     <GameSetupDialog
                         hasJoinedTeam={this.state.hasJoinedTeam}
-                        enableEnterGameBtn={gameData.state === GameStates.READY_TO_START}
-                        gameName={gameData.name}
-                        gameType={gameData.type}
-                        gameStateText={gameData.stateText}
-                        player1={(gameData.player1 != null) ? gameData.player1.name : ""}
-                        player2={(gameData.player2 != null) ? gameData.player2.name : ""}
-                        player3={(gameData.player3 != null) ? gameData.player3.name : ""}
-                        player4={(gameData.player4 != null) ? gameData.player4.name : ""}
+                        enableEnterGameBtn={lobbyGameData.state === GameStates.READY_TO_START}
+                        gameName={lobbyGameData.name}
+                        gameType={lobbyGameData.type}
+                        gameStateText={lobbyGameData.stateText}
+                        player1={(player1 != null) ? player1.name : ""}
+                        player2={(player2 != null) ? player2.name : ""}
+                        player3={(player3 != null) ? player3.name : ""}
+                        player4={(player4 != null) ? player4.name : ""}
                         onJoinTeam={this.handleJoinTeam}
                         onEnterGame={this.handleEnterGame}
                         onLeaveGame={this.handleLeaveGame}/>
-            } else if (gameData.type === "ConnectionTest") {
+            } else if (lobbyGameData.type === "ConnectionTest") {
+                let player1 = lobbyGameData.players.get('player1');
+                let player2 = lobbyGameData.players.get('player2');
                 gameSetupDlg =
                     <ConnectionTestSetupDialog
                         hasJoinedTeam={this.state.hasJoinedTeam}
-                        enableEnterGameBtn={gameData.state === GameStates.READY_TO_START}
-                        gameName={gameData.name}
-                        gameType={gameData.type}
-                        gameStateText={gameData.stateText}
-                        player1Name={(gameData.player1 != null) ? gameData.player1.name : ""}
-                        player2Name={(gameData.player2 != null) ? gameData.player2.name : ""}
+                        enableEnterGameBtn={lobbyGameData.state === GameStates.READY_TO_START}
+                        gameName={lobbyGameData.name}
+                        gameType={lobbyGameData.type}
+                        gameStateText={lobbyGameData.stateText}
+                        player1Name={(player1 != null) ? player1.name : ""}
+                        player2Name={(player2 != null) ? player2.name : ""}
                         onEnterGame={this.handleEnterGame}
                         onLeaveGame={this.handleLeaveGame}/>
             }

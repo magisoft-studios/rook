@@ -7,13 +7,6 @@
   margin-top: 20px;
 }
 
-.loginFormDiv {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  margin-top: 30px;
-}
-
 .loginWelcomeMsg {
   font-weight: bold;
   font-size: 22px;
@@ -22,6 +15,61 @@
 
 .loginInstructionMsg {
   margin-top: 20px;
+}
+
+.loginGoogleDiv {
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  justify-content: center;
+  align-items: center;
+  margin-top: 30px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: black;
+  width: 450px;
+}
+
+.loginGoogleBtnDiv {
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  padding-left: 2px;
+  padding-right: 2px;
+  border-style: outset;
+  border-top-color: lightGray;
+  border-left-color: lightGray;
+  border-radius: 5%;
+}
+
+.loginORText {
+  margin-top: 30px;
+  font-weight: normal;
+  font-size: 20px;
+}
+
+.loginDiv {
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  justify-content: center;
+  align-items: center;
+  margin-top: 30px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: black;
+  width: 450px;
+}
+
+.loginFieldsDiv {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 10px;
+  width: 350px;
 }
 
 .loginInstructionText {
@@ -53,19 +101,26 @@
   font-weight: normal;
   font-size: 16px;
   margin-top: 10px;
+  width: 300px;
 }
 
 .loginBtnDiv {
   margin-top: 20px;
+  margin-bottom: 10px;
   display: flex;
   flex-direction: row;
   justify-content: center;
 }
 
 .loginSubmitBtn {
-  padding: 4px;
-  background-color: #067325;
-  color: white;
+  margin: 10px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 30px;
+  padding-right: 30px;
+  background-color: $btnBgColor;
+  color: $btnTextColor;
   border-radius: 10%;
-  width: 100px;
+  font-family: SansSerif;
+  font-size: 16px;
 }

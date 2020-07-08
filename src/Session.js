@@ -7,6 +7,7 @@ class Session {
             this.playerName = props.playerName;
             this.currentGame = props.currentGame;
             this.permissions = props.permissions;
+            this.friends = props.friends;
         } else {
             this.loggedIn = false;
             this.id = "";
@@ -19,6 +20,7 @@ class Session {
             this.permissions = {
                 createGame: false,
             }
+            this.friends = [];
         }
     }
 }
