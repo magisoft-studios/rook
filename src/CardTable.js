@@ -16,7 +16,7 @@ class CardTable extends Component {
         super(props);
         this.state = {
             bidValue: "Pass",
-            trumpValue: "Black",
+            trumpValue: "Red",
         }
         if (props.gameData.type === "Elements") {
             this.cardDeck = ElementsCards;
@@ -44,6 +44,14 @@ class CardTable extends Component {
             if (this.props.gameData.state === GameStates.BIDDING) {
                 this.setState({
                     bidValue: CardTable.calcDefaultBidValue(this.props.gameData),
+                });
+            } else if (this.props.gameData.state === GameStates.NAME_TRUMP) {
+                let defaultTrumpValue = "Air";
+                if (this.props.gameData.type === "Rook") {
+                    defaultTrumpValue = "Yellow";
+                }
+                this.setState( {
+                    trumpValue: defaultTrumpValue
                 });
             }
         }
