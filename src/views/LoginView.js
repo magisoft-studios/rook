@@ -11,7 +11,6 @@ class LoginView extends Component {
             password: "",
         }
         this.userNameInput = React.createRef();
-        this.resizeTimer = null;
     }
 
     componentDidMount() {
@@ -118,10 +117,7 @@ class LoginView extends Component {
         return (
             <div className="loginViewDiv">
                 <div className="loginWelcomeMsg">
-                    <span>Welcome to Jennings Gaming!</span>
-                </div>
-                <div className="loginInstructionMsg">
-                    <span className="loginInstructionText">Please sign in to continue</span>
+                    <span>Please sign in to continue</span>
                 </div>
                 <div className="loginGoogleDiv">
                     <span className="loginInstructionText">Sign in with Google account</span>

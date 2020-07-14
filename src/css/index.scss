@@ -55,7 +55,6 @@ body {
   list-style-type: none;
   margin: 0;
   color: black;
-  color: black;
   font-weight: bold;
   font-size: 28px;
 }
@@ -74,9 +73,30 @@ body {
   color: white;
 }
 
+.accountMenu {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  background-color: #B4DFC1;
+  height: 40px;
+  width: 800px;
+}
+
+.accountMenuHeader {
+  background-color: #B4DFC1;
+  padding: 0;
+}
+
+.accountMenuButton {
+  @include jg-button;
+  margin-left: 10px;
+}
+
 /* This is the React Router .active class for when I menu item is selected. */
 .active {
-  background-color: #067325;
+  /* background-color: #067325; */
+  background-color: darkBlue;
 }
 
 .logoContainer {

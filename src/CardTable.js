@@ -108,8 +108,8 @@ class CardTable extends Component {
 
     static calcDefaultBidValue = (gameData) => {
         let defaultBid = "";
-        let minBid = 70;
-        let maxBid = 180;
+        let minBid = gameData.minBid;
+        let maxBid = gameData.maxBid;
 
         let currentHighBid = gameData.highBid;
         if (currentHighBid === maxBid) {
@@ -137,9 +137,9 @@ class CardTable extends Component {
         let bidOptions = [];
 
         let highBid = gameData.highBid;
-        let minBid = 70;
+        let minBid = gameData.minBid;
         let nextBid = (highBid >= minBid) ? highBid + 5 : minBid;
-        let maxBid = 180;
+        let maxBid = gameData.maxBid;
 
         // Only include PASS as an option if all other players have not PASSED.
         let passCntr = 0;

@@ -15,10 +15,12 @@ import StoreView from './views/StoreView';
 import GuidesView from './views/GuidesView';
 import ReviewsView from './views/ReviewsView';
 import TestView from './views/TestView';
+import AccountView from './views/AccountView';
 import images from "./Images";
 import Session from './Session';
 import Game from './Game';
 import ConnectionTest from './ConnectionTest';
+import MyButton from "./MyButton";
 
 const TEST = false;
 
@@ -34,9 +36,10 @@ class Main extends Component {
         this.state = {
             session: session,
             showGameWindow: false,
-            redirectRoute: "",
+            redirectRoute: "/",
             gameData: null,
             mediaSettings: {},
+            lastView: "/",
         }
 
         this.context = {};
@@ -46,6 +49,23 @@ class Main extends Component {
         this.setState({
             mediaSettings: mediaSettings,
         });
+    }
+
+    handleNav = (viewRoute) => {
+        this.setState( {
+            redirectRoute: "",
+            lastView: viewRoute
+        });
+    }
+
+    handleSignInBtnClick = () => {
+        this.setState({
+            redirectRoute: '/login',
+        });
+    }
+
+    handleSignOutBtnClick = () => {
+        this.doLogout();
     }
 
     handleLogin = (reply) => {
@@ -66,6 +86,32 @@ class Main extends Component {
         this.setState({
             session: session,
             mediaSettings: mediaSettings,
+            redirectRoute: this.state.lastView,
+        });
+    }
+
+    doLogout = async () => {
+        let session = this.state.session;
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                sessionId: session.id,
+            })
+        };
+        try {
+            const response = await fetch('/user/logout', requestOptions);
+            if (!response.ok) {
+                const jsonResp = await response.json();
+                console.log(`doLogout: response: ${JSON.stringify(jsonResp)}`);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+
+        this.setState({
+            session: new Session(),
+            redirectRoute: '/',
         });
     }
 
@@ -81,7 +127,7 @@ class Main extends Component {
         try {
             const response = await fetch('/rook/getGameData', requestOptions);
             if (!response.ok) {
-                throw Error(response.statusText);
+                console.log(`Main: getGameData: ${response.statusText}`);
             } else {
                 const jsonResp = await response.json();
                 let status = jsonResp.rookResponse.status;
@@ -147,7 +193,6 @@ class Main extends Component {
                 ...this.state,
                 session: session,
                 showGameWindow: true,
-                redirectToGame: true,
                 gameData: gameData,
             });
         });
@@ -159,8 +204,8 @@ class Main extends Component {
         let gameMenuItem = null;
         let gameRoute = null;
         let game = null;
-        let redirect = null;
-        if (this.state.showGameWindow) {
+
+        if (session.loggedIn && (this.state.showGameWindow)) {
             if ((this.state.gameData.type === "Rook") || (this.state.gameData.type === "Elements")) {
                 game = <Game
                     sessionId={session.id}
@@ -176,54 +221,100 @@ class Main extends Component {
                     gameData={this.state.gameData}
                     onExit={this.handleExitGame}/>;
             }
-            gameMenuItem = <li className="mainMenuItem"><NavLink to="/game">Game</NavLink></li>;
-            gameRoute = <Route path="/game">{game}</Route>;
+            gameMenuItem =
+                <li key="gameMenuItem" className="mainMenuItem">
+                    <NavLink to="/game" onClick={() => this.handleNav("/game")}>Game</NavLink>
+                </li>;
+            gameRoute = <Route key="gameRoute" path="/game">{game}</Route>;
+        }
+
+        let mainMenuItems = [];
+        let accountMenuItems = [];
+        let accountMenuBtns = [];
+        let contentAreaItems = [];
+
+        mainMenuItems.push(
+            <li key="homeMenuItem" className="mainMenuItem">
+                <NavLink to="/" exact onClick={() => this.handleNav('/')}>Home</NavLink>
+            </li>);
+        mainMenuItems.push(
+            <li key="storeMenuItem" className="mainMenuItem">
+                <NavLink to="/store" onClick={() => this.handleNav('/store')}>Store</NavLink>
+            </li>);
+        mainMenuItems.push(
+            <li key="guidesMenuItem" className="mainMenuItem">
+                <NavLink to="/guides" onClick={() => this.handleNav('/guides')}>Guides</NavLink>
+            </li>);
+        mainMenuItems.push(
+            <li key="reviewsMenuItem" className="mainMenuItem">
+                <NavLink to="/reviews" onClick={() => this.handleNav('/reviews')}>Reviews</NavLink>
+            </li>);
+        mainMenuItems.push(
+            <li key="lobbyMenuItem" className="mainMenuItem">
+                <NavLink to="/lobby" onClick={() => this.handleNav('/lobby')}>Lobby</NavLink>
+            </li>);
+
+        if (TEST) {
+            mainMenuItems.push(
+                <li key="testMenuItem" className="mainMenuItem">
+                    <NavLink to="/test" onClick={() => this.handleNav('/test')}>Test</NavLink>
+                </li>);
+        }
+
+        if (session.loggedIn) {
+            mainMenuItems.push(gameMenuItem);
+
+            accountMenuItems.push(
+                <li key="accountMenuItem" className="mainMenuItem">
+                    <NavLink to="/account" onClick={() => this.handleNav('/account')}>My Profile</NavLink>
+                </li>);
+            accountMenuBtns.push(
+                <MyButton
+                    key="signInMenuItem"
+                    btnClass="accountMenuButton"
+                    btnText="Sign Out"
+                    onClick={this.handleSignOutBtnClick}>
+                </MyButton>
+            );
+        } else {
+            accountMenuBtns.push(
+                <MyButton
+                    key="signOutMenuItem"
+                    btnClass="accountMenuButton"
+                    btnText="Sign In"
+                    onClick={this.handleSignInBtnClick}>
+                </MyButton>
+            );
+        }
+
+        // CONTENT AREA ITEMS
+
+        contentAreaItems.push(<Route key="homeRoute" exact path="/"><HomeView/></Route>);
+        contentAreaItems.push(<Route key="storeRoute" path="/store"><StoreView/></Route>);
+        contentAreaItems.push(<Route key="guidesRoute" path="/guides"><GuidesView/></Route>);
+        contentAreaItems.push(<Route key="reviewsRoute" path="/reviews"><ReviewsView/></Route>);
+
+        if (session.loggedIn) {
+            contentAreaItems.push(
+                <Route key="lobbyRoute" path="/lobby">
+                    <LobbyView cookies={this.props.cookies} onEnterGame={this.handleEnterGame}/>
+                </Route>
+            );
+            contentAreaItems.push(gameRoute);
+            contentAreaItems.push(<Route key="accountRoute" path="/account"><AccountView/></Route>);
+        } else {
+            contentAreaItems.push(<Route key="lobbyRoute" path="/lobby"><LoginView onLogin={this.handleLogin}/></Route>);
+            contentAreaItems.push(<Route key="loginRoute" path="/login"><LoginView onLogin={this.handleLogin}/></Route>);
+        }
+
+        if (TEST) {
+            contentAreaItems.push(<Route key="testRoute" path="/test"><TestView openTestGame={this.openTestGame}/></Route>);
         }
 
         if (this.state.redirectRoute.length > 0) {
-            redirect = <Redirect to={this.state.redirectRoute} />
+            contentAreaItems.push(<Redirect key="redirectRoute" to={this.state.redirectRoute} />);
         }
 
-        let testRoute = null;
-        let testMenuItem = null;
-        if (TEST) {
-            testRoute = (
-                <Route path="/test">
-                    <TestView openTestGame={this.openTestGame} />
-                </Route>
-            )
-            testMenuItem = <li className="mainMenuItem"><NavLink to="/test">Test</NavLink></li>;
-        }
-
-        let contentArea = null;
-        if (session.loggedIn) {
-            contentArea = (
-                <div className="contentArea">
-                    <Route exact path="/">
-                        <HomeView/>
-                    </Route>
-                    <Route path="/store">
-                        <StoreView/>
-                    </Route>
-                    <Route path="/guides">
-                        <GuidesView/>
-                    </Route>
-                    <Route path="/reviews">
-                        <ReviewsView/>
-                    </Route>
-                    <Route path="/lobby">
-                        <LobbyView cookies={this.props.cookies} onEnterGame={this.handleEnterGame}/>
-                    </Route>
-                    {testRoute}
-                    {gameRoute}
-                    {redirect}
-                </div>
-            );
-        } else {
-            contentArea = (
-                <LoginView onLogin={this.handleLogin}/>
-            );
-        }
 
         return (
             <AppContext.Provider value={
@@ -247,18 +338,20 @@ class Main extends Component {
                             </div>
                             <div className="mainMenu">
                                 <ul className="mainMenuHeader">
-                                    <li className="mainMenuItem"><NavLink to="/" exact>Home</NavLink></li>
-                                    <li className="mainMenuItem"><NavLink to="/store">Store</NavLink></li>
-                                    <li className="mainMenuItem"><NavLink to="/guides">Guides</NavLink></li>
-                                    <li className="mainMenuItem"><NavLink to="/reviews">Reviews</NavLink></li>
-                                    <li className="mainMenuItem"><NavLink to="/lobby">Lobby</NavLink></li>
-                                    {testMenuItem}
-                                    {gameMenuItem}
+                                    {mainMenuItems}
                                 </ul>
+                            </div>
+                            <div className="accountMenu">
+                                <ul className="accountMenuHeader">
+                                    {accountMenuItems}
+                                </ul>
+                                {accountMenuBtns}
                             </div>
                         </div>
                         <div className="mainView">
-                            {contentArea}
+                            <div className="contentArea">
+                                {contentAreaItems}
+                            </div>
                         </div>
                     </div>
                 </HashRouter>
