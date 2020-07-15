@@ -26,7 +26,8 @@ class MyButton extends Component {
         return (
             <button
                 className={this.props.btnClass}
-                onClick={() => this.handleClick()}>
+                onClick={() => this.handleClick()}
+                disabled={this.props.disabled}>
                 <img
                     key={this.props.imgKey}
                     className={this.props.imgClass}

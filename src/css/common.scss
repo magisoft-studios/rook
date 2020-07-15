@@ -1,6 +1,8 @@
 $cfgDlgBgColor: #cce5d9;
 $btnBgColor: #067325;
 $btnTextColor: white;
+$jg-font-family: SansSerif;
+
 
 @mixin jg-button {
   padding-top: 4px;
@@ -13,6 +15,10 @@ $btnTextColor: white;
   font-family: SansSerif;
   font-size: 16px;
   cursor: pointer;
+
+  &:disabled {
+    background-color: lightGray;
+  }
 }
 
 .jgNormalBtn {

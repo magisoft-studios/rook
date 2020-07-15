@@ -130,7 +130,7 @@ class AccountView extends Component {
                 </div>
                 <div className="accountViewFriendsDiv">
                     <div className="accountViewFriendsTableDiv">
-                        <span className="accountViewSectionTitle">Friends/Family</span>
+                        <span className="accountViewSectionTitle">Friends/Family List</span>
                         {friendsTable}
                     </div>
                     <div className="accountViewAddFriendDiv">

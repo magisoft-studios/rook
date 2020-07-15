@@ -3,51 +3,174 @@
 .newGameDlgDiv {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   background-color: #cce5d9;
   border-style: inset;
   border-width: 2px;
   border-color: #B4DFC1;
   margin-top: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
+  width: 460px;
 }
 
-.newGameDlgFormDiv {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  margin: 10px;
+.newGameDlgTitle {
+  margin-top: 10px;
+  font-family: $jg-font-family;
+  font-weight: bold;
+  font-size: 20px;
 }
 
 .newGameDlgGameNameLabel {
-  margin-top: 10px;
+  margin-top: 20px;
+  font-family: $jg-font-family;
+  font-size: 16px;
 }
 
 .newGameDlgGameNameText {
   margin-top: 10px;
-  width: 200px;
+  font-family: $jg-font-family;
+  font-size: 16px;
+  width: 300px;
 }
 
 .newGameDlgGameTypeLabel {
   margin-top: 20px;
+  font-family: $jg-font-family;
+  font-size: 16px;
 }
 
 .newGameDlgGameTypeText {
   margin-top: 10px;
+  font-family: $jg-font-family;
+  font-size: 16px;
+  width: 308px;
+  height: 28px;
 }
 
-.newGameDlgInviteesLabel {
+.newGameDlgInviteesSectionTitle {
   margin-top: 20px;
+  font-family: $jg-font-family;
+  font-size: 16px;
 }
 
-.newGameBtnDiv {
+.newGameDlgInviteesSectionDiv {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  border-style: solid;
+  border-width: 1px;
+  border-color: black;
+  margin-top: 10px;
+  width: 420px;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-bottom: 10px;
+}
+
+.newGameDlgInviteesTableDiv {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.newGameDlgInviteesTable {
+  margin-top: 10px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: black;
+  font-family: $jg-font-family;
+  font-size: 16px;
+  width: 420px;
+}
+
+.newGameDlgInviteesTable th {
+  border-style: solid;
+  border-width: 1px;
+  border-color: black;
+}
+
+.newGameDlgInviteesTable td {
+  border-style: solid;
+  border-width: 1px;
+  border-color: black;
+  padding: 5px;
+}
+
+.newGameDlgRemoveInviteeBtn {
+  @include jg-button;
+}
+
+.newGameDlgAddInviteesDiv {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 420px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: black;
+}
+
+.newGameDlgAddInviteeMsgText {
   margin-top: 20px;
+  font-family: $jg-font-family;
+  font-size: 16px;
+}
+
+.newGameDlgInviteesSelectDiv {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  margin-top: 15px;
+}
+
+.newGameDlgInviteesSelect {
+  font-family: $jg-font-family;
+  font-weight: normal;
+  font-size: 16px;
+  margin-top: 10px;
+  width: 308px;
+  height: 28px;
+}
+
+.newGameAddInviteeSelectBtn {
+  @include jg-button;
+  margin-left: 20px;
+}
+
+.newGameDlgInviteesTextDiv {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.newGameDlgInviteeText {
+  font-family: $jg-font-family;
+  font-weight: normal;
+  font-size: 16px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  width: 300px;
+}
+
+.newGameAddInviteeTextBtn {
+  @include jg-button;
+  margin-left: 20px;
+}
+
+.newGameDlgBtnDiv {
+  margin-top: 30px;
   margin-bottom: 20px;
   display: flex;
   flex-direction: row;
   justify-content: center;
+  width: 460px;
 }
 
-.newGameSubmitBtn {
+.newGameDlgOkBtn {
   padding: 4px;
   background-color: #067325;
   color: white;
@@ -55,11 +178,12 @@
   width: 100px;
 }
 
-.newGameCancelBtn {
+.newGameDlgCancelBtn {
   padding: 4px;
   background-color: #067325;
   color: white;
   border-radius: 10%;
   width: 100px;
+  margin-left: 10px;
 }
 

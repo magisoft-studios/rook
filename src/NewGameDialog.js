@@ -1,8 +1,7 @@
 import React, { Component } from 'react'
 import './css/NewGameDialog.scss';
 import AppContext from "./ContextLib";
-import LobbyView from "./views/LobbyView";
-import GameStates from "./GameStates";
+import MyButton from "./MyButton";
 
 class NewGameDialog extends Component {
     constructor(props) {
@@ -10,27 +9,33 @@ class NewGameDialog extends Component {
         this.state = {
             gameName: "",
             gameType: "Elements",
-            invitee1: props.friends[0],
-            invitee2: props.friends[1],
-            invitee3: props.friends[2],
+            invitees: [],
+            inviteeText: "",
+            inviteeSelect: ""
         }
 
         this.gameNameInput = React.createRef();
     }
 
     componentDidUpdate(prevProps, prevState) {
-        if (prevState.invitee1.length === 0) {
-            this.setState({
-                invitee1: this.context.session.friends[0],
-                invitee2: this.context.session.friends[1],
-                invitee3: this.context.session.friends[2],
-            });
+        console.log(`componentDidUpdate: inviteeSelect length = ${this.state.inviteeSelect.length}`);
+        if ((this.state.inviteeSelect.length === 0) || (prevState.invitees.length != this.state.invitees.length)) {
+            let friendList = this.filterFriendsList();
+            if (friendList.length > 0) {
+                this.setState({
+                    inviteeSelect: friendList[0]
+                });
+            }
         }
     }
 
     componentDidMount() {
-        if (this.props.show) {
-            this.gameNameInput.current.focus();
+        this.gameNameInput.current.focus();
+        let friendList = this.filterFriendsList();
+        if (friendList.length > 0) {
+            this.setState({
+                inviteeSelect: friendList[0]
+            });
         }
     }
 
@@ -42,129 +47,181 @@ class NewGameDialog extends Component {
         this.setState({gameType: event.target.value});
     }
 
-    handleInvitee1Change = (event) => {
-        this.setState({invitee1: event.target.value});
+    handleInviteeTextChange = (event) => {
+        this.setState({inviteeText: event.target.value});
     }
 
-    handleInvitee2Change = (event) => {
-        this.setState({invitee2: event.target.value});
+    handleInviteeSelectChange = (event) => {
+        this.setState({inviteeSelect: event.target.value});
     }
 
-    handleInvitee3Change = (event) => {
-        this.setState({invitee3: event.target.value});
+    handleAddInvitee = async (invitee) => {
+        console.log(`handleAddInvitee: ${invitee}`);
+        if (invitee.length > 0) {
+            let invitees = this.state.invitees.slice();
+            invitees.push(invitee);
+            this.setState({
+                invitees: invitees,
+                inviteeText: ""
+            });
+        }
     }
 
-    handleSubmit = (event) => {
-        event.preventDefault();
+    handleRemoveInvitee = async (invitee) => {
+        let invitees = this.state.invitees.filter((email) => {
+            return (email !== invitee);
+        });
+        this.setState( {
+            invitees: invitees
+        });
+    }
+
+    handleOkBtn = () => {
         if (this.state.gameName.length === 0) {
             alert("Please enter a game name!");
-        }
-        if (this.state.invitee1.length === 0) {
+            return;
+        } else if (this.state.invitees.length < 3) {
             alert("You must invite 3 other players!");
+            return
         }
-        if (this.state.invitee2.length === 0) {
-            alert("You must invite 3 other players!");
-        }
-        if (this.state.invitee3.length === 0) {
-            alert("You must invite 3 other players!");
-        }
-        let inviteeList = [
-            this.state.invitee1.trim(),
-            this.state.invitee2.trim(),
-            this.state.invitee3.trim()
-        ];
-        this.props.onOk(this.state.gameName, this.state.gameType, inviteeList);
+        this.props.onOk(this.state.gameName, this.state.gameType, this.state.invitees);
     }
 
-    createInviteeOptions = (invitedFriends) => {
+    filterFriendsList = () => {
         let friends = this.context.session.friends;
         let filteredFriends = friends.filter( (friend) => {
-            return (! invitedFriends.includes(friend));
+            return (! this.state.invitees.includes(friend));
         });
         return filteredFriends;
     }
 
     render() {
-        let options1 = this.createInviteeOptions([this.state.invitee2, this.state.invitee3]);
-        let invitee1Options = [];
-        for (let i = 0; i < options1.length; i++) {
-            let invitee = options1[i];
-            invitee1Options.push(<option key={invitee} value={invitee}>{invitee}</option>);
+        let availableFriends = this.filterFriendsList();
+        let inviteeOptions = [];
+        availableFriends.forEach( (friend) => {
+            inviteeOptions.push(<option key={friend} value={friend}>{friend}</option>);
+        });
+
+        let inviteesTable = null;
+        let inviteeCmpnts = [];
+        let inviteeList = this.state.invitees;
+        inviteeList.forEach((invitee, index) => {
+            inviteeCmpnts.push(
+                <tr key={invitee}>
+                    <td>{invitee}</td>
+                    <td>
+                        <MyButton
+                            btnClass="newGameDlgRemoveInviteeBtn"
+                            btnText="Remove"
+                            onClick={this.handleRemoveInvitee}
+                            onClickValue={invitee}>
+                        </MyButton>
+                    </td>
+                </tr>
+            )
+        });
+
+        if (inviteeList.length < 3) {
+            inviteeCmpnts.push(
+                <tr key="placeholder">
+                    <td>Must invite {3 - inviteeList.length} more players!</td>
+                    <td></td>
+                </tr>
+            )
         }
 
-        let options2 = this.createInviteeOptions([this.state.invitee1, this.state.invitee3]);
-        let invitee2Options = [];
-        for (let i = 0; i < options2.length; i++) {
-            let invitee = options2[i];
-            invitee2Options.push(<option key={invitee} value={invitee}>{invitee}</option>);
-        }
-
-        let options3 = this.createInviteeOptions([this.state.invitee1, this.state.invitee2]);
-        let invitee3Options = [];
-        for (let i = 0; i < options3.length; i++) {
-            let invitee = options3[i];
-            invitee3Options.push(<option key={invitee} value={invitee}>{invitee}</option>);
-        }
+        inviteesTable = (
+            <table className="newGameDlgInviteesTable">
+                <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {inviteeCmpnts}
+                </tbody>
+            </table>
+        );
 
         return (
             <div className="newGameDlgDiv">
-                <form onSubmit={this.handleSubmit}>
-                    <div className="newGameDlgFormDiv">
-                        <label className="newGameDlgGameNameLabel" htmlFor="gameName">Game Name</label>
-                        <input
-                            ref={this.gameNameInput}
-                            className="newGameDlgGameNameText"
-                            type="text"
-                            id="gameName"
-                            name="gameName"
-                            value={this.state.gameName}
-                            onChange={this.handleNameChange}/>
-                        <label className="newGameDlgGameTypeLabel" htmlFor="gameType">Game Type</label>
-                        <select
-                            className="newGameDlgGameTypeText"
-                            id="gameType"
-                            name="gameType"
-                            value={this.state.gameType}
-                            onChange={this.handleTypeChange}>
-                            <option value="Elements">Elements</option>
-                            <option value="Rook">Rook</option>
-                            <option value="ConnectionTest">ConnectionTest</option>
-                        </select>
-                        <label className="newGameDlgInviteesLabel" htmlFor="gameInvitee1">Invitee 1</label>
-                        <select
-                            className="newGameDlgInviteesText"
-                            id="gameInvitee1"
-                            name="gameInvitee1"
-                            value={this.state.invitee1}
-                            onChange={this.handleInvitee1Change}>
-                            {invitee1Options}
-                        </select>
-                        <label className="newGameDlgInviteesLabel" htmlFor="gameInvitee2">Invitee 2</label>
-                        <select
-                            className="newGameDlgInviteesText"
-                            id="gameInvitee2"
-                            name="gameInvitee2"
-                            value={this.state.invitee2}
-                            onChange={this.handleInvitee2Change}>
-                            {invitee2Options}
-                        </select>
-                        <label className="newGameDlgInviteesLabel" htmlFor="gameInvitee3">Invitee 3</label>
-                        <select
-                            className="newGameDlgInviteesText"
-                            id="gameInvitee3"
-                            name="gameInvitee3"
-                            value={this.state.invitee3}
-                            onChange={this.handleInvitee3Change}>
-                            {invitee3Options}
-                        </select>
-                        <div className="newGameBtnDiv">
-                            <input className="newGameSubmitBtn" type="submit" value="OK"/>
-                            <button type="button"
-                                    className="newGameCancelBtn"
-                                    onClick={this.props.onCancel}>Cancel</button>
+                <span className="newGameDlgTitle">Create New Game</span>
+                <label className="newGameDlgGameNameLabel" htmlFor="newGameName">Game Name</label>
+                <input
+                    ref={this.gameNameInput}
+                    className="newGameDlgGameNameText"
+                    type="text"
+                    id="newGameName"
+                    name="newGameName"
+                    value={this.state.gameName}
+                    onChange={this.handleNameChange}
+                />
+                <label className="newGameDlgGameTypeLabel" htmlFor="newGameType">Game Type</label>
+                <select
+                    className="newGameDlgGameTypeText"
+                    id="newGameType"
+                    name="newGameType"
+                    value={this.state.gameType}
+                    onChange={this.handleTypeChange}>
+                    <option value="Elements">Elements</option>
+                </select>
+                <span className="newGameDlgInviteesSectionTitle">Invitees</span>
+                <div className="newGameDlgInviteesSectionDiv">
+                    <div className="newGameDlgInviteesTableDiv">
+                        {inviteesTable}
+                    </div>
+                    <div className="newGameDlgAddInviteesDiv">
+                        <span className="newGameDlgAddInviteeMsgText">Select from your friend list or type an email address.</span>
+                        <span className="newGameDlgAddInviteeMsgText">(You can modify your friend list on the 'My Profile' page).</span>
+                        <div className="newGameDlgInviteesSelectDiv">
+                            <select
+                                className="newGameDlgInviteesSelect"
+                                id="newGameInviteeSelect"
+                                name="newGameInviteeSelect"
+                                value={this.state.inviteeSelect}
+                                onChange={this.handleInviteeSelectChange}>
+                                {inviteeOptions}
+                            </select>
+                            <MyButton
+                                btnClass="newGameAddInviteeSelectBtn"
+                                btnText="Add"
+                                disabled={((this.state.inviteeSelect.length === 0) || (this.state.invitees.length === 3))}
+                                onClick={this.handleAddInvitee}
+                                onClickValue={this.state.inviteeSelect}>
+                            </MyButton>
+                        </div>
+                        <div className="newGameDlgInviteesTextDiv">
+                            <input
+                                className="newGameDlgInviteeText"
+                                type="text"
+                                id="newGameInviteeText"
+                                name="newGameInviteeText"
+                                value={this.state.inviteeText}
+                                onChange={this.handleInviteeTextChange}
+                            />
+                            <MyButton
+                                btnClass="newGameAddInviteeTextBtn"
+                                btnText="Add"
+                                disabled={((this.state.inviteeText.length === 0) || (this.state.invitees.length === 3))}
+                                onClick={this.handleAddInvitee}
+                                onClickValue={this.state.inviteeText}>
+                            </MyButton>
                         </div>
                     </div>
-                </form>
+                </div>
+                <div className="newGameDlgBtnDiv">
+                    <MyButton
+                        btnClass="newGameDlgOkBtn"
+                        btnText="OK"
+                        onClick={this.handleOkBtn}>
+                    </MyButton>
+                    <MyButton
+                        btnClass="newGameDlgCancelBtn"
+                        btnText="Cancel"
+                        onClick={this.props.onCancel}>
+                    </MyButton>
+                </div>
             </div>
         );
     }
