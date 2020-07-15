@@ -27,6 +27,7 @@ const TEST = false;
 class Main extends Component {
     constructor(props) {
         super(props);
+        console.log(`Main: env = ${process.env.NODE_ENV}`);
         let session = new Session();
 
         if (TEST) {
