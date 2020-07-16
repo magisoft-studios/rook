@@ -19,7 +19,7 @@ class NewGameDialog extends Component {
 
     componentDidUpdate(prevProps, prevState) {
         console.log(`componentDidUpdate: inviteeSelect length = ${this.state.inviteeSelect.length}`);
-        if ((this.state.inviteeSelect.length === 0) || (prevState.invitees.length != this.state.invitees.length)) {
+        if ((this.state.inviteeSelect.length === 0) || (prevState.invitees.length !== this.state.invitees.length)) {
             let friendList = this.filterFriendsList();
             if (friendList.length > 0) {
                 this.setState({

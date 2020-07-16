@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import GameStates from './GameStates';
 
 class Cam extends Component {
     constructor(props) {

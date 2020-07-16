@@ -10,7 +10,7 @@ class RemoteCam extends Component {
     }
 
     componentDidUpdate(prevProps) {
-        if (this.props.mediaStream != prevProps.mediaStream) {
+        if (this.props.mediaStream !== prevProps.mediaStream) {
             this.updateMediaStream(this.props.mediaStream);
         }
     }

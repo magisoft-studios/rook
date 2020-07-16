@@ -500,7 +500,6 @@ class CardTable extends Component {
                         btnValue: {action: PlayerActions.TAKE_TRICK},
                     });
                 } else {
-                    let trickWinner = gameData[gameData.trick.winnerPosn];
                     tableMsgArea = this.setupTableMsgArea([gameData.stateText]);
                 }
                 break;

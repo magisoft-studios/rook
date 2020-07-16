@@ -1,5 +1,4 @@
 import Team from './Team';
-import Player from './Player';
 
 class LobbyGameData {
     constructor(creatorId, name, type, maxTeams, maxPlayers) {

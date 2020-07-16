@@ -10,8 +10,6 @@ import GameStates from '../GameStates';
 import CamCfg from '../CamCfg';
 import '../css/LobbyView.scss';
 import LobbyGameData from '../data/LobbyGameData';
-import Team from '../data/Team';
-import Player from '../data/Player';
 
 class LobbyView extends Component {
     constructor(props) {

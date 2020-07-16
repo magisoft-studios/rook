@@ -72,7 +72,7 @@ class ConnectionTest extends Component {
             this.sentEnterGame = true;
             this.sendEnterGame();
         } else if ((this.state.gameData.state === GameStates.INIT_STREAM) &&
-            (prevState.gameData.state != GameStates.INIT_STREAM)) {
+            (prevState.gameData.state !== GameStates.INIT_STREAM)) {
             console.log(`componentDidUpdate: setting connectionState to initStream`);
             this.setState({ connectionState: 'initStream' });
         } else if (this.state.connectionState === 'initStream') {
@@ -186,7 +186,6 @@ class ConnectionTest extends Component {
 
     handleCamConnConnected = async (name) => {
         console.log(`ConnectionTest: handleCamConnConnected from ${name}`);
-        let gameData = this.state.gameData;
         if (this.state.connectionState === 'negotiating') {
             if (this.camConnMap && (this.camConnMap.size === 1)) {
                 let allConnected = true;

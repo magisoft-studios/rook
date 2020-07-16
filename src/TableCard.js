@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import cards from "./CommonCards";
 
 class TableCard extends Component {
     render() {

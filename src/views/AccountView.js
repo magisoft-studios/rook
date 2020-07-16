@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import MyButton from "../MyButton";
 import '../css/AccountView.scss';
 import AppContext from "../ContextLib";
-import LobbyView from "./LobbyView";
 
 class AccountView extends Component {
     constructor(props) {

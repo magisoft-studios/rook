@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import MyButton from './MyButton';
 import './css/PlayerCard.scss';
-import cards from "./CommonCards";
 
 class PlayerCard extends Component {
     render() {

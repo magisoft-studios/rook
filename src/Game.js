@@ -20,8 +20,6 @@ import './css/Game.scss';
 import MyButton from "./MyButton";
 import PlayerCard from "./PlayerCard";
 
-const RESIZE_TIMEOUT = 100;
-
 class Game extends Component {
     constructor(props) {
         super(props);
@@ -107,7 +105,7 @@ class Game extends Component {
             this.sentEnterGame = true;
             this.sendEnterGame();
         } else if ((this.state.gameData.state === GameStates.INIT_STREAM) &&
-            (prevState.gameData.state != GameStates.INIT_STREAM)) {
+            (prevState.gameData.state !== GameStates.INIT_STREAM)) {
             console.log(`componentDidUpdate: setting connectionState to initStream`);
             this.setState({ connectionState: 'initStream' });
         } else if (this.state.connectionState === 'initialize') {
@@ -239,7 +237,6 @@ class Game extends Component {
 
     handleCamConnConnected = async (name) => {
         console.log(`Game: handleCamConnConnected from ${name}`);
-        let gameData = this.state.gameData;
         if (this.state.connectionState === 'negotiating') {
             if (this.camConnMap && (this.camConnMap.size === 3)) {
                 let allConnected = true;
@@ -659,12 +656,7 @@ class Game extends Component {
     render() {
         console.log("Game: render");
         let gameData = this.state.gameData;
-
-        let topPlayer = gameData[this.posns.topPlayerPosn];
-        let leftPlayer = gameData[this.posns.leftPlayerPosn];
-        let rightPlayer = gameData[this.posns.rightPlayerPosn];
         let bottomPlayer = gameData[this.posns.bottomPlayerPosn];
-
         let playerCardCmpnts = this.getPlayerCardCmpnts(bottomPlayer.cards, gameData);
 
         let topCam =

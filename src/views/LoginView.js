@@ -1,14 +1,9 @@
 import React, { Component } from 'react'
-import MyButton from "../MyButton";
 import '../css/LoginView.scss';
 import GoogleLogin from 'react-google-login';
 import SpecialLogin from '../SpecialLogin';
 
 class LoginView extends Component {
-    constructor(props) {
-        super(props);
-    }
-
     doGoogleLogin = async (token) => {
         console.log("doGoogleLogin START");
         const requestOptions = {
