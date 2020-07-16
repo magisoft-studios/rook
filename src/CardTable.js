@@ -266,15 +266,37 @@ class CardTable extends Component {
         );
     }
 
-    setupCardArea = (gameData, player, cardId, cardAreaClass) => {
+    setupOtherCardArea = (gameData, player, cardId, waitCardAreaClass, cardAreaMsgClass) => {
         let cardArea = null;
         if (player.state === PlayerStates.PLAY_CARD) {
             cardArea = (
-                <div className={cardAreaClass}>
-                    <span className="playerWaitCardText">?</span>
+                <div className={cardAreaMsgClass}>
+                    <span className="playerPlayCardText">Waiting for {player.name}</span>
                 </div>
             );
         } else if (cardId != null) {
+            if (cardId === 'cardElemental') {
+                if (gameData.trumpSuit && (gameData.trumpSuit.length > 0)) {
+                    cardId = 'card' + gameData.trumpSuit + 'Elemental';
+                }
+            }
+            let imgSrc = this.cardDeck[cardId];
+            cardArea = (
+                <div className={waitCardAreaClass}><TableCard imgSrc={imgSrc}/></div>
+            )
+        } else {
+            cardArea = (
+                <div className={waitCardAreaClass}>
+                    <span className="waitCardText">?</span>
+                </div>
+            );
+        }
+        return cardArea;
+    }
+
+    setupMyCardArea = (gameData, player, cardId, cardAreaClass) => {
+        let cardArea = null;
+        if (cardId != null) {
             if (cardId === 'cardElemental') {
                 if (gameData.trumpSuit && (gameData.trumpSuit.length > 0)) {
                     cardId = 'card' + gameData.trumpSuit + 'Elemental';
@@ -347,6 +369,7 @@ class CardTable extends Component {
                 break;
 
             case GameStates.BIDDING:
+                kittyArea = this.createKittyCardArea(gameData, false);
                 topBidArea = this.setupBidArea(gameData, playerPosns.topPlayerPosn, "topPlayerBidArea");
                 leftBidArea = this.setupBidArea(gameData, playerPosns.leftPlayerPosn, "leftPlayerBidArea");
                 rightBidArea = this.setupBidArea(gameData, playerPosns.rightPlayerPosn, "rightPlayerBidArea");
@@ -354,6 +377,7 @@ class CardTable extends Component {
                 if (playerState === PlayerStates.BID) {
                     let bidOptions = this.calcBidOptions(gameData);
                     playerActionArea = this.setupPlayerActionArea({
+                        msg1Text: "Press down-arrow to choose bid",
                         selValue: this.state.bidValue,
                         selHandler: this.handleBidSelect,
                         selOptions: bidOptions,
@@ -362,12 +386,13 @@ class CardTable extends Component {
                         btnValue: {action: PlayerActions.BID, value: this.state.bidValue},
                     });
                 } else {
-                    kittyArea = this.createKittyCardArea(gameData, false);
                     bottomBidArea = this.setupBidArea(gameData, playerPosns.bottomPlayerPosn, "bottomPlayerBidArea");
+                    tableMsgArea = this.setupTableMsgArea([gameData.stateText]);
                 }
                 break;
 
             case GameStates.BID_WON:
+                kittyArea = this.createKittyCardArea(gameData, false);
                 if (player.state === PlayerStates.BID_WON) {
                     let msgText = "You won the bid at " + this.calcBidText(player);
                     playerActionArea = this.setupPlayerActionArea({
@@ -380,16 +405,16 @@ class CardTable extends Component {
                         btnValue: {action: PlayerActions.BID_WON},
                     });
                 } else {
-                    // Just show a message saying who won the bid.
                     tableMsgArea = this.setupTableMsgArea([gameData.stateText]);
                 }
                 break;
 
             case GameStates.NAME_TRUMP:
+                kittyArea = this.createKittyCardArea(gameData, false);
                 if (player.state === PlayerStates.WAIT_FOR_TRUMP) {
                     tableMsgArea = this.setupTableMsgArea([player.stateText]);
                 } else {
-                    let msgText = "Select your trump suit";
+                    let msgText = "Press the down-arrow to choose your trump suit";
                     let selOptions = [
                         <option value="Black">Black</option>,
                         <option value="Green">Green</option>,
@@ -419,6 +444,7 @@ class CardTable extends Component {
 
             case GameStates.POPULATE_KITTY:
                 if (player.state === PlayerStates.WAIT_FOR_KITTY) {
+                    kittyArea = this.createKittyCardArea(gameData, false);
                     tableMsgArea = this.setupTableMsgArea([player.stateText]);
                 } else {
                     kittyArea = this.createKittyCardArea(gameData, true);
@@ -439,10 +465,20 @@ class CardTable extends Component {
                 let rightCardId = gameData.table[playerPosns.rightPlayerPosn];
                 let bottomCardId = gameData.table[playerPosns.bottomPlayerPosn];
 
-                topCardArea = this.setupCardArea(gameData, topPlayer, topCardId, 'tableTopCardArea');
-                leftCardArea = this.setupCardArea(gameData, leftPlayer, leftCardId, 'tableLeftCardArea');
-                rightCardArea = this.setupCardArea(gameData, rightPlayer, rightCardId, 'tableRightCardArea');
-                bottomCardArea = this.setupCardArea(gameData, bottomPlayer, bottomCardId, 'tableBottomCardArea');
+                topCardArea = this.setupOtherCardArea(gameData, topPlayer, topCardId, 'tableTopCardArea', 'tableTopMsgArea');
+                leftCardArea = this.setupOtherCardArea(gameData, leftPlayer, leftCardId, 'tableLeftCardArea', 'tableLeftMsgArea');
+                rightCardArea = this.setupOtherCardArea(gameData, rightPlayer, rightCardId, 'tableRightCardArea', 'tableRightMsgArea');
+
+                if (player.state === PlayerStates.PLAY_CARD) {
+                    let msgText = "Click on a card to play";
+                    playerActionArea = this.setupPlayerActionArea({
+                        areaClass: "kittyActionArea",
+                        msg1Text: msgText,
+                    });
+                } else {
+                    bottomCardArea = this.setupMyCardArea(gameData, bottomPlayer, bottomCardId, 'tableBottomCardArea');
+                }
+
                 break;
             }
 
@@ -452,10 +488,10 @@ class CardTable extends Component {
                 let rightCardId = gameData.table[playerPosns.rightPlayerPosn];
                 let bottomCardId = gameData.table[playerPosns.bottomPlayerPosn];
 
-                topCardArea = this.setupCardArea(gameData, topPlayer, topCardId, 'tableTopCardArea');
-                leftCardArea = this.setupCardArea(gameData, leftPlayer, leftCardId, 'tableLeftCardArea');
-                rightCardArea = this.setupCardArea(gameData, rightPlayer, rightCardId, 'tableRightCardArea');
-                bottomCardArea = this.setupCardArea(gameData, bottomPlayer, bottomCardId, 'tableBottomCardArea');
+                topCardArea = this.setupOtherCardArea(gameData, topPlayer, topCardId, 'tableTopCardArea');
+                leftCardArea = this.setupOtherCardArea(gameData, leftPlayer, leftCardId, 'tableLeftCardArea');
+                rightCardArea = this.setupOtherCardArea(gameData, rightPlayer, rightCardId, 'tableRightCardArea');
+                bottomCardArea = this.setupMyCardArea(gameData, bottomPlayer, bottomCardId, 'tableBottomCardArea');
 
                 if (player.state === PlayerStates.TRICK_WON) {
                     playerActionArea = this.setupPlayerActionArea({
@@ -465,8 +501,7 @@ class CardTable extends Component {
                     });
                 } else {
                     let trickWinner = gameData[gameData.trick.winnerPosn];
-                    let msg = trickWinner.name + " wins";
-                    tableMsgArea = this.setupTableMsgArea([msg]);
+                    tableMsgArea = this.setupTableMsgArea([gameData.stateText]);
                 }
                 break;
             }
@@ -486,6 +521,15 @@ class CardTable extends Component {
                     }
                 }
 
+                let endHandPlayer = null;
+                if (topPlayer.state === PlayerStates.END_HAND) {
+                    endHandPlayer = topPlayer;
+                } else if (leftPlayer.state === PlayerStates.END_HAND) {
+                    endHandPlayer = leftPlayer;
+                } else if (rightPlayer.state === PlayerStates.END_HAND) {
+                    endHandPlayer = rightPlayer;
+                }
+
                 if (player.state === PlayerStates.END_HAND) {
                     playerActionArea = this.setupPlayerActionArea({
                         msg1Text: team1Msg,
@@ -495,7 +539,8 @@ class CardTable extends Component {
                         btnValue: {action: PlayerActions.END_HAND},
                     });
                 } else {
-                    let msgs = [team1Msg,team2Msg];
+                    let endHandMsg = `Waiting for ${endHandPlayer.name} to end hand`;
+                    let msgs = [team1Msg,team2Msg,endHandMsg];
                     tableMsgArea = this.setupTableMsgArea(msgs);
                 }
                 break;

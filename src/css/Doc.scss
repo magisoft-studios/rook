@@ -1,0 +1,11 @@
+@import 'common';
+
+.docDiv{
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+.docLink {
+  color: white;
+}

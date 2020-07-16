@@ -206,4 +206,24 @@
   align-items: center;
 }
 
+.gameHelpArea {
+  grid-row: 1 / span 2;
+  grid-column: 5 / span 2;
+  border-style: inset;
+  border-color: #47686b;
+  border-width: 1px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background-color: white;
+  color: black;
+  margin: 10px;
+  height: 190px;
+  overflow: scroll;
+}
 
+.gameHelpText {
+  font-size: 16px;
+  color: black;
+  margin-left: 10px;
+}

@@ -23,8 +23,17 @@ $fontSize: 24px;
   grid-column-start: 3;
   grid-column-end: 9;
   display: flex;
-  flex-direction: row;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  background-color: white;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  z-index: 100;
+  border-style: solid;
+  border-width: 1px;
+  border-color: black;
 }
 
 .tableMsgText {
@@ -44,6 +53,15 @@ $fontSize: 24px;
   margin-top: 10px;
 }
 
+.tableTopMsgArea {
+  grid-row: 2;
+  grid-column: 4 / span 3;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
 .tableLeftCardArea {
   grid-row-start: 7;
   grid-row-end: 13;
@@ -52,10 +70,26 @@ $fontSize: 24px;
   border: none;
 }
 
+.tableLeftMsgArea {
+  grid-row-start: 7;
+  grid-row-end: 13;
+  grid-column-start: 1;
+  grid-column-end: 5;
+  border: none;
+}
+
 .tableRightCardArea {
   grid-row-start: 7;
   grid-row-end: 13;
   grid-column-start: 8;
+  grid-column-end: 10;
+  border: none;
+}
+
+.tableRightMsgArea {
+  grid-row-start: 7;
+  grid-row-end: 13;
+  grid-column-start: 7;
   grid-column-end: 10;
   border: none;
 }
@@ -72,6 +106,14 @@ $fontSize: 24px;
 .tableCard {
   width: 140px;
   height: 180px;
+}
+
+.playerPlayCardText {
+  font-family: SansSerif;
+  font-size: 24px;
+  font-weight: normal;
+  color: black;
+  animation: blinkingText 1.2s infinite;
 }
 
 .playerWaitCardText {
@@ -94,14 +136,17 @@ $fontSize: 24px;
   grid-column: 2 / span 8;
   display: flex;
   flex-direction: column;
-  align-content: center;
+  align-content: space-around;
   align-items: center;
   margin-bottom: 10px;
   border-style: solid;
   border-width: 4px;
   border-color: #ffd9b3;
   animation: blinkingBorder 1s step-end infinite;
-  background-color: #b3cacc;
+  background-color: lightGray;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 10px;
 }
 
 .kittyActionArea {
@@ -116,7 +161,10 @@ $fontSize: 24px;
   border-width: 8px;
   border-color: #ffd9b3;
   animation: blinkingBorder 1s step-end infinite;
-  background-color: #b3cacc;
+  background-color: lightGray;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 10px;
 }
 
 .playerActionBtn {
@@ -144,6 +192,7 @@ $fontSize: 24px;
 .kittyCardWrapper {
   overflow: hidden;
   padding: 0;
+  margin: 2px;
 }
 
 .kittyCardWrapper:last-child, .kittyCardWrapper:hover {
@@ -209,11 +258,6 @@ $fontSize: 24px;
   justify-content: center;
   align-items: center;
   margin-bottom: 10px;
-  /*
-  border-style: solid;
-  border-width: 8px;
-  border-color: #ffd9b3;
-   */
 }
 
 .currentPlayerBidArea {
@@ -250,11 +294,6 @@ $fontSize: 24px;
   justify-content: center;
   align-items: center;
   margin-bottom: 10px;
-  /*
-  border-style: solid;
-  border-width: 8px;
-  border-color: #ffd9b3;
-  */
 }
 
 .biddingPlayerDiv {
@@ -264,11 +303,6 @@ $fontSize: 24px;
   align-items: center;
   margin-bottom: 10px;
   border-style: solid;
-  /*
-  border-width: 4px;
-  border-color: #ffd9b3;
-  animation: blinkingBorder 1s step-end infinite;
-  */
 }
 
 .playerBidText {
@@ -305,8 +339,8 @@ $fontSize: 24px;
 .playerActionText {
   font-family: SansSerif;
   font-size: $fontSize;
-  font-weight: bold;
-  color: #24756c;
+  font-weight: normal;
+  color: black;
 }
 
 .playerActionSelectInput {
@@ -315,5 +349,6 @@ $fontSize: 24px;
   font-weight: bold;
   color: black;
   width: 120px;
+  margin-top: 10px;
 }
 

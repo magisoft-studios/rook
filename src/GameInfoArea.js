@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import MyButton from './MyButton';
+import ElementsRules from './docs/ElementsRules.pdf';
+import Doc from './Doc';
 import './css/GameInfoArea.scss';
+
 
 class GameInfoArea extends Component {
 
@@ -24,6 +27,8 @@ class GameInfoArea extends Component {
             highBid = gameData.highBid;
         }
         let trumpSuit = gameData.trumpSuit ? gameData.trumpSuit : "";
+        let trumpSuitClass = "gameInfoTrumpSuit" + trumpSuit;
+
 
         return (
             <div className="gameInfoArea">
@@ -32,6 +37,9 @@ class GameInfoArea extends Component {
                 </div>
                 <div className="gameInfoDiv">
                     <span className="gameName">{gameData.name}</span>
+                </div>
+                <div className='gameInfoRulesDiv'>
+                    <Doc linkClass="gameInfoRulesLink" linkHref={ElementsRules} linkText="See Game Rules"/>
                 </div>
                 <div className="gameInfoDiv">
                     <span className="teamTitle">{gameData.team1.name}</span>
@@ -65,7 +73,7 @@ class GameInfoArea extends Component {
                     </div>
                     <div className="gameStatusEntryDiv">
                         <span className="teamScoreTitle">Trump Suit:</span>
-                        <span className="teamScore">{trumpSuit}</span>
+                        <span className={trumpSuitClass}>{trumpSuit}</span>
                     </div>
                     <div className="gameStatusEntryDiv">
                         <span className="teamScoreTitle">Team 1 Score:</span>

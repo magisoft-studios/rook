@@ -719,6 +719,12 @@ class Game extends Component {
                             onClickValue={this.posns.topPlayerPosn}>
                         </MyButton>
                     </div>
+                    {/*}
+                    <div className="gameHelpArea">
+                        <span className="gameHelpText">Hover over card to expand</span>
+                        <span className="gameHelpText">Click card to play</span>
+                    </div>
+                    {*/}
                     <div className="leftPlayerArea">
                         {leftCam}
                         <MyButton
