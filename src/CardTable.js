@@ -36,6 +36,19 @@ class CardTable extends Component {
         if (gd1.table.player3 !== gd2.table.player3) return true;
         if (gd1.table.player4 !== gd2.table.player4) return true;
 
+        if ((gd1.player1) && (gd2.player1)) {
+            if (gd1.player1.state !== gd2.player1.state) return true;
+        }
+        if ((gd1.player2) && (gd2.player2)) {
+            if (gd1.player2.state !== gd2.player2.state) return true;
+        }
+        if ((gd1.player3) && (gd2.player3)) {
+            if (gd1.player3.state !== gd2.player3.state) return true;
+        }
+        if ((gd1.player4) && (gd2.player4)) {
+            if (gd1.player4.state !== gd2.player4.state) return true;
+        }
+
         return false;
     }
 
