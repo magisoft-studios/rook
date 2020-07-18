@@ -5,7 +5,7 @@ import SpecialLogin from '../SpecialLogin';
 
 class LoginView extends Component {
     doGoogleLogin = async (token) => {
-        console.log("doGoogleLogin START");
+        //console.log(`doGoogleLogin: token = ${token}`);
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -35,7 +35,6 @@ class LoginView extends Component {
     }
 
     handleGoogleResponse = (response) => {
-        //console.log(`LoginView: handleGoogleResponse: ${JSON.stringify(response)}`);
         let token = response.tokenId;
         this.doGoogleLogin(token);
     }
@@ -52,6 +51,7 @@ class LoginView extends Component {
                         <GoogleLogin
                             clientId="143514624122-ie3dtumrn2f28ge6hlntvmj7v45j4k8o.apps.googleusercontent.com"
                             buttonText="Sign In with Google"
+                            prompt="select_account consent"
                             onSuccess={this.handleGoogleResponse}
                             onFailure={this.handleGoogleResponse}
                             cookiePolicy={'single_host_origin'}
