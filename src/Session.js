@@ -2,6 +2,7 @@ class Session {
     constructor(props) {
         if (props) {
             this.loggedIn = props.loggedIn;
+            this.loginMethod = props.loginMethod;
             this.id = props.id;
             this.playerId = props.playerId;
             this.playerName = props.playerName;
@@ -10,6 +11,7 @@ class Session {
             this.friends = props.friends;
         } else {
             this.loggedIn = false;
+            this.loginMethod = "";
             this.id = "";
             this.playerId = "";
             this.playerName = "";

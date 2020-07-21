@@ -73,6 +73,7 @@ class Main extends Component {
         console.log(`Main:handleLogin: reply=${JSON.stringify(reply)}`);
         let session = new Session();
         session.loggedIn = true;
+        session.loginMethod = reply.loginMethod;
         session.id = reply.sessionId;
         session.playerId = reply.playerId;
         session.playerName = reply.playerName;
@@ -91,8 +92,21 @@ class Main extends Component {
         });
     }
 
+    doGoogleLogout = () => {
+        console.log("Logging out of google");
+        var auth2 = window.gapi.auth2.getAuthInstance();
+        auth2.signOut().then(function () {
+            console.log('User signed out.');
+        });
+    }
+
     doLogout = async () => {
         let session = this.state.session;
+
+        if (session.loginMethod === "google") {
+            this.doGoogleLogout();
+        }
+
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
