@@ -4,6 +4,8 @@ import Cam from './Cam.js';
 import './css/CamCfg.scss';
 import MyButton from './MyButton';
 
+const COOKIE_EXPIRY_LENGTH = 10 * 365 * 24 * 60 * 60 * 1000;  // 10 years
+
 class CamCfg extends Component {
     constructor(props) {
         super(props);
@@ -65,6 +67,21 @@ class CamCfg extends Component {
         });
     }
 
+    setCookie = (name, value) => {
+        let cookieExpiryDate = new Date();
+        cookieExpiryDate.setTime(cookieExpiryDate.getTime() + COOKIE_EXPIRY_LENGTH);
+        try {
+            this.props.cookies.set(name, value, {
+                path: '/',
+                sameSite: 'strict',
+                secure: true,
+                expires: cookieExpiryDate
+            });
+        } catch (error) {
+            console.log(`CamCfg:setCookie: name:${name}, value:${value}, expires:${cookieExpiryDate}`);
+        }
+    }
+
     handleApplyCfg = async () => {
         console.log(`CamCfg::handleApplyCfg`);
         if (this.state.mediaStream != null) {
@@ -77,9 +94,9 @@ class CamCfg extends Component {
         let audioSrc = this.audioSrcInput.current.value;
         let audioDst = this.audioDstInput.current.value;
 
-        this.props.cookies.set("VideoSource", videoSrc, {path: '/'} );
-        this.props.cookies.set("AudioSource", audioSrc, {path: '/'} );
-        this.props.cookies.set("AudioDest", audioDst, {path: '/'} );
+        this.setCookie("VideoSource", videoSrc);
+        this.setCookie("AudioSource", audioSrc);
+        this.setCookie("AudioDest", audioDst);
 
         this.context.updateMediaSettings( {
             videoSrc: videoSrc,
