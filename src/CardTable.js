@@ -334,7 +334,7 @@ class CardTable extends Component {
         let gameState = gameData.state;
         let playerPosn = this.context.session.currentGame.playerPosn;
         let player = gameData[playerPosn];
-        let playerState = player.state;
+        let playerState = player ? player.state : "";
         let playerPosns = this.props.playerPosns;
 
         let topPlayer = gameData[playerPosns.topPlayerPosn];
@@ -355,7 +355,6 @@ class CardTable extends Component {
         let bottomCardArea = null;
 
         switch (gameState) {
-
             case GameStates.WAIT_FOR_ENTER:
                 tableMsgArea = this.setupTableMsgArea([gameData.stateText]);
                 break;

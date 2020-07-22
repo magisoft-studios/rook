@@ -10,6 +10,9 @@ import GameStates from '../GameStates';
 import CamCfg from '../CamCfg';
 import '../css/LobbyView.scss';
 import LobbyGameData from '../data/LobbyGameData';
+import SessionTimeoutDlg from '../SessionTimeoutDlg';
+
+const SESSION_TIMEOUT = 900000;     // 15 minutes until timeout warning.
 
 class LobbyView extends Component {
     constructor(props) {
@@ -24,17 +27,37 @@ class LobbyView extends Component {
             hasJoinedTeam: false,
             playerPosn: "",
             currentGameData: null,
+            sessionTimingOut: false,
+            sessionTimedOut: false,
         };
+        this.sessionTimer = null;
     }
 
     async componentDidMount() {
         await this.initSocketIo();
+        if (this.sessionTimer) {
+            clearTimeout(this.sessionTimer);
+        }
+        this.sessionTimer = setTimeout(this.handleSessionTimingOut, SESSION_TIMEOUT);
     }
 
     componentWillUnmount() {
         console.log("componentWillUnmount");
         if (this.socket) {
             this.socket.disconnect();
+        }
+        if (this.sessionTimer) {
+            clearTimeout(this.sessionTimer);
+        }
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        if (this.state.sessionTimedOut) {
+            clearTimeout(this.sessionTimer);
+            this.props.onSessionTimeout();
+            this.setState({
+                sessionTimedOut: false
+            });
         }
     }
 
@@ -54,6 +77,31 @@ class LobbyView extends Component {
             console.log(`Error initializing Lobby socket IO: ${error.message}`);
         }
     }
+
+    handleSessionTimingOut = () => {
+        console.log("LobbyView:handleSessionTimingOut");
+        this.setState({
+            sessionTimingOut: true,
+        });
+    }
+
+    handleSessionTimedOut = async () => {
+        console.log("LobbyView:handleSessionTimedOut");
+        this.setState({
+            sessionTimingOut: false,
+            sessionTimedOut: true,
+        });
+    }
+
+    handleContinueSession = () => {
+        console.log("LobbyView:handleContinueSession");
+        this.getAvailGames();
+        this.setState({
+            sessionTimingOut: false,
+            sessionTimedOut: false,
+        });
+    }
+
 
     //
     // RECEIVED MESSAGES
@@ -204,6 +252,10 @@ class LobbyView extends Component {
         } catch (error) {
             console.log(`Error sending socket msg: ${error.message}`);
         }
+        if (this.sessionTimer) {
+            clearTimeout(this.sessionTimer);
+        }
+        this.sessionTimer = setTimeout(this.handleSessionTimingOut, SESSION_TIMEOUT);
     }
 
     getAvailGames = async () => {
@@ -285,6 +337,16 @@ class LobbyView extends Component {
 
     render() {
         console.log(`LobbyView:render`);
+
+        let sessionTimeoutDlg = null;
+        if (this.state.sessionTimingOut) {
+            sessionTimeoutDlg =
+                <div className="lobbyViewSessionTimeoutDiv">
+                    <SessionTimeoutDlg
+                        onContinue={this.handleContinueSession}
+                        onTimedOut={this.handleSessionTimedOut}/>
+                </div>;
+        }
 
         let availableGameTable = null;
         if (this.state.showAvailableGames && this.state.availableGames) {
@@ -401,6 +463,7 @@ class LobbyView extends Component {
                         {gameSetupDlg}
                     </div>
                 </div>
+                {sessionTimeoutDlg}
             </div>
         );
     }

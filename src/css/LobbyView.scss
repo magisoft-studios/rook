@@ -113,3 +113,16 @@
   color: white;
   border-radius: 10%;
 }
+
+.lobbyViewSessionTimeoutDiv{
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  z-index: 200;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}

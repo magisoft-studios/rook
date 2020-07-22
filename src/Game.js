@@ -19,6 +19,9 @@ import SocketMsg from "./SocketMsg";
 import './css/Game.scss';
 import MyButton from "./MyButton";
 import PlayerCard from "./PlayerCard";
+import SessionTimeoutDlg from './SessionTimeoutDlg';
+
+const SESSION_TIMEOUT = 900000;     // 15 minutes until timeout warning.
 
 class Game extends Component {
     constructor(props) {
@@ -40,6 +43,8 @@ class Game extends Component {
                 player3: null,
                 player4: null,
             },
+            sessionTimingOut: false,
+            sessionTimedOut: false,
         }
         this.calcPlayerPosns(props.playerPosn);
         this.socket = null;
@@ -54,6 +59,7 @@ class Game extends Component {
         this.sentStreamInitialized = false;
         this.sentConnectionsInitialized = false;
         this.sentCamOffers = false;
+        this.sessionTimer = null;
     }
 
     /* Changing to the Lobby tab causes the Game to unmount.
@@ -97,10 +103,25 @@ class Game extends Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
+        if (! this.state.gameData) {
+            return;
+        }
         console.log(`Game: componentDidUpdate: prevState=${prevState.gameData.state} newState=${this.state.gameData.state}`);
         console.log(`Game: componentDidUpdate: prevConnState=${prevState.connectionState} newConnState=${this.state.connectionState}`);
 
-        if ((! this.state.gameData[this.state.playerPosn].enteredGame) && (!this.sentEnterGame)) {
+        if (this.state.sessionTimedOut) {
+            clearTimeout(this.sessionTimer);
+            this.props.onSessionTimeout();
+            this.setState({
+                sessionTimedOut: false
+            });
+        }
+
+        let player = this.state.gameData[this.state.playerPosn];
+        if (!player) {
+            return;
+        }
+        if ((! player.enteredGame) && (!this.sentEnterGame)) {
             console.log(`componentDidUpdate: sending enterGame`);
             this.sentEnterGame = true;
             this.sendEnterGame();
@@ -202,6 +223,35 @@ class Game extends Component {
         } catch (error) {
             console.log(`Error sending socket msg: ${error.message}`);
         }
+        if (this.sessionTimer) {
+            clearTimeout(this.sessionTimer);
+        }
+        this.sessionTimer = setTimeout(this.handleSessionTimingOut, SESSION_TIMEOUT);
+    }
+
+    handleSessionTimingOut = () => {
+        console.log("handleSessionTimingOut");
+        this.setState({
+            sessionTimingOut: true,
+        });
+    }
+
+    handleSessionTimedOut = async () => {
+        console.log("handleSessionTimedOut");
+        await this.sendExitGame();
+        this.setState({
+            sessionTimingOut: false,
+            sessionTimedOut: true,
+        });
+    }
+
+    handleContinueSession = () => {
+        console.log("handleContinueSession");
+        this.sendGetGameData();
+        this.setState({
+            sessionTimingOut: false,
+            sessionTimedOut: false,
+        });
     }
 
     initCameraConnections = (sessionId) => {
@@ -362,8 +412,9 @@ class Game extends Component {
         });
     }
 
-    handleExit = () => {
-        this.sendExitGame();
+    handleExit = async () => {
+        clearTimeout(this.sessionTimer);
+        await this.sendExitGame();
         this.props.onExit(this.state.gameData, this.state.playerPosn);
     }
 
@@ -656,8 +707,11 @@ class Game extends Component {
     render() {
         console.log("Game: render");
         let gameData = this.state.gameData;
+        if (! gameData) {
+            return null;
+        }
         let bottomPlayer = gameData[this.posns.bottomPlayerPosn];
-        let playerCardCmpnts = this.getPlayerCardCmpnts(bottomPlayer.cards, gameData);
+        let playerCardCmpnts = bottomPlayer ? this.getPlayerCardCmpnts(bottomPlayer.cards, gameData) : null;
 
         let topCam =
             <RemoteCam
@@ -692,6 +746,15 @@ class Game extends Component {
                 audioDst=""
             />;
 
+        let sessionTimeoutDlg = null;
+        if (this.state.sessionTimingOut) {
+            sessionTimeoutDlg =
+                <div className="gameSessionTimeoutDiv">
+                    <SessionTimeoutDlg
+                        onContinue={this.handleContinueSession}
+                        onTimedOut={this.handleSessionTimedOut}/>
+                </div>;
+        }
 
         return (
             <div className="gameView">
@@ -748,6 +811,7 @@ class Game extends Component {
                             {playerCardCmpnts}
                         </div>
                     </div>
+                    {sessionTimeoutDlg}
                 </div>
                 <ToastContainer />
             </div>

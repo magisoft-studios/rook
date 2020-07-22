@@ -126,8 +126,16 @@ class Main extends Component {
 
         this.setState({
             session: new Session(),
-            redirectRoute: '/',
+            showGameWindow: false,
+            redirectRoute: "/",
+            gameData: null,
+            mediaSettings: {},
+            lastView: "/",
         });
+    }
+
+    handleSessionTimeout = () => {
+        this.doLogout();
     }
 
     getGameData = async () => {
@@ -227,14 +235,16 @@ class Main extends Component {
                     gameId={session.currentGame.id}
                     playerPosn={session.currentGame.playerPosn}
                     gameData={this.state.gameData}
-                    onExit={this.handleExitGame}/>;
+                    onExit={this.handleExitGame}
+                    onSessionTimeout={this.handleSessionTimeout}/>;
             } else if (this.state.gameData.type === "ConnectionTest") {
                 game = <ConnectionTest
                     sessionId={session.id}
                     gameId={session.currentGame.id}
                     playerPosn={session.currentGame.playerPosn}
                     gameData={this.state.gameData}
-                    onExit={this.handleExitGame}/>;
+                    onExit={this.handleExitGame}
+                    onSessionTimeout={this.handleSessionTimeout}/>;
             }
             gameMenuItem =
                 <li key="gameMenuItem" className="mainMenuItem">
@@ -312,7 +322,10 @@ class Main extends Component {
         if (session.loggedIn) {
             contentAreaItems.push(
                 <Route key="lobbyRoute" path="/lobby">
-                    <LobbyView cookies={this.props.cookies} onEnterGame={this.handleEnterGame}/>
+                    <LobbyView
+                        cookies={this.props.cookies}
+                        onEnterGame={this.handleEnterGame}
+                        onSessionTimeout={this.handleSessionTimeout}/>
                 </Route>
             );
             contentAreaItems.push(gameRoute);
