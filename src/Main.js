@@ -166,9 +166,10 @@ class Main extends Component {
     }
 
     handleEnterGame = async (gameData, playerPosn) => {
+        console.log(`Main:handleEnterGame: playerPosn:${playerPosn}, gameData:${JSON.stringify(gameData)}`);
         let session = this.state.session;
         session.currentGame = {
-            id: gameData.id,
+            id: gameData.name,
             playerPosn: playerPosn,
         }
         this.setState({
@@ -229,18 +230,18 @@ class Main extends Component {
         let game = null;
 
         if (session.loggedIn && (this.state.showGameWindow)) {
-            if ((this.state.gameData.type === "Rook") || (this.state.gameData.type === "Elements")) {
+            if ((this.state.gameData.desc.name === "Rook") || (this.state.gameData.desc.name === "Elements")) {
                 game = <Game
                     sessionId={session.id}
-                    gameId={session.currentGame.id}
+                    gameId={session.currentGame.name}
                     playerPosn={session.currentGame.playerPosn}
                     gameData={this.state.gameData}
                     onExit={this.handleExitGame}
                     onSessionTimeout={this.handleSessionTimeout}/>;
-            } else if (this.state.gameData.type === "ConnectionTest") {
+            } else if (this.state.gameData.desc.name === "ConnectionTest") {
                 game = <ConnectionTest
                     sessionId={session.id}
-                    gameId={session.currentGame.id}
+                    gameId={session.currentGame.name}
                     playerPosn={session.currentGame.playerPosn}
                     gameData={this.state.gameData}
                     onExit={this.handleExitGame}

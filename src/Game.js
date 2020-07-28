@@ -50,7 +50,7 @@ class Game extends Component {
         this.socket = null;
         this.camConnMap = new Map();
         this.initCameraConnections(props.sessionId);
-        if (props.gameData.type === "Elements") {
+        if (props.gameData.desc.name === "Elements") {
             this.cardDeck = ElementsCards;
         } else {
             this.cardDeck = RookCards;
@@ -201,6 +201,7 @@ class Game extends Component {
             }
         } else {
             if (message.status === "SUCCESS") {
+                console.log(`Received message: ${JSON.stringify(message)}`);
                 switch (message.msgId) {
                     case "gameDataChanged": {
                         this.rcvdGameDataChangedMsg(message);

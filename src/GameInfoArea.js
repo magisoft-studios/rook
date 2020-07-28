@@ -33,7 +33,7 @@ class GameInfoArea extends Component {
         return (
             <div className="gameInfoArea">
                 <div className="gameTitleArea">
-                    <span className="gameTitle">{gameData.type}</span>
+                    <span className="gameTitle">{gameData.desc.name}</span>
                 </div>
                 <div className="gameInfoDiv">
                     <span className="gameName">{gameData.name}</span>

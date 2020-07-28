@@ -354,15 +354,15 @@ class LobbyView extends Component {
             if (this.state.availableGames.length > 0) {
                 this.state.availableGames.forEach((game, index) => {
                     availGameCmpnts.push(
-                        <tr key={game.name}>
-                            <td>{game.name}</td>
-                            <td>{game.type}</td>
+                        <tr key={game.userGameName}>
+                            <td>{game.userGameName}</td>
+                            <td>{game.descName}</td>
                             <td>
                                 <MyButton
                                     btnClass="lobbyJoinGameBtn"
                                     btnText="View Game"
                                     onClick={this.handleJoinGame}
-                                    onClickValue={game.name}>
+                                    onClickValue={game.userGameName}>
                                 </MyButton>
                             </td>
                         </tr>
@@ -398,7 +398,9 @@ class LobbyView extends Component {
         let gameSetupDlg = null;
         if (this.state.showGameSetupDialog) {
             let lobbyGameData = this.state.currentGameData;
-            if ((lobbyGameData.type === "Rook") || (lobbyGameData.type === "Elements")) {
+            console.log(`render:lobbyGameData = ${JSON.stringify(lobbyGameData)}`);
+            if ((lobbyGameData.desc.name === "Rook") || (lobbyGameData.desc.name === "Elements")) {
+                console.log(`render: creating gameSetupDlg for Elements`);
                 let player1 = lobbyGameData.players.get('player1');
                 let player2 = lobbyGameData.players.get('player2');
                 let player3 = lobbyGameData.players.get('player3');
@@ -406,9 +408,9 @@ class LobbyView extends Component {
                 gameSetupDlg =
                     <GameSetupDialog
                         hasJoinedTeam={this.state.hasJoinedTeam}
-                        enableEnterGameBtn={lobbyGameData.state === GameStates.READY_TO_START}
+                        enableEnterGameBtn={lobbyGameData.readyToStart}
                         gameName={lobbyGameData.name}
-                        gameType={lobbyGameData.type}
+                        gameType={lobbyGameData.desc.name}
                         gameStateText={lobbyGameData.stateText}
                         player1={(player1 != null) ? player1.name : ""}
                         player2={(player2 != null) ? player2.name : ""}
@@ -417,7 +419,7 @@ class LobbyView extends Component {
                         onJoinTeam={this.handleJoinTeam}
                         onEnterGame={this.handleEnterGame}
                         onLeaveGame={this.handleLeaveGame}/>
-            } else if (lobbyGameData.type === "ConnectionTest") {
+            } else if (lobbyGameData.desc.name === "ConnectionTest") {
                 let player1 = lobbyGameData.players.get('player1');
                 let player2 = lobbyGameData.players.get('player2');
                 gameSetupDlg =
@@ -425,7 +427,7 @@ class LobbyView extends Component {
                         hasJoinedTeam={this.state.hasJoinedTeam}
                         enableEnterGameBtn={lobbyGameData.state === GameStates.READY_TO_START}
                         gameName={lobbyGameData.name}
-                        gameType={lobbyGameData.type}
+                        gameType={lobbyGameData.desc.name}
                         gameStateText={lobbyGameData.stateText}
                         player1Name={(player1 != null) ? player1.name : ""}
                         player2Name={(player2 != null) ? player2.name : ""}

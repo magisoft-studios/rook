@@ -18,7 +18,7 @@ class CardTable extends Component {
             bidValue: "Pass",
             trumpValue: "Red",
         }
-        if (props.gameData.type === "Elements") {
+        if (props.gameData.desc.name === "Elements") {
             this.cardDeck = ElementsCards;
         } else {
             this.cardDeck = RookCards;
@@ -60,7 +60,7 @@ class CardTable extends Component {
                 });
             } else if (this.props.gameData.state === GameStates.NAME_TRUMP) {
                 let defaultTrumpValue = "Air";
-                if (this.props.gameData.type === "Rook") {
+                if (this.props.gameData.desc.name === "Rook") {
                     defaultTrumpValue = "Yellow";
                 }
                 this.setState( {
@@ -433,7 +433,7 @@ class CardTable extends Component {
                         <option value="Red">Red</option>,
                         <option value="Yellow">Yellow</option>
                     ];
-                    if (this.props.gameData.type === "Elements") {
+                    if (this.props.gameData.desc.name === "Elements") {
                         selOptions = [
                             <option value="Air">Air</option>,
                             <option value="Earth">Earth</option>,

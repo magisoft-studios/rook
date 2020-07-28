@@ -16,7 +16,7 @@ class Session {
             this.playerId = "";
             this.playerName = "";
             this.currentGame = {
-                id: "",
+                name: "",
                 playerPosn: ""
             };
             this.permissions = {
