@@ -63,9 +63,11 @@ class LobbyGameData {
 
     static fromJson = (lobbyGameDataJson) => {
         let teamMap = new Map();
-        lobbyGameDataJson.teams.forEach( (team) => {
-            teamMap.set(team.id, Team.fromJson(team))
-        });
+        if (lobbyGameDataJson.teams) {
+            lobbyGameDataJson.teams.forEach((team) => {
+                teamMap.set(team.id, Team.fromJson(team))
+            });
+        }
         let lobbyGameData = {
             ...lobbyGameDataJson,
             teams: teamMap,
