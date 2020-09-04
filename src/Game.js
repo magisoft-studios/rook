@@ -8,8 +8,9 @@ import GameInfoArea from './GameInfoArea';
 import OpponentCard from './OpponentCard';
 import CardTable from './CardTable';
 import AppContext from './ContextLib';
-import PlayerStates from './PlayerStates';
-import GameStates from './GameStates';
+import GameStates from './shared/GameStates.mjs';
+import PlayerStates from './shared/PlayerStates.mjs';
+import ElementsPlayerStates from './shared/ElementsPlayerStates.mjs';
 import PlayerActions from './PlayerActions';
 import Cam from './Cam.js';
 import RemoteCam from './RemoteCam.js';
@@ -106,7 +107,7 @@ class Game extends Component {
         if (! this.state.gameData) {
             return;
         }
-        console.log(`Game: componentDidUpdate: prevState=${prevState.gameData.state} newState=${this.state.gameData.state}`);
+        console.log(`Game: componentDidUpdate: prevState=${prevState.gameData.state.str} newState=${this.state.gameData.state.str}`);
         console.log(`Game: componentDidUpdate: prevConnState=${prevState.connectionState} newConnState=${this.state.connectionState}`);
 
         if (this.state.sessionTimedOut) {
@@ -125,8 +126,8 @@ class Game extends Component {
             console.log(`componentDidUpdate: sending enterGame`);
             this.sentEnterGame = true;
             this.sendEnterGame();
-        } else if ((this.state.gameData.state === GameStates.INIT_STREAM) &&
-            (prevState.gameData.state !== GameStates.INIT_STREAM)) {
+        } else if ((this.state.gameData.state.str === 'INIT_STREAM') &&
+            (prevState.gameData.state.str !== 'INIT_STREAM')) {
             console.log(`componentDidUpdate: setting connectionState to initStream`);
             this.setState({ connectionState: 'initStream' });
         } else if (this.state.connectionState === 'initialize') {
@@ -138,7 +139,7 @@ class Game extends Component {
             console.log(`componentDidUpdate: setting connectionState to waitForStream`);
             this.setState({ connectionState: 'waitForStream' } );
         } else if ((this.state.connectionState === 'streamIsReady') &&
-            (this.state.gameData.state >= GameStates.INIT_STREAM) &&
+            (this.state.gameData.state.value >= GameStates.INIT_STREAM) &&
             !this.sentStreamInitialized) {
             console.log(`componentDidUpdate: sending streamInitialized`);
             this.sentStreamInitialized = true;
@@ -150,7 +151,7 @@ class Game extends Component {
             console.log(`componentDidUpdate: setting connectionState to initConn`);
             this.setState( { connectionState: 'initConn' } );
         } else if ((this.state.connectionState === 'initConn') &&
-            (this.state.gameData.state >= GameStates.INIT_CONN) &&
+            (this.state.gameData.state.value >= GameStates.INIT_CONN) &&
              !this.sentCamOffers) {
             console.log(`componentDidUpdate: sending cam offers`);
             this.sentCamOffers = true;
@@ -278,7 +279,7 @@ class Game extends Component {
 
     rcvdGameDataChangedMsg = (message) => {
         console.log("Game: Received gameDataChanged message");
-        console.log(`Game: New game state is ${message.msg.gameData.stateText}`);
+        console.log(`Game: New game state is ${message.msg.gameData.state.str}`);
         let newState = {
             ...this.state,
             gameData: message.msg.gameData,
@@ -493,17 +494,17 @@ class Game extends Component {
     handleCardClick = async (cardId) => {
         let socketMsg = new SocketMsg(this.context.session.id);
         socketMsg.msgId = 'playerAction';
-        if (this.state.gameData.state === GameStates.POPULATE_KITTY) {
+        if (this.state.gameData.state.str === 'SETUP_KITTY') {
             socketMsg.msg = {
                 action: PlayerActions.PUT_KITTY_CARD,
                 actionValue: cardId,
             };
             this.sendSocketMsg(socketMsg);
-        } else if (this.state.gameData.state === GameStates.WAIT_FOR_CARD) {
+        } else if (this.state.gameData.state.str === 'PLAY_CARD') {
             let gameData = this.state.gameData;
             let playerPosn = this.context.session.currentGame.playerPosn;
             let player = gameData[playerPosn];
-            if (player.state === PlayerStates.PLAY_CARD) {
+            if (player.state.value === ElementsPlayerStates.PLAY_CARD) {
                 if (this.isValidPlay(player, cardId, gameData.trick.suit)) {
                     socketMsg.msg = {
                         action: PlayerActions.PLAY_CARD,
@@ -519,8 +520,8 @@ class Game extends Component {
         let gameData = this.state.gameData;
         let playerPosn = this.context.session.currentGame.playerPosn;
         let player = gameData[playerPosn];
-        if (gameData.state === GameStates.POPULATE_KITTY) {
-            if (player.state === PlayerStates.SETUP_KITTY) {
+        if (gameData.state.str === 'SETUP_KITTY') {
+            if (player.state.value === ElementsPlayerStates.SETUP_KITTY) {
                 let errMsg = "";
                 if (gameData.kitty.length === 5) {
                     gameData.kitty.forEach((card) => {
@@ -662,9 +663,9 @@ class Game extends Component {
 
     getImageClass(player) {
         let imageClass = "playerImage";
-        if ((player.state === PlayerStates.DEAL) ||
-            (player.state === PlayerStates.BID) ||
-            (player.state === PlayerStates.PLAY_CARD))
+        if ((player.state.value === ElementsPlayerStates.DEAL) ||
+            (player.state.value === ElementsPlayerStates.BID) ||
+            (player.state.value === ElementsPlayerStates.PLAY_CARD))
         {
             imageClass = "selectedPlayerImage";
         }
@@ -741,7 +742,6 @@ class Game extends Component {
                 initStream={this.state.connectionState === 'initStream'}
                 mediaStream={this.state.streams[this.posns.bottomPlayerPosn]}
                 onStreamReady={this.handleStreamIsReady}
-                gameDataState={this.state.gameData.state}
                 videoSrc={this.context.mediaSettings.videoSrc}
                 audioSrc={this.context.mediaSettings.audioSrc}
                 audioDst=""

@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import TableCard from './TableCard';
-import PlayerStates from './PlayerStates';
-import GameStates from './GameStates';
+import ElementsPlayerStates from './shared/ElementsPlayerStates.mjs';
 import AppContext from "./ContextLib";
 import CommonCards from './CommonCards';
 import RookCards from './RookCards';
@@ -26,8 +25,8 @@ class CardTable extends Component {
     }
 
     static isStateChanged(gd1, gd2) {
-        if (gd1.state !== gd2.state) return true;
-        if (gd1.stateText !== gd2.stateText) return true;
+        if (gd1.state.value !== gd2.state.value) return true;
+        if (gd1.state.text !== gd2.state.text) return true;
         if (gd1.kitty && gd2.kitty) {
             if (gd1.kitty.length !== gd2.kitty.length) return true;
         }
@@ -54,11 +53,11 @@ class CardTable extends Component {
 
     componentDidUpdate(prevProps, prevState) {
         if (CardTable.isStateChanged(prevProps.gameData, this.props.gameData)) {
-            if (this.props.gameData.state === GameStates.BIDDING) {
+            if (this.props.gameData.state.str === 'BID') {
                 this.setState({
                     bidValue: CardTable.calcDefaultBidValue(this.props.gameData),
                 });
-            } else if (this.props.gameData.state === GameStates.NAME_TRUMP) {
+            } else if (this.props.gameData.state.str === 'NAME_TRUMP') {
                 let defaultTrumpValue = "Air";
                 if (this.props.gameData.desc.name === "Rook") {
                     defaultTrumpValue = "Yellow";
@@ -178,7 +177,7 @@ class CardTable extends Component {
     calcBidText = (player) => {
         let bidText = "";
         let bidValue = player.bid;
-        if (player.state === PlayerStates.BID) {
+        if (player.state.value === ElementsPlayerStates.BID) {
             bidText = "???";
         } else {
             if (bidValue < 0) {
@@ -266,7 +265,7 @@ class CardTable extends Component {
         let player = gameData[posn];
         let bidText = this.calcBidText(player);
         let bidTextClass = "playerBidText";
-        if (player.state === PlayerStates.BID) {
+        if (player.state.value === ElementsPlayerStates.BID) {
             bidTextClass = "biddingPlayerText";
         }
         return (
@@ -281,7 +280,7 @@ class CardTable extends Component {
 
     setupOtherCardArea = (gameData, player, cardId, waitCardAreaClass, cardAreaMsgClass) => {
         let cardArea = null;
-        if (player.state === PlayerStates.PLAY_CARD) {
+        if (player.state.value === ElementsPlayerStates.PLAY_CARD) {
             cardArea = (
                 <div className={cardAreaMsgClass}>
                     <span className="playerPlayCardText">Waiting for {player.name}</span>
@@ -354,21 +353,21 @@ class CardTable extends Component {
         let rightCardArea = null;
         let bottomCardArea = null;
 
-        switch (gameState) {
-            case GameStates.WAIT_FOR_ENTER:
-                tableMsgArea = this.setupTableMsgArea([gameData.stateText]);
+        switch (gameState.str) {
+            case 'WAIT_FOR_ENTER':
+                tableMsgArea = this.setupTableMsgArea([gameData.stateDisplayText]);
                 break;
 
-            case GameStates.INIT_STREAM:
-                tableMsgArea = this.setupTableMsgArea([gameData.stateText]);
+            case 'INIT_STREAM':
+                tableMsgArea = this.setupTableMsgArea([gameData.stateDisplayText]);
                 break;
 
-            case GameStates.INIT_CONN:
-                tableMsgArea = this.setupTableMsgArea([gameData.stateText]);
+            case 'INIT_CONN':
+                tableMsgArea = this.setupTableMsgArea([gameData.stateDisplayText]);
                 break;
 
-            case GameStates.DEAL:
-                if (playerState === PlayerStates.DEAL) {
+            case 'DEAL':
+                if (playerState.value === ElementsPlayerStates.DEAL) {
                     playerActionArea = this.setupPlayerActionArea({
                         msg1Text: "Press the button to deal",
                         btnText: "Deal",
@@ -376,17 +375,17 @@ class CardTable extends Component {
                         btnValue: {action: PlayerActions.DEAL},
                     });
                 } else {
-                    tableMsgArea = this.setupTableMsgArea([gameData.stateText]);
+                    tableMsgArea = this.setupTableMsgArea([gameData.stateDisplayText]);
                 }
                 break;
 
-            case GameStates.BIDDING:
+            case 'BID':
                 kittyArea = this.createKittyCardArea(gameData, false);
                 topBidArea = this.setupBidArea(gameData, playerPosns.topPlayerPosn, "topPlayerBidArea");
                 leftBidArea = this.setupBidArea(gameData, playerPosns.leftPlayerPosn, "leftPlayerBidArea");
                 rightBidArea = this.setupBidArea(gameData, playerPosns.rightPlayerPosn, "rightPlayerBidArea");
 
-                if (playerState === PlayerStates.BID) {
+                if (playerState.value === ElementsPlayerStates.BID) {
                     let bidOptions = this.calcBidOptions(gameData);
                     playerActionArea = this.setupPlayerActionArea({
                         msg1Text: "Press down-arrow to choose bid",
@@ -399,13 +398,13 @@ class CardTable extends Component {
                     });
                 } else {
                     bottomBidArea = this.setupBidArea(gameData, playerPosns.bottomPlayerPosn, "bottomPlayerBidArea");
-                    tableMsgArea = this.setupTableMsgArea([gameData.stateText]);
+                    tableMsgArea = this.setupTableMsgArea([gameData.stateDisplayText]);
                 }
                 break;
 
-            case GameStates.BID_WON:
+            case 'BID_WON':
                 kittyArea = this.createKittyCardArea(gameData, false);
-                if (player.state === PlayerStates.BID_WON) {
+                if (playerState.value === ElementsPlayerStates.BID_WON) {
                     let msgText = "You won the bid at " + this.calcBidText(player);
                     playerActionArea = this.setupPlayerActionArea({
                         msg1Text: msgText,
@@ -417,14 +416,14 @@ class CardTable extends Component {
                         btnValue: {action: PlayerActions.BID_WON},
                     });
                 } else {
-                    tableMsgArea = this.setupTableMsgArea([gameData.stateText]);
+                    tableMsgArea = this.setupTableMsgArea([gameData.stateDisplayText]);
                 }
                 break;
 
-            case GameStates.NAME_TRUMP:
+            case 'NAME_TRUMP':
                 kittyArea = this.createKittyCardArea(gameData, false);
-                if (player.state === PlayerStates.WAIT_FOR_TRUMP) {
-                    tableMsgArea = this.setupTableMsgArea([player.stateText]);
+                if (playerState.value === ElementsPlayerStates.WAIT_FOR_TRUMP) {
+                    tableMsgArea = this.setupTableMsgArea([player.stateDisplayText]);
                 } else {
                     let msgText = "Press the down-arrow to choose your trump suit";
                     let selOptions = [
@@ -454,10 +453,10 @@ class CardTable extends Component {
                 }
                 break;
 
-            case GameStates.POPULATE_KITTY:
-                if (player.state === PlayerStates.WAIT_FOR_KITTY) {
+            case 'SETUP_KITTY':
+                if (playerState.value === ElementsPlayerStates.WAIT_FOR_KITTY) {
                     kittyArea = this.createKittyCardArea(gameData, false);
-                    tableMsgArea = this.setupTableMsgArea([player.stateText]);
+                    tableMsgArea = this.setupTableMsgArea([player.stateDisplayText]);
                 } else {
                     kittyArea = this.createKittyCardArea(gameData, true);
                     let msgText = "Click card to move between kitty and hand.";
@@ -471,7 +470,7 @@ class CardTable extends Component {
                 }
                 break;
 
-            case GameStates.WAIT_FOR_CARD: {
+            case 'PLAY_CARD': {
                 let topCardId = gameData.table[playerPosns.topPlayerPosn];
                 let leftCardId = gameData.table[playerPosns.leftPlayerPosn];
                 let rightCardId = gameData.table[playerPosns.rightPlayerPosn];
@@ -481,7 +480,7 @@ class CardTable extends Component {
                 leftCardArea = this.setupOtherCardArea(gameData, leftPlayer, leftCardId, 'tableLeftCardArea', 'tableLeftMsgArea');
                 rightCardArea = this.setupOtherCardArea(gameData, rightPlayer, rightCardId, 'tableRightCardArea', 'tableRightMsgArea');
 
-                if (player.state === PlayerStates.PLAY_CARD) {
+                if (playerState.value === ElementsPlayerStates.PLAY_CARD) {
                     let msgText = "Click on a card to play";
                     playerActionArea = this.setupPlayerActionArea({
                         areaClass: "kittyActionArea",
@@ -494,7 +493,7 @@ class CardTable extends Component {
                 break;
             }
 
-            case GameStates.TAKE_TRICK: {
+            case 'TAKE_TRICK': {
                 let topCardId = gameData.table[playerPosns.topPlayerPosn];
                 let leftCardId = gameData.table[playerPosns.leftPlayerPosn];
                 let rightCardId = gameData.table[playerPosns.rightPlayerPosn];
@@ -505,19 +504,19 @@ class CardTable extends Component {
                 rightCardArea = this.setupOtherCardArea(gameData, rightPlayer, rightCardId, 'tableRightCardArea');
                 bottomCardArea = this.setupMyCardArea(gameData, bottomPlayer, bottomCardId, 'tableBottomCardArea');
 
-                if (player.state === PlayerStates.TRICK_WON) {
+                if (playerState.value === ElementsPlayerStates.TAKE_TRICK) {
                     playerActionArea = this.setupPlayerActionArea({
                         btnText: "Take Trick",
                         btnHandler: this.props.onPlayerAction,
                         btnValue: {action: PlayerActions.TAKE_TRICK},
                     });
                 } else {
-                    tableMsgArea = this.setupTableMsgArea([gameData.stateText]);
+                    tableMsgArea = this.setupTableMsgArea([gameData.stateDisplayText]);
                 }
                 break;
             }
 
-            case GameStates.END_OF_HAND: {
+            case 'END_OF_HAND': {
                 let team1Msg = "Team 1 scored " + gameData.team1.handScore + " points!";
                 if (gameData.highBidTeamId === "team1") {
                     if (gameData.team1.handScore < gameData.highBid) {
@@ -533,15 +532,15 @@ class CardTable extends Component {
                 }
 
                 let endHandPlayer = null;
-                if (topPlayer.state === PlayerStates.END_HAND) {
+                if (topPlayer.state.value === ElementsPlayerStates.END_HAND) {
                     endHandPlayer = topPlayer;
-                } else if (leftPlayer.state === PlayerStates.END_HAND) {
+                } else if (leftPlayer.state.value === ElementsPlayerStates.END_HAND) {
                     endHandPlayer = leftPlayer;
-                } else if (rightPlayer.state === PlayerStates.END_HAND) {
+                } else if (rightPlayer.state.value === ElementsPlayerStates.END_HAND) {
                     endHandPlayer = rightPlayer;
                 }
 
-                if (player.state === PlayerStates.END_HAND) {
+                if (playerState.value === ElementsPlayerStates.END_HAND) {
                     playerActionArea = this.setupPlayerActionArea({
                         msg1Text: team1Msg,
                         msg2Text: team2Msg,
@@ -557,8 +556,8 @@ class CardTable extends Component {
                 break;
             }
 
-            case GameStates.END_OF_GAME: {
-                tableMsgArea = this.setupTableMsgArea([gameData.stateText]);
+            case 'END_OF_GAME': {
+                tableMsgArea = this.setupTableMsgArea([gameData.stateDisplayText]);
                 break;
             }
 

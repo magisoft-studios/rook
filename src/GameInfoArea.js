@@ -87,7 +87,7 @@ class GameInfoArea extends Component {
                 <div className="gameInfoDiv">
                     <span className="statusTitle">Current Status</span>
                     <div className="gameStatusEntryDiv">
-                        <span className="statusText">{gameData.stateText}</span>
+                        <span className="statusText">{gameData.stateDisplayText}</span>
                     </div>
                 </div>
                 <div className="gameInfoCtrlPnlDiv">

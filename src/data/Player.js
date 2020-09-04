@@ -1,4 +1,4 @@
-import PlayerStates from '../PlayerStates';
+import PlayerStates from '../shared/PlayerStates.mjs';
 
 class Player {
     constructor(id, teamId) {

@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import AppContext from './ContextLib';
-import GameStates from './GameStates';
 import Cam from './Cam.js';
 import RemoteCam from './RemoteCam.js';
 import CamConn from './CamConn.js';
@@ -71,8 +70,8 @@ class ConnectionTest extends Component {
             console.log(`componentDidUpdate: sending enterGame`);
             this.sentEnterGame = true;
             this.sendEnterGame();
-        } else if ((this.state.gameData.state === GameStates.INIT_STREAM) &&
-            (prevState.gameData.state !== GameStates.INIT_STREAM)) {
+        } else if ((this.state.gameData.state.str === 'INIT_STREAM') &&
+            (prevState.gameData.state.str !== 'INIT_STREAM')) {
             console.log(`componentDidUpdate: setting connectionState to initStream`);
             this.setState({ connectionState: 'initStream' });
         } else if (this.state.connectionState === 'initStream') {
@@ -176,7 +175,7 @@ class ConnectionTest extends Component {
 
     rcvdGameDataChangedMsg = (message) => {
         console.log("ConnectionTest: Received gameDataChanged message");
-        console.log(`ConnectionTest: New game state is ${message.msg.gameData.stateText}`);
+        console.log(`ConnectionTest: New game state is ${message.msg.gameData.stateDisplayText}`);
         let newState = {
             ...this.state,
             gameData: message.msg.gameData,
@@ -379,7 +378,7 @@ class ConnectionTest extends Component {
         return (
             <div className="connTestView">
                 <div className="connTestGameDataDiv">
-                    <span className="connTestGameStatus">Status: {this.state.gameData.stateText}</span>
+                    <span className="connTestGameStatus">Status: {this.state.gameData.stateDisplayText}</span>
                 </div>
                 <div className="connTestTopArea">
                     {topCam}

@@ -68,10 +68,6 @@ class GameSetupDialog extends Component {
                         <td><span>{this.props.gameType}</span></td>
                     </tr>
                     <tr>
-                        <td><span>Game Status:</span></td>
-                        <td><span>{this.props.gameStateText}</span></td>
-                    </tr>
-                    <tr>
                         <td><span>Team 1</span></td>
                         <td></td>
                     </tr>

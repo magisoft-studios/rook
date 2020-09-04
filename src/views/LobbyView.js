@@ -6,7 +6,6 @@ import AppContext from '../ContextLib';
 import MyButton from "../MyButton";
 import socketIOClient from "socket.io-client";
 import SocketMsg from '../SocketMsg';
-import GameStates from '../GameStates';
 import CamCfg from '../CamCfg';
 import '../css/LobbyView.scss';
 import LobbyGameData from '../data/LobbyGameData';
@@ -411,7 +410,6 @@ class LobbyView extends Component {
                         enableEnterGameBtn={lobbyGameData.readyToStart}
                         gameName={lobbyGameData.name}
                         gameType={lobbyGameData.desc.name}
-                        gameStateText={lobbyGameData.stateText}
                         player1={(player1 != null) ? player1.name : ""}
                         player2={(player2 != null) ? player2.name : ""}
                         player3={(player3 != null) ? player3.name : ""}
@@ -425,10 +423,9 @@ class LobbyView extends Component {
                 gameSetupDlg =
                     <ConnectionTestSetupDialog
                         hasJoinedTeam={this.state.hasJoinedTeam}
-                        enableEnterGameBtn={lobbyGameData.state === GameStates.READY_TO_START}
+                        enableEnterGameBtn={lobbyGameData.readyToStart}
                         gameName={lobbyGameData.name}
                         gameType={lobbyGameData.desc.name}
-                        gameStateText={lobbyGameData.stateText}
                         player1Name={(player1 != null) ? player1.name : ""}
                         player2Name={(player2 != null) ? player2.name : ""}
                         onEnterGame={this.handleEnterGame}
